@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->index('state_id', 'cities_test_ibfk_1');
             $table->index('country_id', 'cities_test_ibfk_2');
+            $table->softDeletes();
         });
     }
 

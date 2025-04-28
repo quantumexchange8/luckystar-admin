@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kyc', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('category');
-            $table->string('proof_type');
-            $table->string('kyc_status')->default('unverified');
-            $table->timestamp('kyc_approval_at')->nullable();
-            $table->text('kyc_approval_description')->nullable();
-            $table->string('remarks')->nullable();
-            $table->timestamps();
+        Schema::create('group_has_users', function (Blueprint $table) {
+            $table->unsignedBigInteger('group_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->softDeletes();
+
+            $table->foreign('group_id')
+                ->references('id')
+                ->on('groups')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kyc');
+        Schema::dropIfExists('group_has_users');
     }
 };
