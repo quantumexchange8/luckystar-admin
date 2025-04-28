@@ -42,7 +42,6 @@ return new class extends Migration
 
             $table->index('region_id', 'country_continent');
             $table->index('subregion_id', 'country_subregion');
-            $table->softDeletes();
         });
     }
 

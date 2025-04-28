@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('group_has_users', function (Blueprint $table) {
             $table->unsignedBigInteger('group_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->softDeletes();
 
             $table->foreign('group_id')
                 ->references('id')

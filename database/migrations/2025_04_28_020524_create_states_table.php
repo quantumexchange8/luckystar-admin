@@ -27,7 +27,6 @@ return new class extends Migration
             $table->string('wikiDataId', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Rapid API GeoDB Cities');
 
             $table->index('country_id', 'country_region');
-            $table->softDeletes();
         });
     }
 
