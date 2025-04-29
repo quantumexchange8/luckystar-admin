@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('phone_number')->nullable()->unique();
             $table->string('chinese_name')->nullable();
             $table->date('dob')->nullable();
+            $table->string('identity_number')->nullable();
             $table->unsignedBigInteger('occupation_id')->nullable();
             $table->unsignedBigInteger('industry_id')->nullable();
             $table->unsignedBigInteger('country_id')->nullable();
@@ -45,6 +46,7 @@ return new class extends Migration
             $table->string('rank_up_status')->default('auto');
             $table->string('status')->default('active');
             $table->string('employment_status')->nullable();
+            $table->string('profile_status')->default('incomplete');
             $table->timestamp('password_changed_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
