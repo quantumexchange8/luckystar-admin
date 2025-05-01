@@ -5,8 +5,9 @@
         bg-primary enabled:hover:bg-primary-emphasis enabled:active:bg-primary-emphasis-alt text-primary-contrast
         border border-primary enabled:hover:border-primary-emphasis enabled:active:border-primary-emphasis-alt
         focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
-        px-3 py-2 transition-colors duration-200 gap-2 rounded-md
+        px-6 py-3 transition-colors duration-200 gap-2 rounded-md
         disabled:cursor-default
+        text-sm
 }
 
 .p-button-icon-right {
@@ -38,15 +39,19 @@
 }
 
 .p-button-sm {
-    @apply text-sm px-[0.625rem] py-[0.375rem]
+    @apply text-sm px-4 py-2
 }
 
 .p-button-sm .p-button-icon {
     @apply text-sm
 }
 
+.p-button-sm.p-button-icon-only.p-button-rounded {
+    @apply w-9 h-9 grow-0 shrink-0 p-2.5
+}
+
 .p-button-lg {
-    @apply text-[1.125rem] px-[0.875rem] py-[0.625rem]
+    @apply text-[1.125rem] px-8 py-4
 }
 
 .p-button-lg .p-button-icon {
