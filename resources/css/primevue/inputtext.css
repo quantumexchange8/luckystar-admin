@@ -1,20 +1,26 @@
 .p-inputtext {
-    @apply appearance-none rounded-md
-        border border-surface-300 dark:border-surface-700
-        enabled:hover:border-surface-400 dark:enabled:hover:border-surface-600
-        enabled:focus:border-primary enabled:focus:ring-0 enabled:focus:hover:border-primary
-        bg-surface-0 dark:bg-surface-950
-        text-surface-700 dark:text-surface-0
-        disabled:bg-surface-200 disabled:text-surface-500 dark:disabled:bg-surface-700 dark:disabled:text-surface-400 disabled:opacity-100
-        placeholder:text-surface-500 dark:placeholder:text-surface-400
-        px-3 py-2
-        transition-colors duration-200
-        shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
-        outline-none
+    @apply appearance-none rounded-lg
+    border border-surface-300 dark:border-surface-700
+    enabled:hover:border-surface-500 dark:enabled:hover:border-surface-600
+    enabled:focus:border-primary-500 enabled:focus:ring-0 enabled:focus:hover:border-primary-500
+    bg-surface-0 dark:bg-surface-950
+    text-surface-700 dark:text-surface-0
+    disabled:bg-surface-100 disabled:text-surface-400 dark:disabled:bg-surface-700 dark:disabled:text-surface-400 disabled:opacity-100
+    placeholder:text-surface-400 dark:placeholder:text-surface-700
+    px-4 py-3
+    transition-colors duration-200
+    shadow-input
+    outline-none
+    text-sm
 }
 
 .p-inputtext.p-invalid {
-    @apply border-red-400 dark:border-red-300
+    @apply border-red-500
+    enabled:focus:border-red-500
+}
+
+.p-inputtext.p-invalid:hover {
+    @apply border-surface-500 dark:border-surface-600
 }
 
 .p-inputtext.p-variant-filled {

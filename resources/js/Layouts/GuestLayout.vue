@@ -1,11 +1,12 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
+import Card from "primevue/card";
 </script>
 
 <template>
     <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0 dark:bg-gray-900"
+        class="flex min-h-screen flex-col gap-8 items-center bg-surface-100 pt-6 sm:justify-center dark:bg-surface-950"
     >
         <div>
             <Link href="/">
@@ -13,10 +14,10 @@ import { Link } from '@inertiajs/vue3';
             </Link>
         </div>
 
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800"
-        >
-            <slot />
-        </div>
+        <Card class="w-full max-w-[300px] sm:max-w-md">
+            <template #content>
+                <slot />
+            </template>
+        </Card>
     </div>
 </template>

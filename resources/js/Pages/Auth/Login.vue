@@ -1,10 +1,14 @@
 <script setup>
-import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import {
+    InputText,
+    Password,
+    Checkbox,
+    Button,
+} from "primevue";
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -37,48 +41,62 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
+        <form
+            @submit.prevent="submit"
+            class="flex flex-col gap-5 self-stretch"
+        >
+            <div class="flex flex-col gap-1 items-start self-stretch">
                 <InputLabel for="email" value="Email" />
 
-                <TextInput
+                <InputText
                     id="email"
                     type="email"
                     class="mt-1 block w-full"
                     v-model="form.email"
-                    required
                     autofocus
                     autocomplete="username"
+                    placeholder="Enter your email"
+                    :invalid="!!form.errors.email"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
+            <div class="flex flex-col gap-1 items-start self-stretch">
                 <InputLabel for="password" value="Password" />
 
-                <TextInput
+                <Password
                     id="password"
-                    type="password"
-                    class="mt-1 block w-full"
+                    class="block w-full"
                     v-model="form.password"
-                    required
-                    autocomplete="current-password"
+                    toggleMask
+                    :inputStyle="{'width': '100%'}"
+                    :style="{'width': '100%'}"
+                    :invalid="!!form.errors.password"
+                    :feedback="false"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
+            <label class="flex items-center">
+                <Checkbox name="remember" v-model:checked="form.remember" :binary="true"/>
+                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
+                >Remember me
+                        </span>
+            </label>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="flex flex-col gap-1 items-center self-stretch">
+                <Button
+                    type="submit"
+                    :class="[
+                        'w-full',
+                        { 'opacity-25': form.processing }
+                    ]"
+                    :disabled="form.processing"
+                    :label="'Login'"
+                />
+
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
@@ -86,14 +104,6 @@ const submit = () => {
                 >
                     Forgot your password?
                 </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
             </div>
         </form>
     </GuestLayout>

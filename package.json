@@ -21,6 +21,9 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "@tabler/icons-vue": "^3.31.0",
+        "@vueuse/core": "^13.1.0",
+        "laravel-vue-i18n": "^2.8.0",
         "primevue": "^4.3.3",
         "tailwindcss-primeui": "^0.6.1"
     }
