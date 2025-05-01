@@ -20,6 +20,7 @@ import {
     IconPhotoCog,
     IconChartPie,
     IconId,
+    IconServerCog
 } from '@tabler/icons-vue';
 import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue";
 //
@@ -63,11 +64,20 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
             </template>
         </SidebarLink>
 
-
         <SidebarCategoryLabel
             :title="$t('public.configuration')"
         />
 
+        <!-- Account Type -->
+        <SidebarLink
+            :title="$t('public.account_type')"
+            :href="route('account_type.index')"
+            :active="route().current('account_type.index')"
+        >
+            <template #icon>
+                <IconServerCog :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
 
 <!--        <SidebarLink-->
 <!--            :title="'Accounts'"-->

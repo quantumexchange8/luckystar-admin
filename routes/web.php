@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/listing', function () {
             // Matches The "/admin/users" URL
         })->name('member.listing');
+    });
+
+    /**
+     * ==============================
+     *         Configurations
+     * ==============================
+     */
+    Route::prefix('configuration')->group(function () {
+        Route::get('/account_type', [AccountTypeController::class, 'index'])->name('account_type.index');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

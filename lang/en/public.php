@@ -6,4 +6,5 @@ return [
     "remember_me" => "Remember me",
     "dashboard" => "Dashboard",
     "configuration" => "Configuration",
+    "account_type" => "Account Type",
 ];
