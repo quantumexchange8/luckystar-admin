@@ -5,13 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AccountType extends Model
+class AccountTypeHasLeverage extends Model
 {
     use SoftDeletes;
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
+    protected $fillable = [
+        'account_type_id',
+        'setting_leverage_id',
     ];
 }

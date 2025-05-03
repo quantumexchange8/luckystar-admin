@@ -7,7 +7,7 @@
     @apply inline-flex cursor-pointer relative select-none rounded-md
         bg-surface-0 dark:bg-surface-950
         border border-surface-300 dark:border-surface-700
-        shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+        shadow-input text-sm
         transition-colors duration-200
 }
 
@@ -24,7 +24,8 @@
 }
 
 .p-multiselect.p-invalid {
-    @apply border-red-400 dark:border-red-300
+    @apply border-red-500
+    enabled:focus:border-red-500
 }
 
 .p-multiselect.p-disabled {
@@ -45,7 +46,7 @@
 }
 
 .p-multiselect-label {
-    @apply flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis px-3 py-2 text-surface-700 dark:text-surface-0
+    @apply flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis px-4 py-3 text-surface-700 dark:text-surface-0
 }
 
 .p-multiselect-label.p-placeholder {
@@ -99,7 +100,7 @@
 .p-multiselect-option {
     @apply cursor-pointer font-normal whitespace-nowrap relative overflow-hidden flex items-center gap-2 px-3 py-2
         rounded-sm text-surface-700 dark:text-surface-0 bg-transparent border-none
-        transition-colors duration-200
+        transition-colors duration-200 text-sm
 }
 
 .p-multiselect-option:not(.p-disabled).p-focus {

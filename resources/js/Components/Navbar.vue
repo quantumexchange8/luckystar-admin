@@ -71,7 +71,7 @@ const handleLogOut = () => {
         </Button>
 
         <div
-            class="font-semibold text-surface-700 dark:text-surface-300"
+            class="font-semibold text-surface-700 dark:text-surface-300 text-nowrap"
         >
             {{ title }}
         </div>

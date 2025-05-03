@@ -16,27 +16,19 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('slug')->nullable();
             $table->string('category')->nullable();
+            $table->string('type')->nullable();
             $table->string('account_group')->nullable();
             $table->decimal('minimum_deposit')->nullable();
-            $table->integer('leverage')->nullable();
             $table->string('currency')->nullable();
             $table->integer('allow_create_account')->nullable();
-            $table->string('type')->nullable();
             $table->string('commission_structure')->nullable();
             $table->string('trade_open_duration')->nullable();
             $table->integer('maximum_account_number')->nullable();
-            $table->json('descriptions')->nullable();
             $table->string('color', 100)->nullable();
-            $table->string('status')->nullable()->default('active');
-            $table->unsignedBigInteger('edited_by');
+            $table->string('status')->default('active');
+            $table->boolean('allow_trade')->default(1);
             $table->timestamps();
             $table->softDeletes();
-
-            $table->foreign('edited_by')
-                ->references('id')
-                ->on('users')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
     }
 

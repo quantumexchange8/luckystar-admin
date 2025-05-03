@@ -33,6 +33,8 @@ Route::middleware('auth')->group(function () {
      */
     Route::prefix('configuration')->group(function () {
         Route::get('/account_type', [AccountTypeController::class, 'index'])->name('account_type.index');
+
+        Route::post('/addAccountType', [AccountTypeController::class, 'addAccountType'])->name('account_type.addAccountType');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
