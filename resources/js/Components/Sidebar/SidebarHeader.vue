@@ -26,7 +26,7 @@ import { IconX } from '@tabler/icons-vue';
                     v-show="sidebarState.isOpen || sidebarState.isHovered"
                     class="text-gray-800 dark:text-white"
                 >
-                    Luckyant Mall
+                    Lucky Star
                 </div>
             </div>
         </Link>
