@@ -11,7 +11,7 @@ import {
 import {
     IconCirclePlus
 } from "@tabler/icons-vue";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import {useForm} from "@inertiajs/vue3";
@@ -45,13 +45,13 @@ const categories = [
 
 const selectedCategory = ref();
 
-const selectCategory = (category) => {
+watch(selectedCategory, (category) => {
     selectedCategory.value = category;
 
     if (category === 'managed') {
         form.allow_trade = false;
     }
-}
+})
 
 const types = [
     'live',
@@ -60,13 +60,13 @@ const types = [
 
 const selectedType = ref();
 
-const selectType = (type) => {
+watch(selectedType, (type) => {
     selectedType.value = type;
 
     if (type === 'virtual') {
         form.allow_trade = false;
     }
-}
+})
 
 const selectedLeverages = ref([]);
 
@@ -157,8 +157,7 @@ const closeDialog = () => {
                         />
                         <SelectChipGroup
                             :items="categories"
-                            :selected-item="selectedCategory"
-                            @update:selected="selectCategory"
+                            v-model="selectedCategory"
                         />
                         <InputError :message="form.errors.category" />
                     </div>
@@ -171,8 +170,7 @@ const closeDialog = () => {
                         />
                         <SelectChipGroup
                             :items="types"
-                            :selected-item="selectedType"
-                            @update:selected="selectType"
+                            v-model="selectedType"
                         />
                         <InputError :message="form.errors.type" />
                     </div>

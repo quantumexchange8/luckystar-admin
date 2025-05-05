@@ -2,19 +2,24 @@
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
 
 const props = defineProps({
+    modelValue: [String, Number, Object],
     items: {
         type: Array,
         required: true,
     },
-    selectedItem: {
-        type: String
-    },
+    valueKey: String,
 });
 
-const emit = defineEmits(['update:selected']);
+const emit = defineEmits(["update:modelValue"]);
 
 const selectItem = (item) => {
-    emit('update:selected', item);
+    const value = props.valueKey ? item[props.valueKey] : item;
+    emit("update:modelValue", value);
+};
+
+const isSelected = (item) => {
+    const value = props.valueKey ? item[props.valueKey] : item;
+    return props.modelValue === value;
 };
 </script>
 
@@ -22,33 +27,32 @@ const selectItem = (item) => {
     <div class="flex items-start overflow-x-auto gap-3 self-stretch">
         <div
             v-for="item in items"
-            :key="item"
+            :key="props.valueKey ? item[props.valueKey] : item"
             @click="selectItem(item)"
             class="group flex flex-col items-start py-3 px-4 gap-1 self-stretch rounded-lg border shadow-input transition-colors duration-300 select-none cursor-pointer w-full relative"
             :class="{
-            'bg-primary-50 dark:bg-primary-800/40 border-primary': selectedItem === item,
-            'bg-white dark:bg-surface-950 border-surface-300 dark:border-surface-700 hover:bg-primary-50 hover:border-primary': selectedItem !== item,
-          }"
+                'bg-primary-50 dark:bg-primary-800/40 border-primary': isSelected(item),
+                'bg-white dark:bg-surface-950 border-surface-300 dark:border-surface-700 hover:bg-primary-50 hover:border-primary':
+                  !isSelected(item),
+            }"
         >
             <div class="flex items-center self-stretch">
                 <div
                     class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700 dark:group-hover:text-primary"
                     :class="{
-                        'text-primary-700 dark:text-primary-200': selectedItem === item,
-                        'text-surface-950 dark:text-white': selectedItem !== item
+                        'text-primary-700 dark:text-primary-200': isSelected(item),
+                        'text-surface-950 dark:text-white': !isSelected(item),
                     }"
                 >
-                    <div class="text-xs uppercase">{{ $t(`public.${item}`) }}</div>
+                    <slot name="option" :item="item">
+                        <div class="text-xs uppercase">
+                            {{ $t(`public.${props.valueKey ? item[props.valueKey] : item}`) }}
+                        </div>
+                    </slot>
                 </div>
-                <div
-                    v-if="selectedItem === item"
-                    class="absolute right-2"
-                >
-                    <IconCircleCheckFilled
-                        size="16"
-                        stroke-width="1.5"
-                        color="#34d399"
-                    />
+
+                <div v-if="isSelected(item)" class="absolute right-2">
+                    <IconCircleCheckFilled size="16" stroke-width="1.5" color="#34d399" />
                 </div>
             </div>
         </div>
