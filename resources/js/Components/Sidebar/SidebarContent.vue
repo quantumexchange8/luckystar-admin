@@ -20,7 +20,8 @@ import {
     IconPhotoCog,
     IconChartPie,
     IconId,
-    IconServerCog
+    IconServerCog,
+    IconSettingsDollar
 } from '@tabler/icons-vue';
 import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue";
 //
@@ -76,6 +77,17 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
         >
             <template #icon>
                 <IconServerCog :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
+
+        <!-- Account Type -->
+        <SidebarLink
+            :title="$t('public.top_up_profile')"
+            :href="route('configuration.top_up_profile')"
+            :active="route().current('configuration.top_up_profile')"
+        >
+            <template #icon>
+                <IconSettingsDollar :size="20" stroke-width="1.5" />
             </template>
         </SidebarLink>
 
