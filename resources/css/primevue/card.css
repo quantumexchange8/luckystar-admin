@@ -15,7 +15,7 @@
 }
 
 .p-card-title {
-    @apply font-medium text-xl
+    @apply font-semibold
 }
 
 .p-card-subtitle {

@@ -98,7 +98,7 @@
 }
 
 .p-multiselect-option {
-    @apply cursor-pointer font-normal whitespace-nowrap relative overflow-hidden flex items-center gap-2 px-3 py-2
+    @apply cursor-pointer text-sm font-normal whitespace-nowrap relative overflow-hidden flex items-center gap-2 px-3 py-2
         rounded-sm text-surface-700 dark:text-surface-0 bg-transparent border-none
         transition-colors duration-200 text-sm
 }
@@ -112,7 +112,7 @@
 }
 
 .p-multiselect-empty-message {
-    @apply px-3 py-2
+    @apply px-3 py-2 text-sm
 }
 
 .p-multiselect-label .p-chip {
