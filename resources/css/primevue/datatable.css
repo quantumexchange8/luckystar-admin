@@ -1,7 +1,7 @@
 @import './paginator';
 
 .p-datatable {
-    @apply relative
+    @apply relative w-full
 }
 
 .p-datatable-table {
@@ -91,7 +91,7 @@
 }
 
 .p-datatable-mask {
-    @apply absolute flex items-center justify-center z-20
+    @apply absolute flex items-center justify-center z-20 w-full h-full bg-gray-100/60
 }
 
 .p-datatable-inline-filter {
@@ -187,11 +187,13 @@
 }
 
 .p-datatable-paginator-bottom {
-    @apply border-t border-surface-200 dark:border-surface-700
+    /* @apply border-t border-surface-200 dark:border-surface-700 */
 }
 
 .p-datatable-header {
-    @apply py-3 px-4 border-b border-surface-200 dark:border-surface-700
+    @apply pb-3
+        /* py-3 px-4  */
+        /* border-b border-surface-200 dark:border-surface-700 */
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
 }
@@ -204,7 +206,7 @@
 
 .p-datatable-header-cell {
     @apply py-3 px-4 font-normal text-start transition-colors duration-200
-        border-b border-surface-200 dark:border-surface-700
+        md:border-b border-surface-200 dark:border-surface-700
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
 }
@@ -217,8 +219,14 @@
     @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 transition-colors duration-200
 }
 
-.p-datatable-tbody > tr > td {
-    @apply text-start py-3 px-4 border-b border-surface-200 dark:border-surface-800
+.p-datatable-tbody > tr:not(.p-datatable-empty-message) > td {
+    @apply text-start py-3 px-4 
+    border-b border-surface-200 dark:border-surface-800
+}
+
+.p-datatable-tbody > tr.p-datatable-empty-message > td {
+    @apply text-start py-3 px-4 
+    /* border-b border-surface-200 dark:border-surface-800 */
 }
 
 .p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover {

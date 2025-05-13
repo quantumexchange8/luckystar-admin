@@ -1,5 +1,5 @@
 .p-radiobutton {
-    @apply relative inline-flex select-none w-5 h-5
+    @apply relative inline-flex select-none w-full h-full
 }
 
 .p-radiobutton-input {
@@ -11,7 +11,7 @@
     @apply flex justify-center items-center rounded-full
         border border-surface-300 dark:border-surface-700
         bg-surface-0 dark:bg-surface-950
-        w-5 h-5
+        w-full h-full
         transition-colors duration-200
         shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
 }

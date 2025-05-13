@@ -3,17 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    // /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable, InteractsWithMedia, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'password_changed_at',
     ];
 
     /**
@@ -49,6 +53,11 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = [
+        'full_name',
+        'kyc_status'
+    ];
+
     public function setReferralId(): void
     {
         $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -64,6 +73,19 @@ class User extends Authenticatable
         $this->save();
     }
 
+    public function assignedGroup($group_id): void
+    {
+        GroupHasUser::updateOrCreate(
+            ['user_id' => $this->id],
+            ['group_id' => $group_id]
+        );
+    }
+
+    public function directChildren(): HasMany
+    {
+        return $this->hasMany(User::class, 'upline_id', 'id');
+    }
+
     public function getChildrenIds(): array
     {
         return User::query()->where('hierarchyList', 'like', '%-' . $this->id . '-%')
@@ -71,19 +93,43 @@ class User extends Authenticatable
             ->toArray();
     }
 
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getKycStatusAttribute(): string
+    {
+        if ($this->kycs()->count() === 0) {
+            return 'unverified';
+        }
+
+        return $this->kycs->every(fn ($kyc) => $kyc->status === 'verified') ? 'verified' : 'unverified';
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id', 'id');
     }
 
-    public function occupation(): BelongsTo
+    // public function occupation(): BelongsTo
+    // {
+    //     return $this->belongsTo(Occupation::class, 'occupation_id', 'id');
+    // }
+
+    // public function industry(): BelongsTo
+    // {
+    //     return $this->belongsTo(Industry::class, 'industry_id', 'id');
+    // }
+
+    public function background(): HasOne
     {
-        return $this->belongsTo(Occupation::class, 'occupation_id', 'id');
+        return $this->hasOne(UserBackground::class, 'user_id');
     }
 
-    public function industry(): BelongsTo
+    public function beneficiary(): HasOne
     {
-        return $this->belongsTo(Industry::class, 'industry_id', 'id');
+        return $this->hasOne(UserBeneficiary::class, 'user_id');
     }
 
     public function rank(): BelongsTo
@@ -101,6 +147,11 @@ class User extends Authenticatable
         return $this->hasOne(GroupHasUser::class, 'user_id');
     }
 
+    public function paymentAccounts(): HasMany
+    {
+        return $this->hasMany(PaymentAccount::class, 'user_id', 'id');
+    }
+
     public function wallets(): HasMany
     {
         return $this->hasMany(Wallet::class, 'user_id', 'id');
@@ -110,4 +161,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(TradingSubscription::class, 'user_id', 'id')->where('status', 'active');
     }
+
+    public function active_trading_accounts(): HasMany
+    {
+        return $this->hasMany(TradingAccount::class, 'user_id', 'id')->where('status', 'active');
+    }
+
+    public function kycs(): HasMany
+    {
+        return $this->hasMany(Kyc::class, 'user_id', 'id');
+    }
+
 }

@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'member_production_url' => env('MEMBER_PRODUCTION_URL', 'https://my.luckystar.global'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

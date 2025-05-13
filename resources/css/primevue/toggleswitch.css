@@ -8,7 +8,7 @@
 
 .p-toggleswitch-slider {
     @apply inline-block w-full h-full rounded-[30px] shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
-        bg-surface-300 dark:bg-surface-700
+        bg-surface-300 dark:bg-surface-500
         border border-transparent
         transition-colors duration-200
 }
@@ -30,7 +30,7 @@
 }
 
 .p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover) .p-toggleswitch-slider {
-    @apply bg-surface-400 dark:bg-surface-600
+    @apply bg-surface-400 dark:bg-surface-500
 }
 
 .p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover) .p-toggleswitch-handle {

@@ -12,6 +12,7 @@
     shadow-input
     outline-none
     text-sm
+    w-full
 }
 
 .p-inputtext.p-invalid {

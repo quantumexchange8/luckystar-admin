@@ -19,11 +19,16 @@
 }
 
 .p-tablist-tab-list {
-    @apply relative flex bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700
+    @apply relative flex 
+    /* bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 */
 }
 
 .p-tablist-content {
-    @apply flex-grow
+    @apply relative flex p-0.5 overflow-x-auto overflow-y-hidden overscroll-y-contain overscroll-x-auto
+}
+
+.p-tablist-content::-webkit-scrollbar {
+    @apply hidden
 }
 
 .p-tablist-nav-button {
@@ -48,7 +53,7 @@
 }
 
 .p-tab {
-    @apply flex-shrink-0 cursor-pointer select-none relative whitespace-nowrap py-4 px-[1.125rem]
+    @apply flex-shrink-0 cursor-pointer select-none relative whitespace-nowrap p-3
         border-b border-surface-200 dark:border-surface-700 font-semibold
         text-surface-500 dark:text-surface-400
         transition-colors duration-200 -mb-px
@@ -63,16 +68,17 @@
 }
 
 .p-tab:not(.p-tab-active):not(.p-disabled):hover {
-    @apply text-surface-700 dark:text-surface-0
+    @apply text-primary
 }
 
 .p-tab-active {
-    @apply border-primary text-primary
+    @apply border-b border-primary text-primary dark:text-primary
 }
 
 .p-tabpanels {
-    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0
-        pt-[0.875rem] pb-[1.125rem] px-[1.125rem] outline-none
+    /* @apply 
+        bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0
+        pt-[0.875rem] pb-[1.125rem] px-[1.125rem] outline-none */
 }
 
 .p-tablist-active-bar {

@@ -1,12 +1,14 @@
 <?php
 
-use App\Http\Controllers\AccountTypeController;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelectOptionController;
 use App\Http\Controllers\TopUpProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return Redirect::route('login');
@@ -19,6 +21,7 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     // select option
     Route::get('/get_countries', [SelectOptionController::class, 'getCountries'])->name('getCountries');
+    Route::get('/get_group_uplines', [SelectOptionController::class, 'getUplinesByGroup'])->name('getUplinesByGroup');
 
     /**
      * ==============================
@@ -26,9 +29,24 @@ Route::middleware('auth')->group(function () {
      * ==============================
      */
     Route::prefix('member')->group(function () {
-        Route::get('/listing', function () {
-            // Matches The "/admin/users" URL
-        })->name('member.listing');
+            // Listing Routes
+        Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
+        Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
+        Route::get('/getFilterData', [MemberController::class, 'getFilterData'])->name('member.getFilterData');
+        Route::get('/getAvailableUplines', [MemberController::class, 'getAvailableUplines'])->name('member.getAvailableUplines');
+
+        Route::get('/access_portal/{user}', [MemberController::class, 'access_portal'])->name('member.access_portal');
+
+        Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
+        Route::post('/updateMemberStatus', [MemberController::class, 'updateMemberStatus'])->name('member.updateMemberStatus');
+        Route::post('/resetPassword', [MemberController::class, 'resetPassword'])->name('member.resetPassword');
+
+        Route::delete('/deleteMember', [MemberController::class, 'deleteMember'])->name('member.deleteMember');
+
+        // details
+        Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
+        Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
+        
     });
 
     /**
