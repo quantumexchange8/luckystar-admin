@@ -60,7 +60,7 @@ const dataOverviews = computed(() => [
     {
         icon: UserIcon,
         total: totalRecords.value,
-        label: trans('public.total_users'),
+        label: trans('public.total_user'),
     },
 ]);
 
@@ -339,7 +339,7 @@ watchEffect(() => {
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
                             <Loader />
-                            <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
+                            <span class="text-sm text-gray-700 dark:text-white">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
                     <template v-if="users?.length > 0">

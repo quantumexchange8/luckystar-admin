@@ -65,15 +65,26 @@ Route::middleware('auth')->group(function () {
 
     /**
      * ==============================
+     *         Account Type
+     * ==============================
+     */
+    Route::prefix('account_type')->group(function () {
+        Route::get('/account_type', [AccountTypeController::class, 'index'])->name('account_type.index');
+        Route::get('/getAccountTypes', [AccountTypeController::class, 'getAccountTypes'])->name('account_type.getAccountTypes');
+        // Route::get('/getAccountTypeUsers', [AccountTypeController::class, 'getAccountTypeUsers'])->name('account_type.getAccountTypeUsers');
+
+        Route::post('/addAccountType', [AccountTypeController::class, 'addAccountType'])->name('account_type.addAccountType');
+        Route::post('/update', [AccountTypeController::class, 'updateAccountType'])->name('account_type.update');
+
+        Route::patch('/updateStatus/{id}', [AccountTypeController::class, 'updateStatus'])->name('account_type.updateStatus');
+    });
+
+    /**
+     * ==============================
      *         Configurations
      * ==============================
      */
     Route::prefix('configuration')->group(function () {
-        // Account Type
-        Route::get('/account_type', [AccountTypeController::class, 'index'])->name('account_type.index');
-
-        Route::post('/addAccountType', [AccountTypeController::class, 'addAccountType'])->name('account_type.addAccountType');
-
         // Top Up Profile
         Route::get('/top_up_profile', [TopUpProfileController::class, 'index'])->name('configuration.top_up_profile');
 

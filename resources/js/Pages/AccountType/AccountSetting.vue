@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import AddAccountType from "@/Pages/AccountType/AddAccountType.vue";
+import AddAccountType from "@/Pages/AccountType/Partials/AddAccountType.vue";
 import AccountTypeTable from "@/Pages/AccountType/AccountTypeTable.vue";
 
 defineProps({
@@ -15,7 +15,7 @@ defineProps({
                 :leverageOptions="leverageOptions"
             />
 
-            <AccountTypeTable />
+            <AccountTypeTable :leverageOptions="leverageOptions" />
         </div>
     </AuthenticatedLayout>
 </template>
