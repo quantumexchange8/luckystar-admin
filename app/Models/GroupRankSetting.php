@@ -12,6 +12,7 @@ class GroupRankSetting extends Model
     protected $fillable = [
         'group_id',
         'rank_name',
+        'rank_code',
         'rank_position',
         'lot_rebate_currency',
         'lot_rebate_amount',

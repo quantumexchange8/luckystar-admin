@@ -14,6 +14,11 @@ return new class extends Migration
         Schema::create('user_beneficiaries', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('beneficiary_name')->nullable();
+            $table->string('beneficiary_relationship')->nullable();
+            $table->string('beneficiary_identity_number')->nullable();
+            $table->string('beneficiary_email')->nullable();
+            $table->string('beneficiary_phone')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

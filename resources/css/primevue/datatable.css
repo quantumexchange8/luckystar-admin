@@ -73,7 +73,7 @@
 }
 
 .p-datatable-column-header-content {
-    @apply flex items-center gap-2
+    @apply flex items-center gap-2 text-xs font-semibold uppercase
 }
 
 .p-datatable-column-resize-indicator {
@@ -199,13 +199,13 @@
 }
 
 .p-datatable-footer {
-    @apply py-3 px-4 border-b border-surface-200 dark:border-surface-700
+    @apply p-3 border-b border-surface-200 dark:border-surface-700
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
 }
 
 .p-datatable-header-cell {
-    @apply py-3 px-4 font-normal text-start transition-colors duration-200
+    @apply p-3 font-normal text-start transition-colors duration-200
         md:border-b border-surface-200 dark:border-surface-700
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
@@ -216,16 +216,16 @@
 }
 
 .p-datatable-tbody > tr {
-    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 transition-colors duration-200
+    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 transition-colors duration-200 text-sm
 }
 
 .p-datatable-tbody > tr:not(.p-datatable-empty-message) > td {
-    @apply text-start py-3 px-4 
+    @apply text-start p-3
     border-b border-surface-200 dark:border-surface-800
 }
 
 .p-datatable-tbody > tr.p-datatable-empty-message > td {
-    @apply text-start py-3 px-4 
+    @apply text-start p-3
     /* border-b border-surface-200 dark:border-surface-800 */
 }
 
@@ -251,7 +251,7 @@
 }
 
 .p-datatable-tfoot > tr > td {
-    @apply text-start py-3 px-4 border-b border-surface-200 dark:border-surface-800
+    @apply text-start p-3 border-b border-surface-200 dark:border-surface-800
         bg-surface-0 dark:bg-surface-900
         text-surface-700 dark:text-surface-0
 }

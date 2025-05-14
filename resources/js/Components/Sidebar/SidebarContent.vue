@@ -48,12 +48,16 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
 
 <template>
     <nav
-        class="relative flex flex-col flex-1 max-h-full gap-1 items-center"
+        class="relative flex flex-col flex-1 max-h-full gap-1 items-center overflow-y-auto"
         :class="{
             'p-3': sidebarState.isOpen || sidebarState.isHovered,
             'px-5 py-3': !sidebarState.isOpen && !sidebarState.isHovered,
         }"
     >
+        <SidebarCategoryLabel
+            :title="$t('public.main_menu')"
+        />
+
         <!-- Dashboard -->
         <SidebarLink
             :title="$t('public.dashboard')"
@@ -66,7 +70,7 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
         </SidebarLink>
 
         <SidebarCategoryLabel
-            :title="$t('public.configuration')"
+            :title="$t('public.member_management')"
         />
 
         <!-- Member -->
@@ -83,8 +87,22 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
                 :href="route('member.listing')"
                 :active="route().current('member.listing') || route().current('member.detail')"
             />
-
         </SidebarCollapsible>
+
+        <!-- Group -->
+        <SidebarLink
+            :title="$t('public.group')"
+            :href="route('group.listing')"
+            :active="route().current('group.listing')"
+        >
+            <template #icon>
+                <IconUsersGroup :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
+
+        <SidebarCategoryLabel
+            :title="$t('public.configuration')"
+        />
 
         <!-- Account Type -->
         <SidebarLink

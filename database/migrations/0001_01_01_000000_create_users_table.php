@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->string('username')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('username')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('password');
             $table->string('security_pin')->nullable();
             $table->string('dial_code', 50)->nullable();
@@ -26,13 +26,9 @@ return new class extends Migration
             $table->string('chinese_name')->nullable();
             $table->date('dob')->nullable();
             $table->string('identity_number')->nullable();
-            $table->unsignedBigInteger('occupation_id')->nullable();
-            $table->unsignedBigInteger('industry_id')->nullable();
             $table->unsignedBigInteger('country_id')->nullable();
             $table->string('nationality')->nullable();
             $table->longText('address')->nullable();
-            $table->string('annual_income')->nullable();
-            $table->string('net_worth')->nullable();
             $table->ipAddress('register_ip')->nullable()->default('::1');
             $table->ipAddress('last_login_ip')->nullable()->default('::1');
             $table->unsignedBigInteger('upline_id')->nullable();

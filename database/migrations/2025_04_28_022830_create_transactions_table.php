@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('to_payment_account_no')->nullable();
             $table->string('to_bank_sub_branch')->nullable();
             $table->string('to_bank_branch_address')->nullable();
+            $table->string('from_token_address')->nullable();
+            $table->string('to_token_address')->nullable();
             $table->string('txn_hash')->nullable();
             $table->decimal('amount', 13)->nullable();
             $table->decimal('transaction_charges', 13)->nullable();

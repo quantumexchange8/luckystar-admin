@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('group_id')->nullable();
             $table->string('rank_name')->nullable();
+            $table->string('rank_code', 20)->nullable();
             $table->integer('rank_position')->nullable();
             $table->string('lot_rebate_currency')->nullable();
             $table->decimal('lot_rebate_amount')->nullable();

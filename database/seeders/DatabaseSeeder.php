@@ -16,13 +16,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CountrySeeder::class,
             StateSeeder::class,
-            CitySeeder::class,
+//            CitySeeder::class,
+            UserSeeder::class,
+            GroupSeeder::class,
+            AccountTypeSeeder::class,
+            RunningNumberSeeder::class,
         ]);
-        // User::factory(10)->create();
-
-//        User::factory()->create([
-//            'name' => 'Test User',
-//            'email' => 'test@example.com',
-//        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GroupRankSetting;
 use App\Models\User;
 use App\Models\Country;
 use App\Models\Group;
@@ -17,7 +18,7 @@ class SelectOptionController extends Controller
         if ($returnAsArray) {
             return $countries;
         }
-    
+
         return response()->json([
             'countries' => $countries,
         ]);
@@ -31,7 +32,7 @@ class SelectOptionController extends Controller
         if ($returnAsArray) {
             return $groups;
         }
-    
+
         return response()->json([
             'groups' => $groups,
         ]);
@@ -45,7 +46,7 @@ class SelectOptionController extends Controller
         if ($returnAsArray) {
             return $uplines;
         }
-    
+
         return response()->json([
             'uplines' => $uplines,
         ]);
@@ -66,4 +67,36 @@ class SelectOptionController extends Controller
         ]);
     }
 
+    public function getAvailableLeader()
+    {
+        $group_leader_ids = Group::pluck('group_leader_id')->toArray();
+
+        $users = User::whereNotIn('role', ['super_admin', 'admin'])
+            ->whereNotIn('id', $group_leader_ids)
+            ->select('id', 'first_name', 'last_name', 'username')
+            ->get()
+            ->map(function($user) {
+                $data = $user;
+                $data['total_group_members'] = count($user->getChildrenIds());
+
+                return $data;
+            });
+
+        return response()->json($users);
+    }
+
+    public function getSettingRanks()
+    {
+        $ranks = GroupRankSetting::select('id', 'rank_name', 'lot_rebate_amount', 'min_group_sales')
+            ->where('group_id', 1)
+            ->where('rank_position', '>', 1)
+            ->get()
+            ->map(function($rank) {
+                $rank->lot_rebate_amount = intval($rank->lot_rebate_amount);
+                $rank->min_group_sales = intval($rank->min_group_sales);
+                return $rank;
+            });
+
+        return response()->json($ranks);
+    }
 }

@@ -101,7 +101,7 @@
 }
 
 .p-datepicker-weekday-cell {
-    @apply p-1
+    @apply p-1 text-sm
 }
 
 .p-datepicker-weekday {
@@ -109,7 +109,7 @@
 }
 
 .p-datepicker-day-cell {
-    @apply p-1
+    @apply p-1 text-sm
 }
 
 .p-datepicker-day {
@@ -123,11 +123,11 @@
 }
 
 .p-datepicker-day-selected {
-    @apply bg-primary text-primary-contrast
+    @apply bg-primary text-white dark:text-surface-900
 }
 
 .p-datepicker-day-selected-range {
-    @apply bg-highlight
+    @apply bg-primary-100 dark:bg-primary-900 text-primary-700
 }
 
 .p-datepicker-today > .p-datepicker-day {
@@ -135,11 +135,11 @@
 }
 
 .p-datepicker-today > .p-datepicker-day-selected {
-    @apply bg-primary text-primary-contrast
+    @apply bg-primary dark:bg-primary-500 text-white dark:text-surface-900
 }
 
 .p-datepicker-today > .p-datepicker-day-selected-range {
-    @apply bg-highlight
+    @apply bg-primary-100 dark:bg-primary-900 text-primary-700
 }
 
 .p-datepicker-weeknumber {
@@ -187,7 +187,7 @@
 }
 
 .p-datepicker-buttonbar .p-button {
-    @apply w-auto
+    @apply w-auto text-xs
 }
 
 .p-datepicker-time-picker {

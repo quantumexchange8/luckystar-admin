@@ -5,7 +5,7 @@
         bg-primary enabled:hover:bg-primary-emphasis enabled:active:bg-primary-emphasis-alt text-primary-contrast
         border border-primary enabled:hover:border-primary-emphasis enabled:active:border-primary-emphasis-alt
         focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
-        px-6 py-3 transition-colors duration-200 gap-3 rounded-md
+        px-6 py-3 transition-colors duration-200 gap-3 rounded-lg
         disabled:cursor-default
         text-sm
 }
@@ -185,11 +185,11 @@
 
 .p-button-outlined.p-button-secondary {
     @apply bg-transparent enabled:hover:bg-surface-50 enabled:active:bg-surface-100
-        border-surface-200 enabled:hover:border-surface-200 enabled:active:border-surface-200
-        text-surface-500 enabled:hover:text-surface-500 enabled:active:text-surface-500
+        border-surface-300 enabled:hover:border-surface-300 enabled:active:border-surface-300
+        text-surface-950 enabled:hover:text-surface-950 enabled:active:text-surface-950
         dark:bg-transparent dark:enabled:hover:bg-white/5 dark:enabled:active:bg-white/15
-        dark:border-surface-700 dark:enabled:hover:border-surface-700 dark:enabled:active:border-surface-700
-        dark:text-surface-400 dark:enabled:hover:text-surface-400 dark:enabled:active:text-surface-400
+        dark:border-surface-600 dark:enabled:hover:border-surface-700 dark:enabled:active:border-surface-700
+        dark:text-surface-100 dark:enabled:hover:text-surface-100 dark:enabled:active:text-surface-100 shadow-input font-medium
 }
 
 .p-button-outlined.p-button-success {

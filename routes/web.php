@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GroupController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,8 @@ Route::middleware('auth')->group(function () {
     // select option
     Route::get('/get_countries', [SelectOptionController::class, 'getCountries'])->name('getCountries');
     Route::get('/get_group_uplines', [SelectOptionController::class, 'getUplinesByGroup'])->name('getUplinesByGroup');
+    Route::get('/getAvailableLeader', [SelectOptionController::class, 'getAvailableLeader'])->name('getAvailableLeader');
+    Route::get('/getSettingRanks', [SelectOptionController::class, 'getSettingRanks'])->name('getSettingRanks');
 
     /**
      * ==============================
@@ -29,7 +32,7 @@ Route::middleware('auth')->group(function () {
      * ==============================
      */
     Route::prefix('member')->group(function () {
-            // Listing Routes
+        // Listing Routes
         Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
         Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
         Route::get('/getFilterData', [MemberController::class, 'getFilterData'])->name('member.getFilterData');
@@ -46,7 +49,18 @@ Route::middleware('auth')->group(function () {
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
-        
+    });
+
+    /**
+     * ==============================
+     *            Group
+     * ==============================
+     */
+    Route::prefix('group')->group(function () {
+        Route::get('/listing', [GroupController::class, 'index'])->name('group.listing');
+        Route::get('/getGroupsData', [GroupController::class, 'getGroupsData'])->name('group.getGroupsData');
+
+        Route::post('/addGroup', [GroupController::class, 'addGroup'])->name('group.addGroup');
     });
 
     /**
