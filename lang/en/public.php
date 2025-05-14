@@ -57,6 +57,8 @@ return [
     "no_account_type_caption" => "Looks like you haven't created any account types yet. Let's get started by adding your first one!",
     "account_type_setting" => "Account Type Setting",
     "toast_update_account_type_success" => "You've successfully updated the Account Type!",
+    "toast_account_type_activated" => "Account type has been activated.",
+    "toast_account_type_deactivated" => "Account type has been deactivated.",
     "top_up_profile" => "Top Up Profile",
     "add_profile" => "Add Profile",
     "payment_type" => "Payment Type",
