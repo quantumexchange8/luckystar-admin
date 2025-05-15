@@ -4,7 +4,8 @@ import AddAccountType from "@/Pages/AccountType/Partials/AddAccountType.vue";
 import AccountTypeTable from "@/Pages/AccountType/AccountTypeTable.vue";
 
 defineProps({
-    leverageOptions: Array
+    accountTypesCount: Number,
+    leverageOptions: Array,
 })
 </script>
 
@@ -15,7 +16,7 @@ defineProps({
                 :leverageOptions="leverageOptions"
             />
 
-            <AccountTypeTable :leverageOptions="leverageOptions" />
+            <AccountTypeTable :accountTypesCount="accountTypesCount" :leverageOptions="leverageOptions" />
         </div>
     </AuthenticatedLayout>
 </template>

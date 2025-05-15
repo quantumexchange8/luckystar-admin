@@ -18,7 +18,8 @@ class AddMemberRequest extends FormRequest
             'dial_code' => ['required'],
             'phone' => ['required', 'max:255', 'unique:' . User::class],
             'password' => ['required', Password::defaults(), 'confirmed'],
-            'upline' => ['required'],
+            'group_id' => ['required'],
+            'upline_id' => ['required'],
         ];
     }
 
@@ -36,7 +37,8 @@ class AddMemberRequest extends FormRequest
             'email' => trans('public.email'),
             'phone' => trans('public.phone_number'),
             'password' => trans('public.password'),
-            'upline' => trans('public.upline'),
+            'group_id' => trans('public.group'),
+            'upline_id' => trans('public.upline'),
         ];
     }
 }

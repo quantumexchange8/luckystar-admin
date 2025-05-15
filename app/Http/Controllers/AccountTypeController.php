@@ -25,6 +25,7 @@ class AccountTypeController extends Controller
             ->toArray();
 
         return Inertia::render('AccountType/AccountSetting', [
+            'accountTypesCount' => AccountType::count(),
             'leverageOptions' => $leverages,
         ]);
     }
@@ -82,26 +83,90 @@ class AccountTypeController extends Controller
         ]);
     }
 
-    public function getAccountTypes()
+    public function getAccountTypes(Request $request)
     {
-        $accountTypes = AccountType::withCount('trading_accounts')
-            ->with('account_leverages')
-            ->get();
-    
-        foreach ($accountTypes as $accountType) {
-            $accountType->trade_delay = $accountType->trade_open_duration >= 60
-                ? ($accountType->trade_open_duration / 60) . ' min'
-                : $accountType->trade_open_duration . ' sec';
-    
-            $accountType->total_account = $accountType->trading_accounts_count;
-    
-            unset($accountType->trading_accounts_count);
-    
-            $accountType->leverages = $accountType->account_leverages->pluck('setting_leverage_id')->values();
-            unset($accountType->account_leverages);
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true); //only() extract parameters in lazyEvent
+
+            $query = AccountType::withCount('trading_accounts')
+                ->with('account_leverages:id,account_type_id,setting_leverage_id');
+        
+            $search = $data['filters']['global'];
+            if ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('slug', 'like', '%' . $search . '%')
+                        ->orWhere('account_group', 'like', '%' . $search . '%');
+                });
+                }
+
+            if ($data['filters']['category']) {
+                $query->where('category', $data['filters']['category']);
+            }
+
+            if ($data['filters']['type']) {
+                $query->where('type', $data['filters']['type']);
+            }
+
+            if ($data['filters']['leverages']) {
+                $query->whereHas('account_leverages', function ($q) use ($data) {
+                    $q->whereIn('setting_leverage_id', $data['filters']['leverages']);
+                });
+            }
+            
+            if ($data['filters']['status']) {
+                $query->where('status', $data['filters']['status']);
+            }
+
+            // Handle sorting
+            if (!empty($data['sortField'])) {
+                switch ($data['sortField']) {
+                    case 'latest':
+                        $query->orderByDesc('created_at');
+                        break;
+                
+                    case 'oldest':
+                        $query->orderBy('created_at');
+                        break;
+                
+                    case 'popular':
+                        $query->orderByDesc('trading_accounts_count');
+                        break;
+                
+                    case 'least_popular':
+                        $query->orderBy('trading_accounts_count');
+                        break;
+                
+                    default:
+                        $query->orderByDesc('created_at');
+                }
+            } else {
+                $query->orderByDesc('created_at');
+            }
+            
+            // Handle pagination
+            $rowsPerPage = $data['rows'] ?? 15; // Default to 15 if 'rows' not provided
+
+            $accountTypes = $query->paginate($rowsPerPage);
+
+            foreach ($accountTypes as $accountType) {
+                $accountType->trade_delay = $accountType->trade_open_duration >= 60
+                    ? ($accountType->trade_open_duration / 60) . ' min'
+                    : $accountType->trade_open_duration . ' sec';
+        
+                $accountType->total_account = $accountType->trading_accounts_count;
+        
+                unset($accountType->trading_accounts_count);
+        
+                $accountType->leverages = $accountType->account_leverages->pluck('setting_leverage_id')->values();
+                unset($accountType->account_leverages);
+            }
         }
-    
-        return response()->json(['accountTypes' => $accountTypes]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $accountTypes,
+        ]);
     }
 
     public function updateAccountType(Request $request)

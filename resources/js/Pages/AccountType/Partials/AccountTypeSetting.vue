@@ -227,11 +227,11 @@ const emit = defineEmits(['detailsVisible']);
                                 class="w-full"
                                 :invalid="!!form.errors.leverages"
                             >
-                            <template #option="{option}">
-                                <div class="flex flex-col">
-                                    <span>{{ option.label }}</span>
-                                </div>
-                            </template>
+                                <template #option="{option}">
+                                    <div class="flex flex-col">
+                                        <span>{{ option.label }}</span>
+                                    </div>
+                                </template>
                             </MultiSelect>
                             <InputError :message="form.errors.leverages" />
                         </div>
