@@ -1,6 +1,5 @@
 <script setup>
 import Button from "@/Components/Button.vue";
-import StatusBadge from "@/Components/StatusBadge.vue";
 import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
@@ -190,7 +189,7 @@ const handleMemberStatus = () => {
                         {{ userDetail.name }}
                     </div>
                     <IconCircleCheckFilled v-if="userDetail.kyc_status == 'approved'" size="20" stroke-width="1.25" class="text-success-700 grow-0 shrink-0" />
-                    <StatusBadge :variant="userDetail.role" :value="$t('public.' + userDetail.role)"/>
+                    <!-- <StatusBadge :variant="userDetail.role" :value="$t('public.' + userDetail.role)"/> -->
                 </div>
                 <div class="text-gray-700 dark:text-gray-300 text-sm md:text-base">{{ userDetail.id_number }}</div>
             </div>

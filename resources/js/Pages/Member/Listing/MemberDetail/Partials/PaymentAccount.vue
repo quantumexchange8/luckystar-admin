@@ -8,7 +8,6 @@ import InputError from "@/Components/InputError.vue";
 import InputText from "primevue/inputtext";
 import {useForm} from "@inertiajs/vue3";
 import PaymentAccountAction from "@/Pages/Member/Listing/MemberDetail/Partials/PaymentAccountAction.vue";
-import StatusBadge from "@/Components/StatusBadge.vue";
 
 const props = defineProps({
     paymentAccounts: Array,
@@ -42,12 +41,12 @@ const props = defineProps({
                     <div class="text-gray-950 font-semibold truncate w-full">{{ account.payment_account_name ? account.payment_account_name : '-' }}</div>
                     <div class="text-gray-500 font-medium truncate w-full">{{ account.account_no ? account.account_no : '-' }}</div>
                     <div class="w-full flex items-center gap-3">
-                        <StatusBadge variant="primary">
+                        <!-- <StatusBadge variant="primary">
                             {{ account.payment_platform ? $t('public.' + account.payment_platform) : '-' }}
                         </StatusBadge>
                         <StatusBadge variant="info">
                             {{ account.payment_account_type ? $t('public.' + account.payment_account_type) : '-' }}
-                        </StatusBadge>
+                        </StatusBadge> -->
                     </div>
                 </div>
                 <div class="flex items-center justify-center">

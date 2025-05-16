@@ -20,6 +20,8 @@ class MemberController extends Controller
     public function listing()
     {
         return Inertia::render('Member/Listing/MemberListing', [
+            'groups' => (new SelectOptionController())->getGroups(true),
+            'countries' => (new SelectOptionController())->getCountries(true),
         ]);
     }
 
@@ -29,7 +31,9 @@ class MemberController extends Controller
         if ($request->has('lazyEvent')) {
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true); //only() extract parameters in lazyEvent
 
-            $query = User::with('group.group:id,name,color')->whereNot('role', 'super_admin');
+            $query = User::with('group.group:id,name,color', 'country:id,name', 'upline:id,first_name,last_name,email,id_number', 'rank:id,rank_name')
+                ->withSum('active_subscriptions', 'subscription_amount')
+                ->whereNot('role', 'super_admin');
 
             $search = $data['filters']['global'];
             if ($search) {
@@ -38,22 +42,24 @@ class MemberController extends Controller
 
                     $query->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
                         ->orWhere('email', 'like', '%' . $keyword . '%')
-                        ->orWhere('id_number', 'like', '%' . $keyword . '%');
+                        ->orWhere('id_number', 'like', '%' . $keyword . '%')
+
+                        ->orWhereHas('upline', function ($q) use ($keyword) {
+                            $q->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
+                                ->orWhere('email', 'like', '%' . $keyword . '%')
+                                ->orWhere('id_number', 'like', '%' . $keyword . '%');
+                        });            
                 });
             }
 
-            if ($data['filters']['role']) {
-                $query->where('role', $data['filters']['role']);
-            }
-
             if ($data['filters']['group_id']) {
-                $query->whereHas('group', function ($query) use ($request) {
-                    $query->where('group_id', $request->input('group_id'));
+                $query->whereHas('group', function ($query) use ($data) {
+                    $query->where('group_id', $data['filters']['group_id']);
                 });
             }
     
             if ($data['filters']['upline_id']) {
-                $query->where('upline_id', $request->input('upline_id'));
+                $query->where('upline_id', $data['filters']['upline_id']);
             }
 
             if ($data['filters']['status']) {
@@ -110,18 +116,39 @@ class MemberController extends Controller
             //     return Excel::download(new MemberListingExport($members), now() . '-members.xlsx');
             // }
 
-            $query->select('id', 'first_name', 'last_name', 'username', 'email', 'id_number', 'hierarchyList', 'role', 'status');
+            $query->select('id', 'first_name', 'last_name', 'username', 'email', 'id_number', 'country_id', 'upline_id', 'hierarchyList', 'role', 'setting_rank_id', 'status');
 
             $users = $query->paginate($rowsPerPage);
 
             foreach ($users as $user) {
+                $country = $user->country ?? null;
                 $group = $user->group->group ?? null;
+                $upline = $user->upline ?? null;
+                $rank = $user->rank ?? null;
             
+                $user->capital = $user->active_subscriptions_sum_subscription_amount;
+                $user->profile_photo = $user?->getFirstMediaUrl('profile_photo');
+
+                $user->country_name = $country?->name;
+
                 $user->group_id = $group?->id;
                 $user->group_name = $group?->name;
                 $user->group_color = $group?->color;
             
-                unset($user->group); // Optional: remove nested group if you don't need it
+                $user->upline_id = $upline?->id;
+                $user->upline_name = $upline?->full_name;
+                $user->upline_email = $upline?->email;
+                $user->upline_id_number = $upline?->id_number;
+                $user->upline_profile_photo = $upline?->getFirstMediaUrl('profile_photo');
+
+                $user->rank_id = $rank?->id;
+                $user->rank_name = $rank?->rank_name;
+
+                unset($user->active_subscriptions_sum_subscription_amount);
+                unset($user->country);
+                unset($user->group);
+                unset($user->upline);
+                unset($user->rank);
             }
             
         }
@@ -129,15 +156,6 @@ class MemberController extends Controller
         return response()->json([
             'success' => true,
             'data' => $users,
-        ]);
-    }
-
-    public function getFilterData()
-    {
-        return response()->json([
-            'countries' => (new SelectOptionController())->getCountries(true),
-            'groups' => (new SelectOptionController())->getGroups(true),
-            'uplines' => (new SelectOptionController())->getUplines(true),
         ]);
     }
 

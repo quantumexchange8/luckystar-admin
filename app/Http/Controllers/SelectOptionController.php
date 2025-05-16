@@ -44,18 +44,23 @@ class SelectOptionController extends Controller
     public function getUplinesByGroup(Request $request)
     {
         $groupId = $request->input('group_id');
-
+    
         $uplines = User::whereHas('group', function ($query) use ($groupId) {
                 $query->where('group_id', $groupId);
             })
             ->select('id', 'first_name', 'last_name', 'email', 'id_number')
             ->get();
-
+    
+        // Add profile_photo URL to each upline
+        foreach ($uplines as $upline) {
+            $upline->profile_photo = $upline?->getFirstMediaUrl('profile_photo');
+        }
+    
         return response()->json([
             'uplines' => $uplines,
         ]);
     }
-
+    
     public function getAvailableLeader()
     {
         $group_leader_ids = Group::pluck('group_leader_id')->toArray();

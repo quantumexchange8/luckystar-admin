@@ -1,15 +1,38 @@
 <script setup>
 import Button from "@/Components/Button.vue";
-import Dialog from 'primevue/dialog';
+import {
+    Dialog,
+    InputText,
+    Select,
+    Password,
+    FileUpload,
+    Avatar,
+} from "primevue";
 import {ref, watch, watchEffect} from "vue";
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import InputText from 'primevue/inputtext';
 import {useForm, usePage} from '@inertiajs/vue3';
-import Select from 'primevue/select';
-import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import Password from 'primevue/password';
-import FileUpload from 'primevue/fileupload';
+import { generalFormat } from "@/Composables/format.js";
+
+const { formatRgbaColor, formatNameLabel } = generalFormat();
+
+const props = defineProps({
+    groups: Array,
+    countries: Array,
+})
+
+const countries = ref()
+const selectedCountry = ref();
+const groups = ref();
+const selectedGroup = ref();
+const uplines = ref();
+const selectedUpline = ref();
+
+// Watch for changes in props
+watch(() => [props.groups, props.countries], ([newGroups, newCountries]) => {
+    groups.value = newGroups;
+    countries.value = newCountries;
+}, { immediate: true });
 
 const visible = ref(false)
 
@@ -21,10 +44,46 @@ const form = useForm({
     dial_code: '',
     phone: '',
     phone_number: '',
-    upline: '',
+    group_id: '',
+    upline_id: '',
     // kyc_verification: '',
     password: '',
     password_confirmation: '',
+});
+
+// Watch for individual changes in upline_id and group_id
+watch([selectedGroup, selectedUpline], ([newGroup, newUpline], [oldGroup]) => {
+    // Handle selectedGroup changes
+    if (newGroup !== oldGroup) {
+        if (newGroup) {
+            form.group_id = newGroup.id;
+
+            // Reset upline selection when group changes
+            selectedUpline.value = null;
+            form.upline_id = null;
+
+            axios.get('/get_group_uplines', {
+                params: { group_id: newGroup.id }
+            }).then((response) => {
+                uplines.value = response.data.uplines;
+            }).catch((error) => {
+                console.error('Failed to fetch uplines:', error);
+                uplines.value = [];
+            });
+        } else {
+            form.group_id = null;
+            selectedUpline.value = null;
+            form.upline_id = null;
+            uplines.value = [];
+        }
+    }
+
+    // Handle selectedUpline changes
+    if (newUpline) {
+        form.upline_id = newUpline.id;
+    } else {
+        form.upline_id = null;
+    }
 });
 
 const submitForm = () => {
@@ -42,29 +101,13 @@ const submitForm = () => {
     });
 };
 
-const isLoading = ref(false)
-const countries = ref()
-const uplines = ref()
-const selectedCountry = ref();
-const getResults = async () => {
-    isLoading.value = true;
-
-    try {
-        const response = await axios.get('/member/getFilterData');
-        countries.value = response.data.countries;
-        uplines.value = response.data.uplines;
-    } catch (error) {
-        console.error('Error changing locale:', error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-watch(visible, (newVal) => {
-    if (newVal === true) {
-        getResults();
-    }
-});
+const openDialog = () => {
+    visible.value = true;
+    form.reset();
+    selectedCountry.value = null;
+    selectedGroup.value = null;
+    selectedUpline.value = null;
+}
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
@@ -79,7 +122,7 @@ watchEffect(() => {
         variant="primary-flat"
         size="base"
         class='w-full md:w-auto'
-        @click="visible = true"
+        @click="openDialog"
     >
         {{ $t('public.add_member') }}
     </Button>
@@ -191,9 +234,43 @@ watchEffect(() => {
                             <InputError :message="form.errors.phone" />
                         </div>
                         <div class="flex flex-col items-start gap-0.5 self-stretch">
-                            <InputLabel for="upline" :value="$t('public.upline')" />
+                            <InputLabel for="group_id" :value="$t('public.group')" />
                             <Select
-                                v-model="form.upline"
+                                v-model="selectedGroup"
+                                :options="groups"
+                                filter
+                                :filterFields="['name', 'phone_code']"
+                                optionLabel="name"
+                                :placeholder="$t('public.group_placeholder')"
+                                class="w-full"
+                                scroll-height="236px"
+                                :invalid="!!form.errors.group_id"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-4 h-4 rounded-full overflow-hidden grow-0 shrink-0" :style="{ backgroundColor: `#${slotProps.value.color}` }"></div>
+                                            <div>{{ slotProps.value.name }}</div>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-gray-400">
+                                        {{ slotProps.placeholder }}
+                                    </span>
+                                </template>
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-4 h-4 rounded-full overflow-hidden grow-0 shrink-0" :style="{ backgroundColor: `#${slotProps.option.color}` }"></div>
+                                        <div>{{ slotProps.option.name }}</div>
+                                    </div>
+                                </template>
+                            </Select>
+                            <InputError :message="form.errors.group_id" />
+                        </div>
+
+                        <div v-if="selectedGroup" class="flex flex-col items-start gap-0.5 self-stretch">
+                            <InputLabel for="upline_id" :value="$t('public.upline')" />
+                            <Select
+                                v-model="selectedUpline"
                                 :options="uplines"
                                 filter
                                 :filterFields="['full_name', 'phone_code']"
@@ -201,19 +278,23 @@ watchEffect(() => {
                                 :placeholder="$t('public.upline_placeholder')"
                                 class="w-full"
                                 scroll-height="236px"
-                                :invalid="!!form.errors.upline"
+                                :invalid="!!form.errors.upline_id"
                             >
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex items-center gap-3">
                                         <div class="flex items-center gap-2">
-                                            <div class="w-5 h-5 rounded-full overflow-hidden">
-                                                <template v-if="slotProps.value.profile_photo">
-                                                    <img :src="slotProps.value.profile_photo" alt="profile_picture" />
-                                                </template>
-                                                <template v-else>
-                                                    <DefaultProfilePhoto />
-                                                </template>
-                                            </div>
+                                            <Avatar
+                                                v-if="slotProps.value.profile_photo"
+                                                :image="slotProps.value.profile_photo"
+                                                shape="circle"
+                                                class="w-5 h-5 text-xs rounded-full overflow-hidden grow-0 shrink-0"
+                                            />
+                                            <Avatar
+                                                v-else
+                                                :label="formatNameLabel(slotProps.value.full_name)"
+                                                shape="circle"
+                                                class="w-5 h-5 text-xs rounded-full overflow-hidden grow-0 shrink-0"
+                                            />
                                             <div>{{ slotProps.value.full_name }}</div>
                                         </div>
                                     </div>
@@ -223,19 +304,23 @@ watchEffect(() => {
                                 </template>
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-5 h-5 rounded-full overflow-hidden">
-                                            <template v-if="slotProps.option.profile_photo">
-                                                <img :src="slotProps.option.profile_photo" alt="profile_picture" />
-                                            </template>
-                                            <template v-else>
-                                                <DefaultProfilePhoto />
-                                            </template>
-                                        </div>
+                                        <Avatar
+                                            v-if="slotProps.option.profile_photo"
+                                            :image="slotProps.option.profile_photo"
+                                            shape="circle"
+                                            class="w-5 h-5 text-xs rounded-full overflow-hidden grow-0 shrink-0"
+                                        />
+                                        <Avatar
+                                            v-else
+                                            :label="formatNameLabel(slotProps.option.full_name)"
+                                            shape="circle"
+                                            class="w-5 h-5 text-xs rounded-full overflow-hidden grow-0 shrink-0"
+                                        />
                                         <div>{{ slotProps.option.full_name }}</div>
                                     </div>
                                 </template>
                             </Select>
-                            <InputError :message="form.errors.upline" />
+                            <InputError :message="form.errors.upline_id" />
                         </div>
                     </div>
                 </div>
@@ -304,7 +389,7 @@ watchEffect(() => {
                     variant="primary-flat"
                     size="base"
                     @click="submitForm"
-                    :disabled="form.processing || isLoading"
+                    :disabled="form.processing"
                 >
                     {{ $t('public.create') }}
                 </Button>
