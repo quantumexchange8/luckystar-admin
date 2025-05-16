@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function () {
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
+        
+        Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
     });
 
     /**

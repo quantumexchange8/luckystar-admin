@@ -17,9 +17,9 @@ import {
     Select,
     Paginator,
     Skeleton,
+    Button,
+    Badge,
 } from "primevue";
-import Button from '@/Components/Button.vue';
-import Badge from '@/Components/Badge.vue';
 import Empty from '@/Components/Empty.vue';
 import Loader from "@/Components/Loader.vue";
 import AccountTypeAction from '@/Pages/AccountType/Partials/AccountTypeAction.vue';
@@ -199,16 +199,14 @@ watchEffect(() => {
         </div>
         <div class="w-full flex justify-between items-center self-stretch gap-3">
             <Button
-                variant="gray-outlined"
-                @click="toggle"
-                size="sm"
-                class="flex gap-3 items-center justify-center py-3 w-full md:w-[130px]"
+                type="button"
+                severity="secondary"
+                outlined
+                class="flex gap-3 items-center"
             >
-                <IconAdjustments size="20" stroke-width="1.25" />
-                <div class="text-sm font-medium">
-                    {{ $t('public.filter') }}
-                </div>
-                <Badge class="w-5 h-5 text-xs text-white" variant="numberbadge">
+                <IconAdjustments size="20" stroke-width="1.5" class="grow-0 shrink-0" />
+                {{ $t('public.filter') }}
+                <Badge severity="info">
                     {{ filterCount }}
                 </Badge>
             </Button>
@@ -241,7 +239,7 @@ watchEffect(() => {
             />
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-4 gap-5 self-stretch">
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-3 gap-5 self-stretch">
             <Card v-if="isLoading" class="w-full">
                 <template #content>
                     <div class="w-full flex flex-col items-start gap-2">
@@ -357,30 +355,30 @@ watchEffect(() => {
                         </div>
 
                         <div class="w-full grid grid-cols-2 pb-2 gap-3">
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.minimum_deposit') }}:</span>
                                 <span class="text-surface-950 dark:text-white text-xs">{{ formatAmount(accountType.minimum_deposit) }}</span>
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.currency') }}:</span>
                                 <span class="text-surface-950 dark:text-white text-xs">{{ accountType.currency }}</span>
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.maximum_account') }}:</span>
                                 <span class="text-surface-950 dark:text-white text-xs">{{ accountType.maximum_account_number }}</span>
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.total_account') }}:</span>
                                 <span class="text-surface-950 dark:text-white text-xs">{{ accountType.total_account }}</span>
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.allow_trade') }}:</span>
                                 <span class="text-surface-950 dark:text-white text-xs">{{ accountType.allow_trade ? $t('public.allow') : $t('public.not_allow') }}</span>
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.color') }}:</span>
                                 <div
-                                    class="w-[18px] h-[18px] grow-0 shrink-0"
+                                    class="w-[18px] h-[18px] grow-0 shrink-0 rounded"
                                     :style="{ backgroundColor: `#${accountType.color}` }"
                                 ></div>
                             </div>
@@ -481,7 +479,7 @@ watchEffect(() => {
             <div class="flex w-full">
                 <Button
                     type="button"
-                    variant="primary-outlined"
+                    outlined
                     class="flex justify-center w-full"
                     @click="clearFilter()"
                 >

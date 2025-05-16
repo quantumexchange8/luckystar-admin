@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Group;
 use App\Models\Wallet;
 use App\Models\Country;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Services\GroupService;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -172,7 +175,6 @@ class MemberController extends Controller
 
         $dial_code = $request->dial_code;
         $country = Country::find($dial_code['id']);
-        $default_ib_id = User::where('id_number', 'IB00000')->first()->id;
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -187,43 +189,38 @@ class MemberController extends Controller
             'nationality' => $country->nationality,
             'hierarchyList' => $hierarchyList,
             'password' => Hash::make($request->password),
-            'role' => $upline_id == $default_ib_id ? 'ib' : 'member',
         ]);
 
         $user->setReferralId();
 
-        // Assign the appropriate role based on the upline ID or default conditions
-        $user->assignRole($upline_id == $default_ib_id ? 'ib' : 'member');
-
-        $id_no = ($user->role == 'ib' ? 'IB' : 'MB') . Str::padLeft($user->id - 2, 5, "0");
+        $id_no = 'LID' . Str::padLeft($user->id, 6, "0");
         $user->id_number = $id_no;
         $user->save();
-
-        if ($upline->group) {
-            $user->assignedGroup($upline->group->group_id);
+        
+        if ($upline->group){
+            (new GroupService())->addUserToGroup($upline->group->group_id, $user->id);
+            $group_rank_setting = $upline->group->group->group_rank_settings()->first();
+            $user->setting_rank_id = $group_rank_setting->id;
+        } else {
+            (new GroupService())->addUserToGroup(Group::first()->id, $user->id);
         }
 
-        if ($user->role == 'ib') {
-            Wallet::create(attributes: [
-                'user_id' => $user->id,
-                'type' => 'rebate_wallet',
-                'address' => str_replace('IB', 'RB', $user->id_number),
-                'balance' => 0
-            ]);
+        Wallet::create([
+            'user_id' => $user->id,
+            'type' => 'cash_wallet',
+            'address' => "LS-CW-". Str::padLeft($user->id, 7, "0"),
+            'currency' => 'USD',
+            'currency_symbol' => '$'
+        ]);
 
-            // $uplineRebates = RebateAllocation::where('user_id', $user->upline_id)->get();
-
-            // foreach ($uplineRebates as $uplineRebate) {
-            //     RebateAllocation::create([
-            //         'user_id' => $user->id,
-            //         'account_type_id' => $uplineRebate->account_type_id,
-            //         'symbol_group_id' => $uplineRebate->symbol_group_id,
-            //         'amount' => 0,
-            //         'edited_by' => Auth::id(),
-            //     ]);
-            // }
-        }
-
+        Wallet::create([
+            'user_id' => $user->id,
+            'type' => 'bonus_wallet',
+            'address' => "LS-BW-". Str::padLeft($user->id, 7, "0"),
+            'currency' => 'USD',
+            'currency_symbol' => '$'
+        ]);
+        
         return back()->with('toast', [
             'title' => trans("public.toast_create_member_success"),
             'type' => 'success',
@@ -309,41 +306,84 @@ class MemberController extends Controller
 
     public function getUserData(Request $request)
     {
-        $user = User::findOrFail($request->id);
-
+        $user = User::with('country', 'group.group', 'upline', 'rank', 'active_subscriptions')
+            ->findOrFail($request->id);
+    
+        $capital = $user->active_subscriptions->sum('subscription_amount');
+    
         $userData = [
             'id' => $user->id,
+            'username' => $user->username,
             'name' => $user->full_name,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
             'email' => $user->email,
             'dial_code' => $user->dial_code,
             'phone' => $user->phone,
             'phone_number' => $user->phone_number,
             'country' => $user->country->name ?? null,
             'nationality' => $user->nationality,
-            'upline_id' => $user->upline_id,
-            'role' => $user->role,
+            'upline_name' => $user->upline->full_name ?? null,
+            'upline_id_number' => $user->upline->id_number ?? null,
+            'upline_email' => $user->upline->email ?? null,
+            'upline_profile_photo' => $user->upline ? $user->upline->getFirstMediaUrl('profile_photo') : null,
             'id_number' => $user->id_number,
             'status' => $user->status,
+            'rank_name' => $user->rank->rank_name ?? null,
             'profile_photo' => $user->getFirstMediaUrl('profile_photo'),
-            'group_id' => $user->group->group_id ?? null,
+            'capital' => $capital,
             'group_name' => $user->group->group->name ?? null,
             'group_color' => $user->group->group->color ?? null,
-            'upline_name' => $user->upline->full_name ?? null,
-            'upline_profile_photo' => $user->upline ? $user->upline->getFirstMediaUrl('profile_photo') : null,
             'total_direct_member' => $user->directChildren->where('role', 'member')->count(),
             'total_direct_ib' => $user->directChildren->where('role', 'ib')->count(),
-            // 'kyc_verification' => $user->getMedia('kyc_verification'),
-            // 'kyc_approved_at' => $user->kyc_approved_at,
             'kyc_status' => $user->kyc_status,
         ];
-
+    
         $paymentAccounts = $user->paymentAccounts()
             ->latest()
             ->get();
-
+    
         return response()->json([
             'userDetail' => $userData,
             'paymentAccounts' => $paymentAccounts
+        ]);
+    }
+    
+    public function updateProfileInfo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email', 'max:255', Rule::unique(User::class)->ignore($request->user_id)],
+            'first_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+            'last_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+            'username' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+            'dial_code' => ['required'],
+            'phone' => ['required', 'max:255'],
+            'phone_number' => ['required', 'max:255', Rule::unique(User::class)->ignore($request->user_id)],
+        ])->setAttributeNames([
+            'email' => trans('public.email'),
+            'first_name' => trans('public.first_name'),
+            'last_name' => trans('public.last_name'),
+            'username' => trans('public.username'),
+            'dial_code' => trans('public.phone_code'),
+            'phone' => trans('public.phone'),
+            'phone_number' => trans('public.phone_number'),
+        ]);
+        $validator->validate();
+
+        $user = User::find($request->user_id);
+
+        // Update user contact information
+        $user->update([
+            'email' => $request->email,
+            'name' => $request->name,
+            'dial_code' => $request->dial_code['phone_code'],
+            'phone' => $request->phone,
+            'phone_number' => $request->phone_number,
+        ]);
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.update_contact_info_alert'),
+            'type' => 'success'
         ]);
     }
 

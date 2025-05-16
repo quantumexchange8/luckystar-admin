@@ -1,9 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Button from '@/Components/Button.vue';
 import { IconChevronRight } from '@tabler/icons-vue';
 import {ref, h, watch, watchEffect} from "vue";
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "primevue";
+import { Tab, TabList, TabPanel, TabPanels, Tabs, Button } from "primevue";
 import {usePage} from '@inertiajs/vue3';
 // import MemberFinancialInfo from '@/Pages/Member/Listing/Partials/MemberFinancialInfo.vue';
 // import MemberTradingAccounts from '@/Pages/Member/Listing/Partials/MemberTradingAccounts.vue';
@@ -68,10 +67,9 @@ const activeIndex = ref(0);
             <!-- Breadcrumb -->
             <div class="flex flex-wrap md:flex-nowrap items-center gap-2 self-stretch">
                 <Button
-                    external
-                    type="button"
-                    variant="primary-text"
-                    size="sm"
+                    text
+                    size="small"
+                    as="a"
                     :href="route('member.listing')"
                 >
                     {{ $t('public.member_listing') }}

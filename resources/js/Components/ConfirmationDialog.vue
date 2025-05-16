@@ -1,6 +1,8 @@
 <script setup>
 import ConfirmDialog from 'primevue/confirmdialog';
-import Button from "@/Components/Button.vue";
+import {
+    Button,
+} from "primevue";
 import {
     SecurityIcon,
     BulbIcon,
@@ -48,19 +50,17 @@ import {
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
                         <Button
                             type="button"
-                            variant="gray-tonal"
+                            severity="secondary"
+                            raised
                             @click="rejectCallback"
                             class="w-full"
-                            size="base"
                         >
                             {{ message.cancelButton }}
                         </Button>
                         <Button
                             type="button"
-                            variant="primary-flat"
                             @click="acceptCallback"
                             class="w-full text-nowrap"
-                            size="base"
                         >
                             {{ message.acceptButton }}
                         </Button>
@@ -96,19 +96,18 @@ import {
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
                         <Button
                             type="button"
-                            variant="gray-tonal"
+                            severity="secondary"
+                            raised
                             @click="rejectCallback"
                             class="w-full"
-                            size="base"
                         >
                             {{ message.cancelButton }}
                         </Button>
                         <Button
                             type="button"
-                            variant="gray-flat"
+                            severity="secondary"
                             @click="acceptCallback"
                             class="w-full text-nowrap"
-                            size="base"
                         >
                             {{ message.acceptButton }}
                         </Button>
@@ -148,19 +147,18 @@ import {
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
                         <Button
                             type="button"
-                            variant="gray-tonal"
+                            severity="secondary"
+                            raised
                             @click="rejectCallback"
                             class="w-full"
-                            size="base"
                         >
                             {{ message.cancelButton }}
                         </Button>
                         <Button
                             type="button"
-                            variant="error-flat"
+                            severity="danger"
                             @click="acceptCallback"
                             class="w-full text-nowrap"
-                            size="base"
                         >
                             {{ message.acceptButton }}
                         </Button>

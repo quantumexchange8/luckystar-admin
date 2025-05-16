@@ -1,9 +1,11 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import Password from 'primevue/password';
 import { useForm } from "@inertiajs/vue3";
-import Button from "@/Components/Button.vue";
+import {
+    Password,
+    Button,
+} from "primevue";
 
 const props = defineProps({
     member: Object,
@@ -61,7 +63,8 @@ const submitForm = () => {
 
         <div class="flex justify-end items-center pt-6 gap-4 self-stretch">
             <Button
-                variant="gray-outlined"
+                severity="secondary"
+                outlined
                 class="w-full"
                 :disabled="form.processing"
                 @click.prevent="closeDialog"
@@ -69,7 +72,6 @@ const submitForm = () => {
                 {{ $t('public.cancel') }}
             </Button>
             <Button
-                variant="primary-flat"
                 class="w-full"
                 :disabled="form.processing"
                 @click.prevent="submitForm"

@@ -119,8 +119,9 @@ class AccountTypeController extends Controller
             }
 
             // Handle sorting
-            if (!empty($data['sortField'])) {
-                switch ($data['sortField']) {
+            $sortField = $request->input('sortField', 'latest');
+            if ($sortField) {
+                switch ($sortField) {
                     case 'latest':
                         $query->orderByDesc('created_at');
                         break;
@@ -140,8 +141,6 @@ class AccountTypeController extends Controller
                     default:
                         $query->orderByDesc('created_at');
                 }
-            } else {
-                $query->orderByDesc('created_at');
             }
             
             // Handle pagination

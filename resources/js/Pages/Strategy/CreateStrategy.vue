@@ -398,7 +398,7 @@ const closeDialog = () => {
                                 v-model="selectedGroup"
                                 :options="groups"
                                 optionLabel="name"
-                                :placeholder="$t('public.select_group_placeholder')"
+                                :placeholder="$t('public.group_placeholder')"
                                 :maxSelectedLabels="3"
                                 class="w-full"
                                 :invalid="!!form.errors.visible_to"

@@ -1,18 +1,20 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import InputNumber from "primevue/inputnumber";
-import Passord from 'primevue/password';
 import { useForm } from "@inertiajs/vue3";
-import Button from "@/Components/Button.vue";
-import Select from 'primevue/select';
 import { computed, ref, watch } from "vue";
 import { router } from "@inertiajs/vue3";
-import { useConfirm } from "primevue/useconfirm";
 import { IconUserCheck } from "@tabler/icons-vue";
 import { trans, wTrans } from "laravel-vue-i18n";
-import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import MultiSelect from 'primevue/multiselect';
+import {
+    InputNumber,
+    Password,
+    Select,
+    useConfirm,
+    MultiSelect,
+    Button,
+    Avatar
+} from "primevue";
 import { generalFormat } from "@/Composables/format.js";
 
 const props = defineProps({
@@ -287,14 +289,19 @@ const requireConfirmation = (action_type) => {
                         <template #value="slotProps">
                             <div v-if="slotProps.value" class="flex items-center gap-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-5 h-5 rounded-full overflow-hidden">
-                                        <template v-if="slotProps.value.profile_photo">
-                                            <img :src="slotProps.value.profile_photo" alt="profile_picture" />
-                                        </template>
-                                        <template v-else>
-                                            <DefaultProfilePhoto />
-                                        </template>
-                                    </div>
+                                    <Avatar
+                                        v-if="slotProps.value.profile_photo"
+                                        :image="slotProps.value.profile_photo"
+                                        shape="circle"
+                                        class="w-5 h-5 rounded-full overflow-hidden"
+                                    />
+                                    <Avatar
+                                        v-else
+                                        :label="formatNameLabel(slotProps.value.name)"
+                                        shape="circle"
+                                        class="w-5 h-5 rounded-full overflow-hidden"
+                                    />
+
                                     <div>{{ slotProps.value.name }}</div>
                                 </div>
                             </div>
@@ -302,14 +309,19 @@ const requireConfirmation = (action_type) => {
                         </template>
                         <template #option="slotProps">
                             <div class="flex items-center gap-2">
-                                <div class="w-5 h-5 rounded-full overflow-hidden">
-                                    <template v-if="slotProps.option.profile_photo">
-                                        <img :src="slotProps.option.profile_photo" alt="profile_picture" />
-                                    </template>
-                                    <template v-else>
-                                        <DefaultProfilePhoto />
-                                    </template>
-                                </div>
+                                <Avatar
+                                    v-if="slotProps.option.profile_photo"
+                                    :image="slotProps.option.profile_photo"
+                                    shape="circle"
+                                    class="w-5 h-5 rounded-full overflow-hidden"
+                                />
+                                <Avatar
+                                    v-else
+                                    :label="formatNameLabel(slotProps.option.name)"
+                                    shape="circle"
+                                    class="w-5 h-5 rounded-full overflow-hidden"
+                                />
+                                
                                 <div>{{ slotProps.option.name }}</div>
                             </div>
                         </template>
@@ -386,7 +398,8 @@ const requireConfirmation = (action_type) => {
 
                             <div class="flex justify-end items-center pt-6 gap-4 self-stretch">
                                 <Button
-                                    variant="gray-outlined"
+                                    severity="secondary"
+                                    outlined
                                     class="w-full"
                                     :disabled="form.processing"
                                     @click.prevent="closeDialog"
@@ -394,7 +407,6 @@ const requireConfirmation = (action_type) => {
                                     {{ $t('public.cancel') }}
                                 </Button>
                                 <Button
-                                    variant="primary-flat"
                                     class="w-full"
                                     @click.prevent="nextStep"
                                     :disabled="form.processing"
@@ -470,7 +482,8 @@ const requireConfirmation = (action_type) => {
 
                             <div class="flex justify-end items-center pt-6 gap-4 self-stretch">
                                 <Button
-                                    variant="gray-outlined"
+                                    severity="secondary"
+                                    outlined
                                     class="w-full"
                                     :disabled="form.processing"
                                     @click.prevent="previousStep"
@@ -478,7 +491,6 @@ const requireConfirmation = (action_type) => {
                                     {{ $t('public.back') }}
                                 </Button>
                                 <Button
-                                    variant="primary-flat"
                                     class="w-full"
                                     :disabled="form.processing || isLoading"
                                     @click.prevent="submitForm"
@@ -492,7 +504,8 @@ const requireConfirmation = (action_type) => {
 
                 <div v-else class="flex justify-end items-center pt-6 gap-4 self-stretch">
                     <Button
-                        variant="gray-outlined"
+                        severity="secondary"
+                        outlined
                         class="w-full"
                         :disabled="form.processing"
                         @click.prevent="closeDialog"
@@ -500,7 +513,6 @@ const requireConfirmation = (action_type) => {
                         {{ $t('public.cancel') }}
                     </Button>
                     <Button
-                        variant="primary-flat"
                         class="w-full"
                         :disabled="form.processing || isLoading"
                         @click.prevent="submitForm"

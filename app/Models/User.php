@@ -73,14 +73,6 @@ class User extends Authenticatable implements HasMedia
         $this->save();
     }
 
-    public function assignedGroup($group_id): void
-    {
-        GroupHasUser::updateOrCreate(
-            ['user_id' => $this->id],
-            ['group_id' => $group_id]
-        );
-    }
-
     public function directChildren(): HasMany
     {
         return $this->hasMany(User::class, 'upline_id', 'id');

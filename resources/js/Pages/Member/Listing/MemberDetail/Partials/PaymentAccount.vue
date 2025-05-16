@@ -1,12 +1,4 @@
 <script setup>
-import Button from "@/Components/Button.vue";
-import {Edit01Icon} from "@/Components/Icons/outline.jsx";
-import {computed, ref, watch} from "vue";
-import Dialog from "primevue/dialog";
-import InputLabel from "@/Components/InputLabel.vue";
-import InputError from "@/Components/InputError.vue";
-import InputText from "primevue/inputtext";
-import {useForm} from "@inertiajs/vue3";
 import PaymentAccountAction from "@/Pages/Member/Listing/MemberDetail/Partials/PaymentAccountAction.vue";
 
 const props = defineProps({
@@ -19,17 +11,6 @@ const props = defineProps({
     <div class="flex flex-col h-full max-h-full items-start p-4 md:py-6 md:px-8 gap-3 self-stretch rounded-2xl bg-white shadow-toast">
         <div class="flex justify-between items-center self-stretch">
             <div class="text-gray-950 text-sm font-bold">{{ $t('public.payment_account_information') }}</div>
-            <!-- <Button
-                type="button"
-                iconOnly
-                size="sm"
-                variant="gray-text"
-                @click="openDialog"
-                pill
-                :disabled="!userDetail"
-            >
-                <Edit01Icon class="w-4 h-4 text-gray-500"/>
-            </Button> -->
         </div>
         <div v-if="props?.paymentAccounts" class="flex flex-col divide-y items-start self-stretch overflow-y-auto max-h-[250px]">
             <div

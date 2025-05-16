@@ -10,14 +10,16 @@ import {
     IconDeviceLaptop
 } from "@tabler/icons-vue";
 import {Edit01Icon} from "@/Components/Icons/outline.jsx";
-import Button from "@/Components/Button.vue";
 import {computed, h, ref, watch} from "vue";
-import TieredMenu from "primevue/tieredmenu";
-import InputSwitch from "primevue/inputswitch";
 import {router} from "@inertiajs/vue3";
-import {useConfirm} from "primevue/useconfirm";
 import {trans} from "laravel-vue-i18n";
-import Dialog from "primevue/dialog";
+import {
+    TieredMenu,
+    ToggleSwitch,
+    useConfirm,
+    Dialog,
+    Button,
+} from "primevue";
 import EditPaymentAccount from "@/Pages/Member/Listing/MemberDetail/Partials/EditPaymentAccount.vue";
 
 const props = defineProps({
@@ -49,11 +51,12 @@ const toggle = (event) => {
 <template>
     <div class="flex gap-3 items-center justify-center">
         <Button
-            variant="gray-text"
-            size="sm"
+            severity="secondary"
+            text
+            size="small"
             type="button"
-            iconOnly
-            pill
+            icon="IconDotsVertical"
+            rounded
             @click="toggle"
             aria-haspopup="true"
             aria-controls="overlay_tmenu"

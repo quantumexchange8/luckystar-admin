@@ -1,6 +1,5 @@
 <script setup>
 import { IconAdjustmentsHorizontal } from "@tabler/icons-vue";
-import Button from "@/Components/Button.vue";
 import {computed, h, ref, watch} from "vue";
 import TieredMenu from "primevue/tieredmenu";
 import ToggleSwitch from "primevue/toggleswitch";

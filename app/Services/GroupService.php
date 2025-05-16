@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\GroupHasUser;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class GroupService
 {

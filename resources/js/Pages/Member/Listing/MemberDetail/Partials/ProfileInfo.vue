@@ -1,18 +1,20 @@
 <script setup>
-import Button from "@/Components/Button.vue";
+import {
+    ToggleSwitch,
+    Dialog,
+    Select,
+    InputText,
+    Button,
+    useConfirm,
+    Avatar
+} from "primevue";
 import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
-import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import ToggleSwitch from "primevue/toggleswitch";
 import { ref, watch } from "vue";
-import Dialog from "primevue/dialog";
 import InputLabel from "@/Components/InputLabel.vue";
-import Select from "primevue/select";
 import InputError from "@/Components/InputError.vue";
-import InputText from "primevue/inputtext";
 import { useForm } from "@inertiajs/vue3";
 import { generalFormat } from "@/Composables/format.js";
-import { useConfirm } from "primevue/useconfirm";
 import { trans } from "laravel-vue-i18n";
 import { router } from "@inertiajs/vue3";
 
@@ -24,12 +26,14 @@ const checked = ref(false)
 const visible = ref(false)
 const countries = ref()
 const selectedCountry = ref();
-const { formatRgbaColor } = generalFormat();
+const { formatRgbaColor, formatNameLabel } = generalFormat();
 
 watch(() => props.userDetail, (user) => {
     checked.value = user.status === 'active';
     form.user_id = props.userDetail.id
-    form.name = props.userDetail.name
+    form.username = props.userDetail.username
+    form.first_name = props.userDetail.first_name
+    form.last_name = props.userDetail.last_name
     form.email = props.userDetail.email
     form.phone = props.userDetail.phone
 });
@@ -53,7 +57,7 @@ const form = useForm({
 
 const getResults = async () => {
     try {
-        const response = await axios.get('/member/getFilterData');
+        const response = await axios.get('/get_countries');
         countries.value = response.data.countries;
     } catch (error) {
         console.error('Error changing locale:', error);
@@ -69,7 +73,7 @@ const submitForm = () => {
         form.phone_number = selectedCountry.value.phone_code + form.phone;
     }
 
-    form.post(route('member.updateContactInfo'), {
+    form.post(route('member.updateProfileInfo'), {
         onSuccess: () => {
             visible.value = false;
         },
@@ -139,19 +143,27 @@ const handleMemberStatus = () => {
     <div class="bg-white dark:bg-gray-700 w-full xl:min-w-[540px] flex flex-col gap-6 md:gap-5 xl:gap-8 p-4 md:py-6 md:px-8 rounded-2xl shadow-toast self-stretch">
         <div class="flex flex-col pb-6 md:pb-5 xl:pb-8 items-start gap-4 self-stretch border-b border-gray-200 dark:border-gray-500">
             <div class="flex justify-between items-start self-stretch">
-                <div class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden">
-                    <div v-if="userDetail">
-                        <div v-if="userDetail.profile_photo">
-                            <img :src="userDetail.profile_photo" alt="Profile Photo" class="w-full object-cover" />
-                        </div>
-                        <div v-else class="p-2 bg-gray-300 dark:bg-gray-500">
-                            <DefaultProfilePhoto />
-                        </div>
-                    </div>
-                    <div v-else class="animate-pulse p-2 bg-gray-300 dark:bg-gray-500">
-                        <DefaultProfilePhoto />
-                    </div>
+                <div v-if="userDetail">
+                    <Avatar
+                        v-if="userDetail.profile_photo"
+                        :image="userDetail.profile_photo"
+                        shape="circle"
+                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden"
+                    />
+                    <Avatar
+                        v-else
+                        :label="formatNameLabel(userDetail.name)"
+                        shape="circle"
+                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden"
+                    />
                 </div>
+                <div v-else class="animate-pulse">
+                    <Avatar
+                        shape="circle"
+                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden"
+                    />
+                </div>
+
                 <div class="flex gap-2 items-center">
                     <div class="p-2.5 flex items-center hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full">
                         <ToggleSwitch
@@ -162,21 +174,21 @@ const handleMemberStatus = () => {
                     </div>
                     <!-- <Button
                         type="button"
-                        iconOnly
-                        size="sm"
-                        variant="gray-text"
-                        pill
+                        severity="secondary"
+                        text
+                        icon="Edit01Icon"
+                        size="small"
+                        rounded
                         @click="openDialog()"
                         :disabled="!userDetail"
-                    >
-                        <Edit01Icon class="w-4 h-4 text-gray-500 dark:text-gray-300"/>
-                    </Button> -->
+                    > -->
                     <Button
                         type="button"
-                        iconOnly
-                        size="sm"
-                        variant="gray-text"
-                        pill
+                        severity="secondary"
+                        text
+                        icon="Edit01Icon"
+                        size="small"
+                        rounded
                         :disabled="!userDetail"
                     >
                         <Edit01Icon class="w-4 h-4 text-gray-500 dark:text-gray-300"/>
@@ -245,14 +257,19 @@ const handleMemberStatus = () => {
                 <div class="flex flex-col justify-center items-start gap-2 w-1/2">
                     <div class="text-gray-500 dark:text-gray-300 text-xs w-full truncate">{{ $t('public.upline') }}</div>
                     <div class="flex items-center gap-2 w-full">
-                        <div class="w-[26px] h-[26px] grow-0 shrink-0 rounded-full overflow-hidden">
-                            <div v-if="userDetail.upline_profile_photo">
-                                <img :src="userDetail.upline_profile_photo" alt="Profile Photo" />
-                            </div>
-                            <div v-else>
-                                <DefaultProfilePhoto />
-                            </div>
-                        </div>
+                        <Avatar
+                            v-if="userDetail.upline_profile_photo"
+                            :image="userDetail.upline_profile_photo"
+                            shape="circle"
+                            class="w-[26px] h-[26px] grow-0 shrink-0 rounded-full overflow-hidden"
+                        />
+                        <Avatar
+                            v-else
+                            :label="formatNameLabel(userDetail.upline_name)"
+                            shape="circle"
+                            class="w-[26px] h-[26px] grow-0 shrink-0 rounded-full overflow-hidden"
+                        />
+
                         <div class="truncate text-gray-950 dark:text-white text-sm font-medium w-full">{{ userDetail.upline_name ?? '-' }}</div>
                     </div>
                 </div>
@@ -314,17 +331,17 @@ const handleMemberStatus = () => {
         <form>
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col gap-1">
-                    <InputLabel for="name" :value="$t('public.name')" />
+                    <InputLabel for="username" :value="$t('public.username')" />
                     <InputText
-                        id="name"
+                        id="username"
                         type="text"
                         class="block w-full"
-                        v-model="form.name"
+                        v-model="form.username"
                         :placeholder="$t('public.enter_name')"
-                        :invalid="!!form.errors.name"
-                        autocomplete="name"
+                        :invalid="!!form.errors.username"
+                        autocomplete="username"
                     />
-                    <InputError :message="form.errors.name" />
+                    <InputError :message="form.errors.username" />
                 </div>
                 <div class="flex flex-col gap-1">
                     <InputLabel for="email" :value="$t('public.email')" />
@@ -338,6 +355,32 @@ const handleMemberStatus = () => {
                         autocomplete="email"
                     />
                     <InputError :message="form.errors.email" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <InputLabel for="first_name" :value="$t('public.first_name')" />
+                    <InputText
+                        id="first_name"
+                        type="text"
+                        class="block w-full"
+                        v-model="form.first_name"
+                        :placeholder="$t('public.enter_name')"
+                        :invalid="!!form.errors.first_name"
+                        autocomplete="first_name"
+                    />
+                    <InputError :message="form.errors.first_name" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <InputLabel for="last_name" :value="$t('public.last_name')" />
+                    <InputText
+                        id="last_name"
+                        type="text"
+                        class="block w-full"
+                        v-model="form.last_name"
+                        :placeholder="$t('public.enter_name')"
+                        :invalid="!!form.errors.last_name"
+                        autocomplete="last_name"
+                    />
+                    <InputError :message="form.errors.last_name" />
                 </div>
                 <div class="flex flex-col gap-1 items-start self-stretch">
                     <InputLabel for="phone" :value="$t('public.phone_number')" />
@@ -358,8 +401,8 @@ const handleMemberStatus = () => {
                                     <div>{{ slotProps.value.phone_code }}</div>
                                 </div>
                                 <span v-else>
-                                            {{ slotProps.placeholder }}
-                                        </span>
+                                    {{ slotProps.placeholder }}
+                                </span>
                             </template>
                             <template #option="slotProps">
                                 <div class="flex items-center w-[262px] md:max-w-[236px]">
@@ -383,7 +426,8 @@ const handleMemberStatus = () => {
             <div class="flex justify-end items-center pt-10 md:pt-7 gap-4 self-stretch">
                 <Button
                     type="button"
-                    variant="gray-tonal"
+                    severity="secondary"
+                    raised
                     class="w-full md:w-[120px]"
                     :disabled="form.processing"
                     @click.prevent="visible = false"
@@ -391,7 +435,6 @@ const handleMemberStatus = () => {
                     {{ $t('public.cancel') }}
                 </Button>
                 <Button
-                    variant="primary-flat"
                     class="w-full md:w-[120px]"
                     :disabled="form.processing"
                     @click="submitForm"

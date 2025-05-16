@@ -9,14 +9,14 @@ import {
     IconDeviceLaptop
 } from "@tabler/icons-vue";
 import {
+    Button,
     Dialog,
     TieredMenu,
     ToggleSwitch,
+    useConfirm,
 } from "primevue";
-import Button from "@/Components/Button.vue";
 import {computed, h, ref, watch} from "vue";
 import {router} from "@inertiajs/vue3";
-import {useConfirm} from "primevue/useconfirm";
 import {trans} from "laravel-vue-i18n";
 import TransferUpline from "@/Pages/Member/Listing/Partials/TransferUpline.vue";
 import UpgradeToAgent from "@/Pages/Member/Listing/Partials/UpgradeToAgent.vue";
@@ -179,11 +179,12 @@ const handleMemberStatus = () => {
             @click.prevent="handleMemberStatus"
         />
         <Button
-            variant="gray-text"
-            size="sm"
+            severity="secondary"
+            text
+            size="small"
             type="button"
-            iconOnly
-            pill
+            icon="IconDotsVertical"
+            rounded
             @click="toggle"
             aria-haspopup="true"
             aria-controls="overlay_tmenu"

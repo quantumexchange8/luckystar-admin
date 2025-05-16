@@ -1,10 +1,12 @@
 <script setup>
-import Button from "@/Components/Button.vue";
-import Dropdown from "primevue/dropdown";
+import {
+    Select,
+    InputText,
+    Button,
+} from "primevue";
 import {computed, onMounted, ref, watch} from "vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
-import InputText from "primevue/inputtext";
 import {useForm} from "@inertiajs/vue3";
 import {IconCircleCheckFilled} from "@tabler/icons-vue";
 
@@ -233,7 +235,7 @@ const submit = () => {
                     for="bank_name"
                     :value="$t('public.bank_name')"
                 />
-                <Dropdown
+                <Select
                     v-model="selectedBank"
                     :options="banks"
                     filter
@@ -258,7 +260,7 @@ const submit = () => {
                             <div>{{ slotProps.option.bank_name }} <span class="text-gray-500">( {{ slotProps.option.bank_code }} )</span></div>
                         </div>
                     </template>
-                </Dropdown>
+                </Select>
                 <InputError :message="form.errors.payment_platform_name" />
             </div>
 
@@ -322,7 +324,6 @@ const submit = () => {
             <Button
                 type="submit"
                 class="flex justify-center"
-                variant="primary-flat"
                 :disabled="form.processing"
                 @click="submit"
             >

@@ -1,14 +1,16 @@
 <script setup>
 import {IconArrowRight} from "@tabler/icons-vue"
 import {computed, ref, watch} from "vue";
-import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import { generalFormat } from "@/Composables/format.js";
 import InputError from "@/Components/InputError.vue";
-import InputNumber from "primevue/inputnumber";
 import {useForm} from "@inertiajs/vue3";
-import Button from "@/Components/Button.vue";
-import Dropdown from "primevue/dropdown";
-import MultiSelect from 'primevue/multiselect';
+import {
+    InputNumber,
+    Select,
+    MultiSelect,
+    Button,
+    Avatar
+} from "primevue";
 
 const props = defineProps({
     member: Object
@@ -177,14 +179,19 @@ const closeDialog = () => {
                     {{ $t('public.member') }}
                 </div>
                 <div class="flex gap-3 items-center self-stretch">
-                    <div class="w-9 h-9 rounded-full overflow-hidden">
-                        <template v-if="member.profile_photo">
-                            <img :src="member.profile_photo" alt="profile_photo">
-                        </template>
-                        <template v-else>
-                            <DefaultProfilePhoto />
-                        </template>
-                    </div>
+                    <Avatar
+                        v-if="member.profile_photo"
+                        :image="member.profile_photo"
+                        shape="circle"
+                        class="w-9 h-9 rounded-full overflow-hidden"
+                    />
+                    <Avatar
+                        v-else
+                        :label="formatNameLabel(member.name)"
+                        shape="circle"
+                        class="w-9 h-9 rounded-full overflow-hidden"
+                    />
+
                     <div class="flex flex-col items-start">
                         <span class="text-gray-950 text-sm font-medium max-w-[200px] truncate">{{ member.name }}</span>
                         <div class="text-gray-500 text-xs max-w-[200px] truncate flex gap-1 items-center self-stretch">
@@ -205,14 +212,19 @@ const closeDialog = () => {
                     v-if="availableUpline"
                     class="flex gap-3 items-center self-stretch"
                 >
-                    <div class="w-9 h-9 rounded-full overflow-hidden">
-                        <template v-if="availableUpline.profile_photo">
-                            <img :src="availableUpline.profile_photo" alt="profile_photo">
-                        </template>
-                        <template v-else>
-                            <DefaultProfilePhoto />
-                        </template>
-                    </div>
+                    <Avatar
+                        v-if="availableUpline.profile_photo"
+                        :image="availableUpline.profile_photo"
+                        shape="circle"
+                        class="w-9 h-9 rounded-full overflow-hidden"
+                    />
+                    <Avatar
+                        v-else
+                        :label="formatNameLabel(availableUpline.name)"
+                        shape="circle"
+                        class="w-9 h-9 rounded-full overflow-hidden"
+                    />
+                    
                     <div class="flex flex-col items-start">
                         <span class="text-gray-950 text-sm font-medium max-w-[200px] truncate">{{ availableUpline.name }}</span>
                         <span class="text-gray-500 text-xs truncate">{{ availableUpline.id_number }}</span>
@@ -221,9 +233,10 @@ const closeDialog = () => {
 
                 <!-- lazy loading -->
                 <div v-else class="flex gap-3 items-center self-stretch">
-                    <div class="w-9 h-9 rounded-full overflow-hidden">
-                        <DefaultProfilePhoto />
-                    </div>
+                    <Avatar
+                        shape="circle"
+                        class="w-9 h-9 rounded-full overflow-hidden"
+                    />
                     <div class="flex flex-col items-start animate-pulse">
                         <div class="h-2.5 bg-gray-200 rounded-full w-48 my-2"></div>
                         <div class="h-2 bg-gray-200 rounded-full w-20 mb-1"></div>
@@ -301,16 +314,14 @@ const closeDialog = () => {
                     <div class="flex gap-3 md:gap-4 md:justify-end pt-10 md:pt-7 self-stretch">
                         <Button
                             type="button"
-                            variant="gray-tonal"
-                            size="base"
+                            severity="secondary"
+                            raised
                             class="w-full md:w-[120px]"
                             @click="closeDialog"
                         >
                             {{ $t('public.cancel') }}
                         </Button>
                         <Button
-                            variant="primary-flat"
-                            size="base"
                             class="w-full md:w-[120px]"
                             @click="nextStep"
                             :disabled="form.processing"
@@ -324,7 +335,7 @@ const closeDialog = () => {
             <template v-if="step === 2">
                 <!-- Markup Profile -->
                 <div class="flex flex-col items-start gap-1">
-                    <Dropdown
+                    <Select
                         v-model="selectedAccountType"
                         id="accountTypes"
                         :options="filteredAccountTypes"
@@ -387,16 +398,14 @@ const closeDialog = () => {
                     <div class="flex gap-3 md:gap-4 md:justify-end pt-10 md:pt-7 self-stretch">
                         <Button
                             type="button"
-                            variant="gray-tonal"
-                            size="base"
+                            severity="secondary"
+                            raised
                             class="w-full md:w-[120px]"
                             @click="previousStep"
                         >
                             {{ $t('public.back') }}
                         </Button>
                         <Button
-                            variant="primary-flat"
-                            size="base"
                             class="w-full md:w-[120px]"
                             @click="submitForm"
                             :disabled="form.processing"

@@ -8,8 +8,9 @@ import {
     Column,
     Select,
     Avatar,
+    Button,
+    Badge,
 } from "primevue";
-import Button from '@/Components/Button.vue';
 import { usePage } from '@inertiajs/vue3';
 import Loader from "@/Components/Loader.vue";
 import {
@@ -18,7 +19,6 @@ import {
     IconAdjustments,
     IconAlertCircleFilled,
 } from '@tabler/icons-vue';
-import Badge from '@/Components/Badge.vue';
 import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
 import { generalFormat } from "@/Composables/format.js";
 import Empty from "@/Components/Empty.vue";
@@ -292,22 +292,21 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                 </div>
                 <div class="grid grid-cols-2 w-full gap-3">
                     <Button
-                        variant="gray-outlined"
+                        type="button"
+                        severity="secondary"
                         @click="toggle"
-                        size="sm"
-                        class="flex gap-3 items-center justify-center py-3 w-full md:w-[130px]"
+                        outlined
+                        class="flex w-fit gap-3 items-center"
                     >
-                        <IconAdjustments size="20" stroke-width="1.25" />
-                        <div class="text-sm font-medium">
-                            {{ $t('public.filter') }}
-                        </div>
-                        <Badge class="w-5 h-5 text-xs text-white" variant="numberbadge">
+                        <IconAdjustments size="20" stroke-width="1.5" class="grow-0 shrink-0" />
+                        {{ $t('public.filter') }}
+                        <Badge severity="info">
                             {{ filterCount }}
                         </Badge>
                     </Button>
                     <div class="w-full flex justify-end">
                         <Button
-                            variant="primary-outlined"
+                            outlined
                             @click="exportMember"
                             class="w-full md:w-auto"
                         >
@@ -663,7 +662,7 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
         <div class="flex w-full">
             <Button
                 type="button"
-                variant="primary-outlined"
+                outlined
                 class="flex justify-center w-full"
                 @click="clearFilter()"
             >

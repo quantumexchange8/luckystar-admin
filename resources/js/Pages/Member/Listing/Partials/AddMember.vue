@@ -1,5 +1,4 @@
 <script setup>
-import Button from "@/Components/Button.vue";
 import {
     Dialog,
     InputText,
@@ -7,6 +6,7 @@ import {
     Password,
     FileUpload,
     Avatar,
+    Button,
 } from "primevue";
 import {ref, watch, watchEffect} from "vue";
 import InputError from '@/Components/InputError.vue';
@@ -119,8 +119,6 @@ watchEffect(() => {
 <template>
     <Button
         type="button"
-        variant="primary-flat"
-        size="base"
         class='w-full md:w-auto'
         @click="openDialog"
     >
@@ -386,8 +384,6 @@ watchEffect(() => {
 
             <div class="flex flex-col items-end pt-5 self-stretch">
                 <Button
-                    variant="primary-flat"
-                    size="base"
                     @click="submitForm"
                     :disabled="form.processing"
                 >

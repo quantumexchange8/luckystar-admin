@@ -1,17 +1,19 @@
 <script setup>
-import Button from '@/Components/Button.vue';
 import { IconAdjustmentsHorizontal } from '@tabler/icons-vue';
-import Dialog from 'primevue/dialog';
-import Select from 'primevue/select';
 import { onMounted, ref, watch } from 'vue';
-import InputText from 'primevue/inputtext';
-import ToggleSwitch from 'primevue/toggleswitch';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/vue3';
-import ColorPicker from 'primevue/colorpicker';
-import InputNumber from 'primevue/inputnumber';
-import MultiSelect from 'primevue/multiselect';
+import {
+    Dialog,
+    Select,
+    InputText,
+    ToggleSwitch,
+    ColorPicker,
+    InputNumber,
+    MultiSelect,
+    Button,
+} from "primevue";
 
 const props = defineProps({
     accountType: Object,
@@ -105,15 +107,17 @@ const emit = defineEmits(['detailsVisible']);
 
 <template>
     <Button
-        variant="gray-text"
         type="button"
-        size="sm"
-        iconOnly
-        pill
+        severity="secondary"
+        text
+        rounded
+        size="small"
+        class="flex gap-3 items-center"
+        icon="IconAdjustmentsHorizontal"
         @click="openDialog"
         :disabled="props.loading"
     >
-        <IconAdjustmentsHorizontal size="16" stroke-width="1.25" color="#667085" />
+        <IconAdjustmentsHorizontal size="16" class="grow-0 shrink-0" />
     </Button>
 
     <Dialog
@@ -310,7 +314,6 @@ const emit = defineEmits(['detailsVisible']);
             </div>
             <div class="pt-5 md:pt-7 flex flex-col items-end self-stretch">
                 <Button
-                    variant="primary-flat"
                     :disabled="form.processing || props.loading || isLoading"
                 >
                     {{ $t('public.save') }}
