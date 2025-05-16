@@ -4,7 +4,7 @@
 @import './iconfield';
 
 .p-multiselect {
-    @apply inline-flex cursor-pointer relative select-none rounded-md
+    @apply inline-flex cursor-pointer relative select-none rounded-lg
         bg-surface-0 dark:bg-surface-950
         border border-surface-300 dark:border-surface-700
         shadow-input text-sm
@@ -100,7 +100,7 @@
 .p-multiselect-option {
     @apply cursor-pointer text-sm font-normal whitespace-nowrap relative overflow-hidden flex items-center gap-2 px-3 py-2
         rounded-sm text-surface-700 dark:text-surface-0 bg-transparent border-none
-        transition-colors duration-200 text-sm
+        transition-colors duration-200
 }
 
 .p-multiselect-option:not(.p-disabled).p-focus {

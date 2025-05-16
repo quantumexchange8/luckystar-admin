@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\StrategyController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -25,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/get_group_uplines', [SelectOptionController::class, 'getUplinesByGroup'])->name('getUplinesByGroup');
     Route::get('/getAvailableLeader', [SelectOptionController::class, 'getAvailableLeader'])->name('getAvailableLeader');
     Route::get('/getSettingRanks', [SelectOptionController::class, 'getSettingRanks'])->name('getSettingRanks');
+    Route::get('/getGroups', [SelectOptionController::class, 'getGroups'])->name('getGroups');
+    Route::get('/getLeverages/{id}', [SelectOptionController::class, 'getLeverages'])->name('getLeverages');
 
     /**
      * ==============================
@@ -61,6 +64,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/getGroupsData', [GroupController::class, 'getGroupsData'])->name('group.getGroupsData');
 
         Route::post('/addGroup', [GroupController::class, 'addGroup'])->name('group.addGroup');
+    });
+
+    /**
+     * ==============================
+     *           Strategy
+     * ==============================
+     */
+    Route::prefix('strategy')->group(function () {
+        Route::get('/listing', [StrategyController::class, 'index'])->name('strategy.listing');
+        Route::get('/getStrategyData', [StrategyController::class, 'getStrategyData'])->name('strategy.getStrategyData');
+
+        Route::post('/addStrategy', [StrategyController::class, 'addStrategy'])->name('strategy.addStrategy');
     });
 
     /**

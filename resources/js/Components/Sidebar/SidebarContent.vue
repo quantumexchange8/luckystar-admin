@@ -101,6 +101,21 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
         </SidebarLink>
 
         <SidebarCategoryLabel
+            :title="$t('public.trading')"
+        />
+
+        <!-- Master -->
+        <SidebarLink
+            :title="$t('public.strategy')"
+            :href="route('strategy.listing')"
+            :active="route().current('strategy.listing')"
+        >
+            <template #icon>
+                <IconCoinMonero :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
+
+        <SidebarCategoryLabel
             :title="$t('public.configuration')"
         />
 

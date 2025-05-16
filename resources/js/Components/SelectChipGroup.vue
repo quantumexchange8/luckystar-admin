@@ -7,7 +7,10 @@ const props = defineProps({
         type: Array,
         required: true,
     },
-    valueKey: String,
+    valueKey: {
+        type: String,
+        default: null,
+    },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -38,14 +41,14 @@ const isSelected = (item) => {
         >
             <div class="flex items-center self-stretch">
                 <div
-                    class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700 dark:group-hover:text-primary"
+                    class="flex-grow text-xs font-semibold transition-colors duration-300 group-hover:text-primary-700 dark:group-hover:text-primary"
                     :class="{
                         'text-primary-700 dark:text-primary-200': isSelected(item),
                         'text-surface-950 dark:text-white': !isSelected(item),
                     }"
                 >
                     <slot name="option" :item="item">
-                        <div class="text-xs uppercase">
+                        <div class="uppercase">
                             {{ $t(`public.${props.valueKey ? item[props.valueKey] : item}`) }}
                         </div>
                     </slot>

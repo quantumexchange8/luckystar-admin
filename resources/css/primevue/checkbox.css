@@ -30,7 +30,7 @@
 }
 
 .p-checkbox-checked .p-checkbox-icon {
-    @apply text-primary-contrast
+    @apply text-white dark:text-surface-900
 }
 
 .p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-icon {

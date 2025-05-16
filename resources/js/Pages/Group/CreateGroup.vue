@@ -250,10 +250,8 @@ const closeDialog = () => {
                     <div class="flex pt-6 justify-end">
                         <Button
                             type="button"
-                            severity="secondary"
                             :disabled="form.processing"
                             @click="activateCallback('2')"
-                            size="small"
                         >
                             {{ $t('public.next') }}
                             <IconArrowNarrowRight size="20" stroke-witdth="1.5" />
@@ -321,7 +319,6 @@ const closeDialog = () => {
                             severity="secondary"
                             :disabled="form.processing"
                             @click="activateCallback('1')"
-                            size="small"
                         >
                             <IconArrowNarrowLeft size="20" stroke-witdth="1.5" />
                             {{ $t('public.back') }}
@@ -332,7 +329,6 @@ const closeDialog = () => {
                             @click="submitForm"
                             :disabled="form.processing"
                             class="w-full md:w-auto"
-                            size="small"
                         >
                             {{ $t('public.create') }}
                         </Button>

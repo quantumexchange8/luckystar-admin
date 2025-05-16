@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccountTypeHasLeverage;
 use App\Models\GroupRankSetting;
 use App\Models\User;
 use App\Models\Country;
@@ -10,42 +11,30 @@ use Illuminate\Http\Request;
 
 class SelectOptionController extends Controller
 {
-    public function getCountries($returnAsArray = false)
+    public function getCountries()
     {
         $countries = Country::select('id', 'name', 'phone_code', 'iso2', 'emoji', 'translations', 'currency', 'currency_symbol')
             ->get();
-
-        if ($returnAsArray) {
-            return $countries;
-        }
 
         return response()->json([
             'countries' => $countries,
         ]);
     }
 
-    public function getGroups($returnAsArray = false)
+    public function getGroups()
     {
         $groups = Group::select('id', 'name', 'group_leader_id', 'color', 'parent_group_id')
             ->get();
-
-        if ($returnAsArray) {
-            return $groups;
-        }
 
         return response()->json([
             'groups' => $groups,
         ]);
     }
 
-    public function getUplines($returnAsArray = false)
+    public function getUplines()
     {
         $uplines = User::select('id', 'first_name', 'last_name', 'email', 'id_number')
             ->get();
-
-        if ($returnAsArray) {
-            return $uplines;
-        }
 
         return response()->json([
             'uplines' => $uplines,
@@ -98,5 +87,16 @@ class SelectOptionController extends Controller
             });
 
         return response()->json($ranks);
+    }
+
+    public function getLeverages($id)
+    {
+        $leverages = AccountTypeHasLeverage::with('setting_leverage')
+            ->where('account_type_id', $id)
+            ->get();
+
+        return response()->json([
+            'leverages' => $leverages,
+        ]);
     }
 }

@@ -15,29 +15,31 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('master_name')->nullable();
+            $table->string('trader_name')->nullable();
             $table->unsignedInteger('meta_login')->nullable();
+            $table->unsignedBigInteger('account_type_id')->nullable();
+            $table->integer('leverage')->nullable();
             $table->string('category')->nullable();
             $table->string('type')->nullable();
-            $table->decimal('min_investment', 13)->nullable();
             $table->decimal('sharing_profit')->nullable();
-            $table->decimal('sa_profit')->nullable();
             $table->decimal('market_profit')->nullable();
-            $table->string('estimated_monthly_returns')->nullable();
-            $table->string('estimated_lot_size')->nullable();
+            $table->decimal('company_profit')->nullable();
+            $table->decimal('minimum_investment', 13)->nullable();
             $table->decimal('subscription_fee')->nullable()->default(0);
-            $table->decimal('extra_fund')->nullable()->default(0);
-            $table->decimal('total_fund')->nullable()->default(0);
+            $table->string('estimated_lot')->nullable();
+            $table->string('estimated_monthly_return')->nullable();
             $table->string('max_drawdown')->nullable();
-            $table->string('settlement_period_type')->nullable();
+            $table->string('cut_loss')->nullable();
+            $table->decimal('additional_capital', 13)->nullable()->default(0);
+            $table->integer('additional_investors')->nullable()->default(0);
+            $table->integer('investment_period')->nullable();
+            $table->string('investment_period_type')->nullable();
             $table->integer('settlement_period')->nullable();
-            $table->string('join_period_type')->nullable();
-            $table->integer('join_period')->nullable();
+            $table->string('settlement_period_type')->nullable();
             $table->tinyInteger('signal_status')->nullable()->default(1);
             $table->tinyInteger('can_top_up')->nullable()->default(1);
-            $table->tinyInteger('can_revoke')->nullable()->default(1);
-            $table->string('visibility_type')->nullable();
-            $table->string('status')->nullable()->default('active');
-            $table->unsignedBigInteger('handle_by')->nullable();
+            $table->tinyInteger('can_terminate')->nullable()->default(1);
+            $table->string('status')->default('active');
             $table->timestamps();
             $table->softDeletes();
 
@@ -47,9 +49,9 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            $table->foreign('handle_by')
+            $table->foreign('account_type_id')
                 ->references('id')
-                ->on('users')
+                ->on('account_types')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
         });
