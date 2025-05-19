@@ -22,5 +22,12 @@ class RunningNumberSeeder extends Seeder
             'digits' => 6,
             'last_number' => 0,
         ]);
+
+        RunningNumber::create([
+            'type' => 'subscription',
+            'prefix' => 'STR',
+            'digits' => 7,
+            'last_number' => 0,
+        ]);
     }
 }

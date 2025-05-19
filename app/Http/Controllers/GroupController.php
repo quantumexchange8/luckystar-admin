@@ -77,7 +77,7 @@ class GroupController extends Controller
             foreach ($groups as $group) {
                 $userIds = $group->group_has_user->pluck('user_id')->toArray();
 
-                $group->wallet_top_up = $this->sumTransactionAmount($userIds, 'cash_wallet', 'topup', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
+                $group->wallet_top_up = $this->sumTransactionAmount($userIds, 'cash_wallet', 'top_up', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
                 $group->wallet_withdrawal = $this->sumTransactionAmount($userIds, 'cash_wallet', 'withdrawal', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
                 $group->account_deposit = $this->sumTransactionAmount($userIds, 'trading_account', 'deposit', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
                 $group->account_withdrawal = $this->sumTransactionAmount($userIds, 'trading_account', 'withdrawal', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);

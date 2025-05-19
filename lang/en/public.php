@@ -242,4 +242,10 @@ return [
     "fee_percentage" => "Fee Percentage",
     "add_fee" => "Add Fee",
     "toast_create_strategy_success" => "Strategy has been created successfully",
+    "investors" => "Investors",
+    "real_fund" => "Real Fund",
+    "minimum" => "Minimum",
+    "settlement" => "Settlement",
+    "data_not_available" => "Data not available",
+    "current_joining_investors" => "Current Joining Investors",
 ];

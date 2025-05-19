@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
-        
+
         Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
     });
 
@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::prefix('strategy')->group(function () {
         Route::get('/listing', [StrategyController::class, 'index'])->name('strategy.listing');
+        Route::get('/getStrategiesOverview', [StrategyController::class, 'getStrategiesOverview'])->name('strategy.getStrategiesOverview');
         Route::get('/getStrategyData', [StrategyController::class, 'getStrategyData'])->name('strategy.getStrategyData');
 
         Route::post('/addStrategy', [StrategyController::class, 'addStrategy'])->name('strategy.addStrategy');

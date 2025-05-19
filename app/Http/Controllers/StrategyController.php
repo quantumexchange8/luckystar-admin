@@ -6,8 +6,11 @@ use App\Models\AccountType;
 use App\Models\GroupHasTradingMaster;
 use App\Models\TradingMaster;
 use App\Models\TradingMasterHasFee;
+use App\Models\TradingSubscription;
 use App\Models\User;
 use App\Services\TradingAccountService;
+use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -18,12 +21,14 @@ class StrategyController extends Controller
 {
     public function index()
     {
+        // TODO:: Get LIVE account type
         $account_types = AccountType::where('status', 'active')
             ->get()
             ->toArray();
 
         return Inertia::render('Strategy/StrategyListing', [
-            'accountTypes' => $account_types
+            'accountTypes' => $account_types,
+            'strategiesCount' => TradingMaster::count(),
         ]);
     }
 
@@ -116,7 +121,7 @@ class StrategyController extends Controller
 
         $master = TradingMaster::create([
             'user_id' => $user['id'],
-            'master_name' => $request->master_name,
+            'master_name' => $request->strategy_name,
             'trader_name' => $request->trader_name,
             'leverage' => $leverage,
             'category' => $request->category,
@@ -181,5 +186,122 @@ class StrategyController extends Controller
             'message' => trans('public.toast_create_strategy_success'),
             'type' => 'success',
         ]);
+    }
+
+    public function getStrategiesOverview()
+    {
+        // current month
+        $endOfMonth = \Illuminate\Support\Carbon::now()->endOfMonth();
+
+        // last month
+        $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
+
+        $subscription_query = TradingSubscription::where('status', 'active');
+
+        // current month assets
+        $current_month_assets = (clone $subscription_query)
+            ->whereDate('approval_at', '<=', $endOfMonth)
+            ->sum('subscription_amount');
+
+        // current month investors
+        $current_month_investors = (clone $subscription_query)
+            ->whereDate('approval_at', '<=', $endOfMonth)
+            ->count();
+
+        // last month assets
+        $last_month_assets = (clone $subscription_query)
+            ->whereDate('approval_at', '<=', $endOfLastMonth)
+            ->sum('subscription_amount');
+
+        // last month investors
+        $last_month_investors = (clone $subscription_query)
+            ->whereDate('approval_at', '<=', $endOfLastMonth)
+            ->count();
+
+        // comparison % of assets vs last month
+        $last_month_asset_comparison = $last_month_assets > 0
+            ? (($current_month_assets - $last_month_assets) / $last_month_assets) * 100
+            : ($current_month_assets > 0 ? 100 : 0);
+
+        // comparison % of investors vs last month
+        $last_month_investor_comparison = $current_month_investors - $last_month_investors;
+
+        // Get and format top 3 masters by total fund
+        $topThreeMaster = TradingSubscription::select(
+            'master_meta_login',
+            DB::raw('SUM(subscription_amount) as total_investment')
+        )
+            ->where('status', 'active')
+            ->groupBy('master_meta_login')
+            ->orderByDesc('total_investment')
+            ->take(3)
+            ->with(['trading_master:meta_login,master_name'])
+            ->get();
+
+        return response()->json([
+            'currentAssets' => $current_month_assets,
+            'lastMonthAssetComparison' => $last_month_asset_comparison,
+            'currentInvestors' => $current_month_investors,
+            'lastMonthInvestorComparison' => $last_month_investor_comparison,
+            'topThreeMaster' => $topThreeMaster,
+        ]);
+    }
+
+    public function getStrategyData(Request $request)
+    {
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
+
+            $query = TradingMaster::with([
+                'account_type',
+                'groups',
+            ])
+                ->withCount('active_subscriptions')
+                ->withSum('active_subscriptions', 'subscription_amount');
+
+            if ($data['filters']['global']['value']) {
+                $keyword = $data['filters']['global']['value'];
+
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('name', 'LIKE', '%' . $keyword . '%')
+                        ->orWhereHas('group_leader', function ($query) use ($keyword) {
+                            $query->where('first_name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('last_name', 'LIKE', '%' . $keyword . '%')
+                                ->orWhere('email', 'LIKE', '%' . $keyword . '%');
+                        });
+                });
+            }
+
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay();
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                $query->whereBetween('created_at', [$start_date, $end_date]);
+            }
+
+            //sort field/order
+            if ($data['sortField'] && $data['sortOrder']) {
+                $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
+                $query->orderBy($data['sortField'], $order);
+            } else {
+                $query->orderByDesc('created_at');
+            }
+
+            $groups = $query->paginate($data['rows']);
+
+            foreach ($groups as $group) {
+                $group->group_names = $group->groups->pluck('name')->join(', ');
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $groups,
+                'totalWalletTopUp' => (float) $groups->sum('wallet_top_up'),
+                'totalWalletWithdrawal' => (float) $groups->sum('wallet_withdrawal'),
+                'totalActiveCapital' => (float) $groups->sum('active_capital'),
+            ]);
+        }
+
+        return response()->json(['success' => false, 'data' => []]);
     }
 }

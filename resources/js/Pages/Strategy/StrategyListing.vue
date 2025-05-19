@@ -6,6 +6,7 @@ import StrategyListView from "@/Pages/Strategy/StrategyListView.vue";
 
 defineProps({
     accountTypes: Array,
+    strategiesCount: Number,
 })
 </script>
 
@@ -20,7 +21,9 @@ defineProps({
             <!-- Overview -->
             <StrategyOverview />
 
-            <StrategyListView />
+            <StrategyListView
+                :strategiesCount="strategiesCount"
+            />
         </div>
     </AuthenticatedLayout>
 </template>

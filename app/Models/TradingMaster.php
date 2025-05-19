@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TradingMaster extends Model
@@ -39,8 +41,18 @@ class TradingMaster extends Model
     ];
 
     // Relations
-    public function ongoing_subscriptions(): HasMany
+    public function account_type(): BelongsTo
+    {
+        return $this->belongsTo(AccountType::class, 'account_type_id', 'id');
+    }
+
+    public function active_subscriptions(): HasMany
     {
         return $this->hasMany(TradingSubscription::class, 'master_meta_login', 'meta_login')->where('status', 'active');
+    }
+
+    public function groups(): HasManyThrough
+    {
+        return $this->hasManyThrough(Group::class, GroupHasTradingMaster::class, 'trading_master_id', 'id', 'id', 'group_id');
     }
 }
