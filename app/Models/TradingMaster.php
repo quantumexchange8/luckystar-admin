@@ -55,4 +55,14 @@ class TradingMaster extends Model
     {
         return $this->hasManyThrough(Group::class, GroupHasTradingMaster::class, 'trading_master_id', 'id', 'id', 'group_id');
     }
+
+    public function completed_subscriptions(): HasMany
+    {
+        return $this->hasMany(TradingSubscription::class, 'master_meta_login', 'meta_login')->where('status', 'completed');
+    }
+
+    public function revoked_subscriptions(): HasMany
+    {
+        return $this->hasMany(TradingSubscription::class, 'master_meta_login', 'meta_login')->where('status', 'revoked');
+    }
 }

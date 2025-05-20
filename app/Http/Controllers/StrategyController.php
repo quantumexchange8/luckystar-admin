@@ -257,6 +257,8 @@ class StrategyController extends Controller
                 'groups',
             ])
                 ->withCount('active_subscriptions')
+                ->withCount('completed_subscriptions')
+                ->withCount('revoked_subscriptions')
                 ->withSum('active_subscriptions', 'real_fund');
 
             if ($data['filters']['global']['value']) {
@@ -299,6 +301,98 @@ class StrategyController extends Controller
                 'totalWalletTopUp' => (float) $groups->sum('wallet_top_up'),
                 'totalWalletWithdrawal' => (float) $groups->sum('wallet_withdrawal'),
                 'totalActiveCapital' => (float) $groups->sum('active_capital'),
+            ]);
+        }
+
+        return response()->json(['success' => false, 'data' => []]);
+    }
+
+    public function getInvestmentDataByStrategy(Request $request)
+    {
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
+
+            $status = $data['filters']['status']['value'];
+            $strategy = $data['filters']['strategy']['value'];
+
+            $query = TradingSubscription::with([
+                'user',
+                'user.upline',
+                'user.group.group:id,name,color',
+                'trading_master',
+                'trading_master.account_type',
+            ])
+                ->where('status', $status)
+                ->where('master_meta_login', $strategy);
+
+            if ($data['filters']['global']['value']) {
+                $keyword = $data['filters']['global']['value'];
+
+                $query->where(function ($q) use ($keyword) {
+                    $q->whereHas('user', function ($query) use ($keyword) {
+                        $query->where(function ($q) use ($keyword) {
+                            $q->where('first_name', 'like', '%' . $keyword . '%')
+                                ->orWhere('last_name', 'like', '%' . $keyword . '%')
+                                ->orWhere('email', 'like', '%' . $keyword . '%')
+                                ->orWhere('username', 'like', '%' . $keyword . '%');
+                        });
+                    })->orWhere('meta_login', 'like', '%' . $keyword . '%')
+                        ->orWhere('master_meta_login', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay();
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                if ($status == 'revoked') {
+                    $query->whereBetween('terminated_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereBetween('approval_at', [$start_date, $end_date]);
+                }
+            }
+
+            if (!empty($data['filters']['group_id']['value'])) {
+                $query->whereHas('user.group', function ($q) use ($data) {
+                    $q->where('group_id', $data['filters']['group_id']['value']['id']);
+                });
+            }
+
+            if (!empty($data['filters']['referrers']['value'])) {
+                $query->whereHas('user', function ($q) use ($data) {
+                    $selected_referrers = $data['filters']['referrers']['value'];
+                    $userIds = array_column($selected_referrers, 'user_id');
+
+                    $q->whereIn('upline_id', $userIds);
+                });
+            }
+
+            if (!empty($data['filters']['status']['value'])) {
+                $query->where('status', $data['filters']['status']['value']);
+            }
+
+            //sort field/order
+            if ($data['sortField'] && $data['sortOrder']) {
+                $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
+
+                if ($data['sortField'] == 'days') {
+                    $query->orderBy('approval_at', $data['sortOrder'] == 0 ? 'asc' : 'desc');
+                } else {
+                    $query->orderBy($data['sortField'], $order);
+                }
+            } else {
+                if ($status == 'revoked') {
+                    $query->orderByDesc('terminated_at');
+                } else {
+                    $query->orderByDesc('approval_at');
+                }
+            }
+
+            $transactions = $query->paginate($data['rows']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $transactions,
             ]);
         }
 

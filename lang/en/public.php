@@ -271,4 +271,13 @@ return [
     "empty_pending_data_message" => "You're all caught up! There are no pending data in the listing yet.",
     "compare_last_month" => "vs last month",
     "pax" => "pax",
+    "investment_report" => "Investment Report",
+    "edit" => "Edit",
+    "empty_investment_title" => "No Investment Found",
+    "empty_investment_message" => "There are no investments in the listing yet. Once user join, you'll see their details here.",
+    "completed" => "Completed",
+    "revoked" => "Revoked",
+    "join_date" => "Join Date",
+    "status" => "Status",
+    "revoked_date" => "Revoked Date",
 ];

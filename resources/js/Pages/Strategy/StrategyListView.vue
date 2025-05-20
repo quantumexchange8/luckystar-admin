@@ -15,6 +15,7 @@ import {generalFormat} from "@/Composables/format.js";
 import {FilterMatchMode} from "@primevue/core/api";
 import debounce from "lodash/debounce.js";
 import {usePage} from "@inertiajs/vue3";
+import StrategyAction from "@/Pages/Strategy/Partials/StrategyAction.vue";
 
 defineProps({
     strategiesCount: Number,
@@ -338,7 +339,7 @@ watchEffect(() => {
                                     shape="circle"
                                     class="min-w-10"
                                 />
-                                <div class="flex flex-col">
+                                <div class="flex flex-col overflow-hidden w-full">
                                     <div class="self-stretch truncate text-surface-950 dark:text-white font-bold">
                                         {{ strategy.master_name }}
                                     </div>
@@ -346,10 +347,10 @@ watchEffect(() => {
                                         {{ strategy.meta_login }}
                                     </div>
                                 </div>
-                                <div class="flex gap-3 items-center w-full justify-end">
-<!--                                    <TradingMasterAction-->
-<!--                                        :strategy="strategy"-->
-<!--                                    />-->
+                                <div class="flex gap-3 items-center w-fit justify-end">
+                                    <StrategyAction
+                                        :strategy="strategy"
+                                    />
                                 </div>
                             </div>
 

@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/listing', [StrategyController::class, 'index'])->name('strategy.listing');
         Route::get('/getStrategiesOverview', [StrategyController::class, 'getStrategiesOverview'])->name('strategy.getStrategiesOverview');
         Route::get('/getStrategyData', [StrategyController::class, 'getStrategyData'])->name('strategy.getStrategyData');
+        Route::get('/getInvestmentDataByStrategy', [StrategyController::class, 'getInvestmentDataByStrategy'])->name('strategy.getInvestmentDataByStrategy');
 
         Route::post('/addStrategy', [StrategyController::class, 'addStrategy'])->name('strategy.addStrategy');
     });
