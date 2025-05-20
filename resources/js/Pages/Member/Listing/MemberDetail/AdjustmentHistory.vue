@@ -63,7 +63,7 @@ const rowClicked = (data) => {
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
                             <Loader />
-                            <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
+                            <span class="text-sm text-surface-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
                     <Column field="created_at" sortable class="hidden md:table-cell" headerClass="hidden md:table-cell">
@@ -111,14 +111,14 @@ const rowClicked = (data) => {
                         <template #body="slotProps">
                             <div class="flex items-center gap-5">
                                 <div class="flex flex-col items-start justify-center gap-1 w-full">
-                                    <div class="flex gap-2 items-center text-gray-950 dark:text-white">
+                                    <div class="flex gap-2 items-center text-surface-950 dark:text-white">
                                         <span class="text-sm font-semibold">{{ $t(`public.${slotProps.data.transaction_type}`) }}</span>
                                         <span v-if="['balance_in', 'credit_in'].includes(slotProps.data.transaction_type)">{{ slotProps.data.to_meta_login }}</span>
                                         <span v-else-if="['balance_out', 'credit_out'].includes(slotProps.data.transaction_type)">{{ slotProps.data.from_meta_login }}</span>
                                     </div>
-                                    <span class="text-gray-500 dark:text-gray-300 text-xs"> {{ formatDateTime(slotProps.data.created_at) }}</span>
+                                    <span class="text-surface-500 dark:text-surface-300 text-xs"> {{ formatDateTime(slotProps.data.created_at) }}</span>
                                 </div>
-                                <div class="w-[120px] truncate text-right font-semibold text-gray-950 dark:text-white">
+                                <div class="w-[120px] truncate text-right font-semibold text-surface-950 dark:text-white">
                                     {{ formatAmount(slotProps.data.transaction_amount) }}
                                 </div>
                             </div>
@@ -134,44 +134,44 @@ const rowClicked = (data) => {
                 >
                     <div class="flex flex-col items-center gap-3 self-stretch">
                         <div class="flex items-center gap-1 self-stretch">
-                            <div class="self-stretch text-gray-500 dark:text-gray-300 text-xs font-medium w-[120px] shrink-0">
+                            <div class="self-stretch text-surface-500 dark:text-surface-300 text-xs font-medium w-[120px] shrink-0">
                                 {{ $t('public.date') }}
                             </div>
-                            <div class="text-gray-950 dark:text-white text-sm font-medium">
+                            <div class="text-surface-950 dark:text-white text-sm font-medium">
                                 {{ formatDateTime(selected_row.created_at) }}
                             </div>
                         </div>
                         <div class="flex items-center gap-1 self-stretch">
-                            <div class="self-stretch text-gray-500 dark:text-gray-300 text-xs font-medium w-[120px] shrink-0">
+                            <div class="self-stretch text-surface-500 dark:text-surface-300 text-xs font-medium w-[120px] shrink-0">
                                 {{ $t('public.adjustment_type') }}
                             </div>
-                            <div class="text-gray-950 dark:text-white text-sm font-medium">
+                            <div class="text-surface-950 dark:text-white text-sm font-medium">
                                 {{ $t(`public.${selected_row.transaction_type}`) }}
                             </div>
                         </div>
                         <div class="flex items-center gap-1 self-stretch">
-                            <div class="self-stretch text-gray-500 dark:text-gray-300 text-xs font-medium w-[120px] shrink-0">
+                            <div class="self-stretch text-surface-500 dark:text-surface-300 text-xs font-medium w-[120px] shrink-0">
                                 {{ $t('public.account') }}
                             </div>
-                            <div class="text-gray-950 dark:text-white text-sm font-medium">
+                            <div class="text-surface-950 dark:text-white text-sm font-medium">
                                 <span v-if="selected_row.transaction_type === 'balance_in' || selected_row.transaction_type === 'credit_in'">{{ selected_row.to_meta_login }}</span>
                                 <span v-else-if="selected_row.transaction_type === 'balance_out' || selected_row.transaction_type === 'credit_out'">{{ selected_row.from_meta_login }}</span>
                                 <span v-else>-</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-1 self-stretch">
-                            <div class="self-stretch text-gray-500 dark:text-gray-300 text-xs font-medium w-[120px] shrink-0">
+                            <div class="self-stretch text-surface-500 dark:text-surface-300 text-xs font-medium w-[120px] shrink-0">
                                 {{ $t('public.amount') }}
                             </div>
-                            <div class="text-gray-950 dark:text-white text-sm font-medium">
+                            <div class="text-surface-950 dark:text-white text-sm font-medium">
                                 {{ formatAmount(selected_row.transaction_amount) }}
                             </div>
                         </div>
                         <div class="flex items-start gap-1 self-stretch">
-                            <div class="text-gray-500 dark:text-gray-300 text-xs font-medium w-[120px] shrink-0">
+                            <div class="text-surface-500 dark:text-surface-300 text-xs font-medium w-[120px] shrink-0">
                                 {{ $t('public.remarks') }}
                             </div>
-                            <div class="text-gray-950 dark:text-white text-sm font-medium">
+                            <div class="text-surface-950 dark:text-white text-sm font-medium">
                                 {{ selected_row.remarks }}
                             </div>
                         </div>

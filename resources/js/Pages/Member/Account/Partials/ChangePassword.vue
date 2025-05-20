@@ -48,7 +48,7 @@ const submitForm = () => {
                     :invalid="!!form.errors.master_password"
                 />
                 <InputError :message="form.errors.master_password" />
-                <span class="self-stretch text-gray-500 text-xs">{{ $t('public.password_desc') }}</span>
+                <span class="self-stretch text-surface-500 text-xs">{{ $t('public.password_desc') }}</span>
             </div>
             <div class="flex flex-col items-start gap-2 self-stretch">
                 <InputLabel for="investor_password" :value="$t('public.investor_password')" :invalid="!!form.errors.investor_password" />
@@ -60,7 +60,7 @@ const submitForm = () => {
                     :invalid="!!form.errors.investor_password"
                 />
                 <InputError :message="form.errors.investor_password" />
-                <span class="self-stretch text-gray-500 text-xs">{{ $t('public.password_desc') }}</span>
+                <span class="self-stretch text-surface-500 text-xs">{{ $t('public.password_desc') }}</span>
             </div>
         </div>
 

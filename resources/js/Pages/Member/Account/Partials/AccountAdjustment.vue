@@ -113,14 +113,14 @@ const submitForm = () => {
 <template>
     <form>
         <div class="flex flex-col gap-5 items-center self-stretch">
-            <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-gray-200 dark:bg-gray-700">
-                <div class="text-gray-500 dark:text-gray-200 text-center text-xs font-medium">
+            <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-surface-200 dark:bg-surface-700">
+                <div class="text-surface-500 dark:text-surface-200 text-center text-xs font-medium">
                     #{{ account.meta_login }} - {{ dialogType === 'account_balance' ? $t('public.available_account_balance') : $t('public.available_account_credit') }}
                 </div>
                 <div v-if="currentAmount === null" class="animate-pulse">
-                    <div class="h-3 bg-gray-400 dark:bg-gray-200 rounded-full w-28 my-1"></div>
+                    <div class="h-3 bg-surface-400 dark:bg-surface-200 rounded-full w-28 my-1"></div>
                 </div>
-                <div v-else class="text-gray-950 dark:text-white text-center text-xl font-semibold">
+                <div v-else class="text-surface-950 dark:text-white text-center text-xl font-semibold">
                     <span v-if="dialogType === 'account_balance'">{{ formatAmount(currentAmount['account_balance']) }}</span>
                     <span v-else>{{ formatAmount(currentAmount[dialogType]) }}</span>
                 </div>
@@ -133,9 +133,9 @@ const submitForm = () => {
                     <div
                         v-for="(action, index) in radioOptions"
                         :key="index"
-                        class="flex items-center gap-2 text-sm text-gray-950 dark:text-white"
+                        class="flex items-center gap-2 text-sm text-surface-950 dark:text-white"
                     >
-                        <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-surface-100 dark:hover:bg-surface-700">
                             <RadioButton
                                 v-model="form.action"
                                 :inputId="action.value"
@@ -176,10 +176,10 @@ const submitForm = () => {
                     <div v-for="(chip, index) in chips" :key="index">
                         <Chip
                             :label="chip.label"
-                            class="hover:bg-gray-50"
+                            class="hover:bg-surface-50"
                             :class="{
                                     'border-primary-300 bg-primary-50 hover:bg-primary-25 text-primary-500': form.remarks === chip.label,
-                                    'text-gray-950': form.remarks !== chip.label,
+                                    'text-surface-950': form.remarks !== chip.label,
                                 }"
                             @click="handleChipClick(chip.label)"
                         />

@@ -56,9 +56,9 @@ const closeDialog = () => {
     <form>
         <div class="flex flex-col items-center gap-8 self-stretch md:gap-10">
             <div class="flex flex-col items-center gap-5 self-stretch">
-                <div class="flex flex-col justify-center items-center py-4 px-8 gap-2 self-stretch bg-gray-200">
-                    <span class="w-full text-gray-500 text-center text-xs font-medium">#{{ account.meta_login }} - {{ $t('public.available_account_balance') }}</span>
-                    <span class="w-full text-gray-950 text-center text-xl font-semibold">$ {{ account.balance }}</span>
+                <div class="flex flex-col justify-center items-center py-4 px-8 gap-2 self-stretch bg-surface-200">
+                    <span class="w-full text-surface-500 text-center text-xs font-medium">#{{ account.meta_login }} - {{ $t('public.available_account_balance') }}</span>
+                    <span class="w-full text-surface-950 text-center text-xl font-semibold">$ {{ account.balance }}</span>
                 </div>
 
                 <!-- input fields -->
