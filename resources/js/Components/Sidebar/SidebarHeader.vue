@@ -21,10 +21,10 @@ import { IconX } from '@tabler/icons-vue';
             }"
         >
             <div class="flex items-center self-stretch gap-2">
-                <ApplicationLogo aria-hidden="true" class="w-10 h-10 shrink-0 grow-0 overflow-hidden fill-logo" />
+                <ApplicationLogo aria-hidden="true" class="w-10 h-10 shrink-0 grow-0 overflow-hidden fill-primary" />
                 <div
                     v-show="sidebarState.isOpen || sidebarState.isHovered"
-                    class="text-gray-800 dark:text-white"
+                    class="text-surface-800 dark:text-white"
                 >
                     Lucky Star
                 </div>

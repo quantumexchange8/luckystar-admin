@@ -36,14 +36,14 @@ const dataOverviews = computed(() => [
     <div
       v-for="(item, index) in dataOverviews"
       :key="index"
-      class="flex justify-center items-center px-6 py-4 md:p-6 gap-5 self-stretch rounded-2xl bg-white dark:bg-gray-700 shadow-toast"
+      class="flex justify-center items-center px-6 py-4 md:p-6 gap-5 self-stretch rounded-2xl bg-white dark:bg-surface-700 shadow-toast"
     >
       <component :is="item.icon" class="w-12 h-12 grow-0 shrink-0" />
       <div class="flex flex-col items-start gap-1 w-full">
-        <div class="text-gray-950 dark:text-white text-lg md:text-2xl font-semibold">
+        <div class="text-surface-950 dark:text-white text-lg md:text-2xl font-semibold">
           {{ formatAmount(item.total, 0, '') }}
         </div>
-        <span class="text-gray-500 dark:text-white text-xs md:text-sm">{{ item.label }}</span>
+        <span class="text-surface-500 dark:text-white text-xs md:text-sm">{{ item.label }}</span>
       </div>
     </div>
   </div>

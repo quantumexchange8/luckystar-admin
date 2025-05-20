@@ -10,7 +10,7 @@ const props = defineProps({
 <template>
     <div class="flex flex-col h-full max-h-full items-start p-4 md:py-6 md:px-8 gap-3 self-stretch rounded-2xl bg-white shadow-toast">
         <div class="flex justify-between items-center self-stretch">
-            <div class="text-gray-950 text-sm font-bold">{{ $t('public.payment_account_information') }}</div>
+            <div class="text-surface-950 text-sm font-bold">{{ $t('public.payment_account_information') }}</div>
         </div>
         <div v-if="props?.paymentAccounts" class="flex flex-col divide-y items-start self-stretch overflow-y-auto max-h-[250px]">
             <div
@@ -19,8 +19,8 @@ const props = defineProps({
                 class="flex text-sm gap-1 self-stretch py-3 first:pt-0 last:pb-0"
             >
                 <div class="w-full grid grid-cols-1 gap-1">
-                    <div class="text-gray-950 font-semibold truncate w-full">{{ account.payment_account_name ? account.payment_account_name : '-' }}</div>
-                    <div class="text-gray-500 font-medium truncate w-full">{{ account.account_no ? account.account_no : '-' }}</div>
+                    <div class="text-surface-950 font-semibold truncate w-full">{{ account.payment_account_name ? account.payment_account_name : '-' }}</div>
+                    <div class="text-surface-500 font-medium truncate w-full">{{ account.account_no ? account.account_no : '-' }}</div>
                     <div class="w-full flex items-center gap-3">
                         <!-- <StatusBadge variant="primary">
                             {{ account.payment_platform ? $t('public.' + account.payment_platform) : '-' }}

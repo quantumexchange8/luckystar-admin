@@ -2,11 +2,11 @@
 
 namespace App\Services\Data;
 
+use Throwable;
 use App\Models\AccountType;
 use App\Models\TradingUser;
-use Auth;
 use Illuminate\Support\Facades\DB;
-use Throwable;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateTradingUser
 {

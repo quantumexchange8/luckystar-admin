@@ -129,7 +129,7 @@ const emit = defineEmits(['detailsVisible']);
         <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">
                 <div class="flex flex-col items-center gap-3 self-stretch">
-                    <div class="self-stretch text-gray-950 text-sm font-bold">
+                    <div class="self-stretch text-surface-950 text-sm font-bold">
                         {{ $t('public.account_information') }}
                     </div>
                     <div class="w-full flex flex-col gap-1">
@@ -216,7 +216,7 @@ const emit = defineEmits(['detailsVisible']);
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-3 self-stretch">
-                    <div class="self-stretch text-gray-950 text-sm font-bold">
+                    <div class="self-stretch text-surface-950 text-sm font-bold">
                         {{ $t('public.trading_conditions') }}
                     </div>
                     <div class="grid justify-center items-start content-start gap-3 self-stretch flex-wrap grid-cols-1 md:grid-cols-2 md:gap-5">
@@ -255,7 +255,7 @@ const emit = defineEmits(['detailsVisible']);
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-3 self-stretch">
-                    <div class="self-stretch text-gray-950 text-sm font-bold">
+                    <div class="self-stretch text-surface-950 text-sm font-bold">
                         {{ $t('public.extra_settings') }}
                     </div>
                     <div class="grid justify-center items-start content-start gap-3 self-stretch flex-wrap grid-cols-1 md:grid-cols-2 md:gap-5">
@@ -287,7 +287,7 @@ const emit = defineEmits(['detailsVisible']);
                                 <template #option="{option}">
                                     <div class="flex flex-col">
                                         <span>{{ option.name }}</span>
-                                        <span class="text-xs text-gray-400 max-w-52 truncate">{{ option.email }}</span>
+                                        <span class="text-xs text-surface-400 max-w-52 truncate">{{ option.email }}</span>
                                     </div>
                                 </template>
                                 <template #value>
@@ -297,7 +297,7 @@ const emit = defineEmits(['detailsVisible']);
                                     <span v-else-if="selectedUser?.length > 1">
                                         {{ selectedUser?.length }} {{ $t('public.users_selected') }}
                                     </span>
-                                    <span v-else class="text-gray-400">
+                                    <span v-else class="text-surface-400">
                                         {{ $t('public.select_user') }}
                                     </span>
                                 </template>

@@ -108,12 +108,6 @@ const openDialog = () => {
     selectedGroup.value = null;
     selectedUpline.value = null;
 }
-
-watchEffect(() => {
-    if (usePage().props.toast !== null) {
-        getResults();
-    }
-});
 </script>
 
 <template>
@@ -136,7 +130,7 @@ watchEffect(() => {
 
                 <!-- Basic Information -->
                 <div class="flex flex-col gap-3 items-center self-stretch">
-                    <div class="text-gray-950 font-semibold text-sm self-stretch">
+                    <div class="text-surface-950 font-semibold text-sm self-stretch">
                         {{ $t('public.basic_information') }}
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full">
@@ -215,7 +209,7 @@ watchEffect(() => {
                                     </template>
                                     <template #option="slotProps">
                                         <div class="flex items-center w-[262px] md:max-w-[236px]">
-                                            <div>{{ slotProps.option.name }} <span class="text-gray-500">{{ slotProps.option.phone_code }}</span></div>
+                                            <div>{{ slotProps.option.name }} <span class="text-surface-500">{{ slotProps.option.phone_code }}</span></div>
                                         </div>
                                     </template>
                                 </Select>
@@ -251,7 +245,7 @@ watchEffect(() => {
                                             <div>{{ slotProps.value.name }}</div>
                                         </div>
                                     </div>
-                                    <span v-else class="text-gray-400">
+                                    <span v-else class="text-surface-400">
                                         {{ slotProps.placeholder }}
                                     </span>
                                 </template>
@@ -296,7 +290,7 @@ watchEffect(() => {
                                             <div>{{ slotProps.value.full_name }}</div>
                                         </div>
                                     </div>
-                                    <span v-else class="text-gray-400">
+                                    <span v-else class="text-surface-400">
                                             {{ slotProps.placeholder }}
                                     </span>
                                 </template>
@@ -325,11 +319,11 @@ watchEffect(() => {
 
                 <!-- Kyc Verification -->
                 <!-- <div class="flex flex-col gap-3 items-center self-stretch">
-                    <div class="text-gray-950 font-semibold text-sm self-stretch">
+                    <div class="text-surface-950 font-semibold text-sm self-stretch">
                         {{ $t('public.kyc_verification') }}
                     </div>
                     <div class="flex flex-col gap-3 items-start self-stretch">
-                        <span class="text-xs text-gray-500">{{ $t('public.kyc_caption') }}</span>
+                        <span class="text-xs text-surface-500">{{ $t('public.kyc_caption') }}</span>
                         <FileUpload
                             class="w-full"
                             name="kyc_verification"
@@ -357,7 +351,7 @@ watchEffect(() => {
 
                 <!-- Create Password -->
                 <div class="flex flex-col gap-3 items-center self-stretch">
-                    <div class="text-gray-950 font-semibold text-sm self-stretch">
+                    <div class="text-surface-950 font-semibold text-sm self-stretch">
                         {{ $t('public.create_password') }}
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full">

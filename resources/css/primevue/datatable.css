@@ -1,7 +1,7 @@
 @import './paginator';
 
 .p-datatable {
-    @apply relative
+    @apply relative w-full h-full
 }
 
 .p-datatable-table {
@@ -9,7 +9,7 @@
 }
 
 .p-datatable-scrollable > .p-datatable-table-container {
-    @apply relative
+    @apply relative w-full h-full
 }
 
 .p-datatable-scrollable-table > .p-datatable-thead {

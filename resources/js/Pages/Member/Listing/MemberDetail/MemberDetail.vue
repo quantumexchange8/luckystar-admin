@@ -4,12 +4,12 @@ import { IconChevronRight } from '@tabler/icons-vue';
 import {ref, h, watch, watchEffect} from "vue";
 import { Tab, TabList, TabPanel, TabPanels, Tabs, Button } from "primevue";
 import {usePage} from '@inertiajs/vue3';
-// import MemberFinancialInfo from '@/Pages/Member/Listing/Partials/MemberFinancialInfo.vue';
-// import MemberTradingAccounts from '@/Pages/Member/Listing/Partials/MemberTradingAccounts.vue';
-import ProfileInfo from "@/Pages/Member/Listing/MemberDetail/Partials/ProfileInfo.vue";
+import FinancialInfo from "@/Pages/Member/Listing/MemberDetail/FinancialInfo.vue";
+import TradingAccount from "@/Pages/Member/Listing/MemberDetail/TradingAccount.vue";
+import ProfileInfo from "@/Pages/Member/Listing/MemberDetail/ProfileInfo.vue";
 // import KycVerification from "@/Pages/Member/Listing/MemberDetail/KycVerification.vue";
 import PaymentAccount from "@/Pages/Member/Listing/MemberDetail/Partials/PaymentAccount.vue";
-// import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
+import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
 
 const props = defineProps({
     user: Object
@@ -40,17 +40,17 @@ watchEffect(() => {
 const tabs = ref([
     {
         title: 'financial_info',
-        //   component: h(MemberFinancialInfo, {user_id: props.user.id}),
+        component: h(FinancialInfo, {user_id: props.user.id}),
         value: 0
     },
     {
         title: 'trading_accounts',
-        //   component: h(MemberTradingAccounts, {user_id: props.user.id}),
+        component: h(TradingAccount, {user_id: props.user.id}),
         value: 1
     },
     {
         title: 'adjustment_history',
-        //   component: h(AdjustmentHistory, {user_id: props.user.id}),
+        component: h(AdjustmentHistory, {user_id: props.user.id}),
         value: 2
     },
 ]);
@@ -79,7 +79,7 @@ const activeIndex = ref(0);
                     stroke-width="1.25"
                     class="dark:text-white"
                 />
-                <span class="flex px-4 py-2 text-gray-400 dark:text-gray-200 items-center justify-center text-sm font-medium">{{ userDetail?.name }} - {{ $t('public.view_member_details') }}</span>
+                <span class="flex px-4 py-2 text-surface-400 dark:text-surface-200 items-center justify-center text-sm font-medium">{{ userDetail?.name }} - {{ $t('public.view_member_details') }}</span>
             </div>
 
             <!-- Profile Info -->
@@ -98,7 +98,7 @@ const activeIndex = ref(0);
                 </div>
             </div>
 
-            <!-- <Tabs v-model:value="activeIndex">
+            <Tabs v-model:value="activeIndex">
                 <TabList>
                     <Tab
                         v-for="tab in tabs"
@@ -115,10 +115,10 @@ const activeIndex = ref(0);
                         :value="tab.value"
                         class="flex flex-col gap-5"
                     >
-                        <component :is="tab.component" />
+                        <component v-if="activeIndex === tab.value" :is="tab.component" />
                     </TabPanel>
                 </TabPanels>
-            </Tabs> -->
+            </Tabs>
         </div>
     </AuthenticatedLayout>
 </template>
