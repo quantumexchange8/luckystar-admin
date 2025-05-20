@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PendingController;
 use App\Http\Controllers\StrategyController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,39 @@ Route::middleware('auth')->group(function () {
     Route::get('/getSettingRanks', [SelectOptionController::class, 'getSettingRanks'])->name('getSettingRanks');
     Route::get('/getGroups', [SelectOptionController::class, 'getGroups'])->name('getGroups');
     Route::get('/getLeverages/{id}', [SelectOptionController::class, 'getLeverages'])->name('getLeverages');
+    Route::get('/getGroupLeaders', [SelectOptionController::class, 'getGroupLeaders'])->name('getGroupLeaders');
+    Route::get('/getGroupMembers', [SelectOptionController::class, 'getGroupMembers'])->name('getGroupMembers');
+
+    /**
+     * ==============================
+     *           Pending
+     * ==============================
+     */
+    Route::prefix('pending')->group(function () {
+        /**
+         * ==============================
+         *           Deposit
+         * ==============================
+         */
+
+        /**
+         * ==============================
+         *          Withdrawal
+         * ==============================
+         */
+
+        /**
+         * ==============================
+         *          Investment
+         * ==============================
+         */
+        Route::prefix('investment')->group(function () {
+            Route::get('/', [PendingController::class, 'pending_investment'])->name('pending.investment');
+            Route::get('/getPendingInvestmentsData', [PendingController::class, 'getPendingInvestmentsData'])->name('pending.getPendingInvestmentsData');
+
+            Route::post('/pendingInvestmentApproval', [PendingController::class, 'pendingInvestmentApproval'])->name('pending.pendingInvestmentApproval');
+        });
+    });
 
     /**
      * ==============================

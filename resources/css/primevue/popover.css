@@ -9,7 +9,7 @@
 }
 
 .p-popover-content {
-    @apply p-3
+    @apply py-5 px-4
 }
 
 .p-popover-flipped {

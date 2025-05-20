@@ -21,15 +21,14 @@ return new class extends Migration
             $table->decimal('real_fund', 13)->nullable()->default(0);
             $table->decimal('demo_fund', 13)->nullable()->default(0);
             $table->string('subscription_number')->nullable();
-            $table->string('group_subscription_number')->nullable();
-            $table->string('subscription_period_type')->nullable();
             $table->integer('subscription_period')->nullable();
+            $table->string('subscription_period_type')->nullable();
             $table->timestamp('expired_at')->nullable();
-            $table->string('settlement_period_type')->nullable();
             $table->integer('settlement_period')->nullable();
+            $table->string('settlement_period_type')->nullable();
             $table->timestamp('settlement_at')->nullable();
             $table->timestamp('approval_at')->nullable();
-            $table->string('status')->nullable()->default('ongoing');
+            $table->string('status')->nullable()->default('active');
             $table->timestamp('terminated_at')->nullable();
             $table->text('remarks')->nullable();
             $table->string('extra_conditions')->nullable();

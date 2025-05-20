@@ -1,5 +1,5 @@
 .p-progressspinner {
-    @apply relative my-0 mx-auto w-[100px] h-[100px] inline-block
+    @apply relative my-0 mx-auto w-10 h-10 inline-block
         before:block before:pt-[100%]
 }
 
@@ -43,16 +43,16 @@
 @keyframes p-progressspinner-color {
     100%,
     0% {
-        stroke: theme(colors.red.500);
+        stroke: #6ee7b7;
     }
     40% {
-        stroke: theme(colors.blue.500);
+        stroke: #064e3b;
     }
     66% {
-        stroke: theme(colors.green.500);
+        stroke: #34d399;
     }
     80%,
     90% {
-        stroke: theme(colors.yellow.500);
+        stroke: #064e3b;
     }
 }

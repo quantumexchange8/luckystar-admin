@@ -69,6 +69,22 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
             </template>
         </SidebarLink>
 
+        <!-- Pending -->
+        <SidebarCollapsible
+            :title="$t('public.pending')"
+            :active="route().current('pending.*')"
+        >
+            <template #icon>
+                <IconClockDollar :size="20" stroke-width="1.5" />
+            </template>
+
+            <SidebarCollapsibleItem
+                :title="$t('public.investment')"
+                :href="route('pending.investment')"
+                :active="route().current('pending.investment')"
+            />
+        </SidebarCollapsible>
+
         <SidebarCategoryLabel
             :title="$t('public.member_management')"
         />
@@ -79,7 +95,7 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
             :active="route().current('member.*')"
         >
             <template #icon>
-                <IconUsers :size="20" stroke-width="1.25" />
+                <IconUsers :size="20" stroke-width="1.5" />
             </template>
 
             <SidebarCollapsibleItem

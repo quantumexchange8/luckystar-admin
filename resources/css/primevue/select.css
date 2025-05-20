@@ -79,7 +79,7 @@ input.p-select-label {
 }
 
 .p-select-header {
-    @apply pt-2 pb-1 px-4
+    @apply pt-2 pb-1 px-3
 }
 
 .p-select-filter {
@@ -95,7 +95,7 @@ input.p-select-label {
 }
 
 .p-select-list {
-    @apply m-0 p-1 list-none gap-[2px] flex flex-col
+    @apply m-0 py-1 list-none gap-[2px] flex flex-col
 }
 
 .p-select-option {
@@ -109,7 +109,7 @@ input.p-select-label {
 }
 
 .p-select-option.p-select-option-selected {
-    @apply bg-primary-50 text-primary-500
+    @apply bg-primary-50 text-primary-500 dark:bg-primary-950 dark:text-primary-100
 }
 
 /* .p-select-option.p-select-option-selected.p-focus {

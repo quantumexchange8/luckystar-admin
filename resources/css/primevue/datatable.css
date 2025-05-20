@@ -1,7 +1,7 @@
 @import './paginator';
 
 .p-datatable {
-    @apply relative w-full
+    @apply relative
 }
 
 .p-datatable-table {
@@ -73,7 +73,7 @@
 }
 
 .p-datatable-column-header-content {
-    @apply flex items-center gap-2 text-xs font-semibold uppercase
+    @apply flex items-center gap-2 uppercase font-semibold text-xs
 }
 
 .p-datatable-column-resize-indicator {
@@ -91,7 +91,7 @@
 }
 
 .p-datatable-mask {
-    @apply absolute flex items-center justify-center z-20 w-full h-full bg-gray-100/60
+    @apply absolute flex items-center justify-center z-20 bg-surface-200/40 dark:bg-surface-950/20
 }
 
 .p-datatable-inline-filter {
@@ -104,9 +104,9 @@
 
 .p-datatable-filter-overlay {
     @apply bg-surface-0 dark:bg-surface-900 rounded-md min-w-52
-        border border-surface-200 dark:border-surface-700
-        text-surface-700 dark:text-surface-0
-        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+    border border-surface-200 dark:border-surface-700
+    text-surface-700 dark:text-surface-0
+    shadow-table
 }
 
 .p-datatable-filter-constraint-list {
@@ -144,9 +144,9 @@
 
 .p-datatable-filter-overlay-popover {
     @apply flex flex-col gap-2
-        bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0
-        border border-surface-200 dark:border-surface-700 rounded-md p-3 min-w-52
-        shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+    bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0
+    border border-surface-200 dark:border-surface-700 rounded-md p-3 min-w-52
+    shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
 }
 
 .p-datatable-filter-operator-dropdown {
@@ -187,11 +187,11 @@
 }
 
 .p-datatable-paginator-bottom {
-    /* @apply border-t border-surface-200 dark:border-surface-700 */
+    @apply border-t border-surface-200 dark:border-surface-700
 }
 
 .p-datatable-header {
-    @apply pb-3
+    @apply pb-5
         /* py-3 px-4  */
         /* border-b border-surface-200 dark:border-surface-700 */
         bg-surface-0 dark:bg-surface-900
@@ -199,34 +199,28 @@
 }
 
 .p-datatable-footer {
-    @apply p-3 border-b border-surface-200 dark:border-surface-700
-        bg-surface-0 dark:bg-surface-900
-        text-surface-700 dark:text-surface-0
+    @apply py-3 px-4 border-b border-surface-200 dark:border-surface-700
+    bg-surface-0 dark:bg-surface-900
+    text-surface-700 dark:text-surface-0
 }
 
 .p-datatable-header-cell {
-    @apply p-3 font-normal text-start transition-colors duration-200
-        md:border-b border-surface-200 dark:border-surface-700
-        bg-surface-0 dark:bg-surface-900
-        text-surface-700 dark:text-surface-0
+    @apply py-3 px-4 font-normal text-start transition-colors duration-200
+    border-b border-surface-200 dark:border-surface-700
+    bg-surface-0 dark:bg-surface-900
+    text-surface-700 dark:text-surface-0
 }
 
 .p-datatable-column-title {
-    @apply font-semibold
+    @apply font-bold
 }
 
 .p-datatable-tbody > tr {
-    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 transition-colors duration-200 text-sm
+    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 transition-colors duration-200
 }
 
-.p-datatable-tbody > tr:not(.p-datatable-empty-message) > td {
-    @apply text-start p-3
-    border-b border-surface-200 dark:border-surface-800
-}
-
-.p-datatable-tbody > tr.p-datatable-empty-message > td {
-    @apply text-start p-3
-    /* border-b border-surface-200 dark:border-surface-800 */
+.p-datatable-tbody > tr > td {
+    @apply text-start py-3 px-4 border-b border-surface-200 dark:border-surface-800 text-sm text-surface-900 dark:text-white
 }
 
 .p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover {
@@ -251,9 +245,9 @@
 }
 
 .p-datatable-tfoot > tr > td {
-    @apply text-start p-3 border-b border-surface-200 dark:border-surface-800
-        bg-surface-0 dark:bg-surface-900
-        text-surface-700 dark:text-surface-0
+    @apply text-start py-3 px-4 border-b border-surface-200 dark:border-surface-800
+    bg-surface-0 dark:bg-surface-900
+    text-surface-700 dark:text-surface-0
 }
 
 .p-datatable-column-footer {
@@ -267,11 +261,11 @@
 .p-datatable-column-title,
 .p-datatable-sort-icon,
 .p-datatable-sort-badge {
-    @apply align-middle
+    @apply align-middle fill-transparent
 }
 
 .p-datatable-sort-icon {
-    @apply text-surface-500 dark:text-surface-400 transition-colors duration-200
+    @apply text-surface-500 dark:text-surface-400 transition-colors duration-200 w-3 h-3
 }
 
 .p-datatable-sortable-column:not(.p-datatable-column-sorted):hover {
@@ -283,11 +277,11 @@
 }
 
 .p-datatable-column-sorted {
-    @apply bg-highlight
+    @apply bg-primary-100 dark:bg-highlight
 }
 
 .p-datatable-column-sorted .p-datatable-sort-icon {
-    @apply bg-highlight
+    @apply bg-primary-100 dark:bg-highlight
 }
 
 .p-datatable-hoverable .p-datatable-selectable-row {
@@ -400,10 +394,10 @@
 
 .p-datatable-row-toggle-button {
     @apply inline-flex items-center justify-center overflow-hidden relative w-7 h-7 cursor-pointer select-none
-        transition-colors duration-200 rounded-full border-none bg-transparent
-        text-surface-500 enabled:hover:bg-surface-100 enabled:hover:text-surface-700
-        dark:text-surface-400 dark:enabled:hover:bg-surface-800 dark:enabled:hover:text-surface-0
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
+    transition-colors duration-200 rounded-full border-none bg-transparent
+    text-surface-500 enabled:hover:bg-surface-100 enabled:hover:text-surface-700
+    dark:text-surface-400 dark:enabled:hover:bg-surface-800 dark:enabled:hover:text-surface-0
+    focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
 
 }
 

@@ -257,7 +257,7 @@ class StrategyController extends Controller
                 'groups',
             ])
                 ->withCount('active_subscriptions')
-                ->withSum('active_subscriptions', 'subscription_amount');
+                ->withSum('active_subscriptions', 'real_fund');
 
             if ($data['filters']['global']['value']) {
                 $keyword = $data['filters']['global']['value'];

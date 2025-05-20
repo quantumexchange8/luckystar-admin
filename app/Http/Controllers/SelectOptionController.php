@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountTypeHasLeverage;
+use App\Models\GroupHasUser;
 use App\Models\GroupRankSetting;
 use App\Models\User;
 use App\Models\Country;
@@ -56,23 +57,23 @@ class SelectOptionController extends Controller
     public function getUplinesByGroup(Request $request)
     {
         $groupId = $request->input('group_id');
-    
+
         $uplines = User::whereHas('group', function ($query) use ($groupId) {
                 $query->where('group_id', $groupId);
             })
             ->select('id', 'first_name', 'last_name', 'email', 'id_number')
             ->get();
-    
+
         // Add profile_photo URL to each upline
         foreach ($uplines as $upline) {
             $upline->profile_photo = $upline?->getFirstMediaUrl('profile_photo');
         }
-    
+
         return response()->json([
             'uplines' => $uplines,
         ]);
     }
-    
+
     public function getAvailableLeader()
     {
         $group_leader_ids = Group::pluck('group_leader_id')->toArray();
@@ -115,5 +116,22 @@ class SelectOptionController extends Controller
         return response()->json([
             'leverages' => $leverages,
         ]);
+    }
+
+    public function getGroupLeaders()
+    {
+        $groups = Group::with('group_leader')
+            ->get();
+
+        return response()->json($groups);
+    }
+
+    public function getGroupMembers(Request $request)
+    {
+        $groups = GroupHasUser::with('user:id,first_name,last_name')
+            ->where('group_id', $request->group_id)
+            ->get();
+
+        return response()->json($groups);
     }
 }

@@ -26,6 +26,7 @@
         "@tabler/icons-vue": "^3.31.0",
         "@vitejs/plugin-vue-jsx": "^4.1.2",
         "@vueuse/core": "^13.1.0",
+        "dayjs": "^1.11.13",
         "laravel-vue-i18n": "^2.8.0",
         "lodash": "^4.17.21",
         "primevue": "^4.3.3",

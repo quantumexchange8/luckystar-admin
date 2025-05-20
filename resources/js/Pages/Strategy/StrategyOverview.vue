@@ -113,7 +113,7 @@ const calculatePercentage = (fund) => {
                 <template #content>
                     <span class="self-stretch text-surface-500 text-sm">{{ $t('public.current_joining_investors') }}</span>
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <span class="text-surface-950 text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors, 0) : 0 }}</span>
+                        <span class="text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors, 0, '') : 0 }}</span>
                         <div class="flex items-center pb-1.5 gap-2">
                             <div v-if="currentInvestors" class="flex items-center gap-2">
                                 <div
@@ -140,7 +140,7 @@ const calculatePercentage = (fund) => {
                 <template #content>
                     <span class="self-stretch text-surface-500 text-sm">{{ $t('public.current_joining_investors') }}</span>
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <span class="text-surface-950 text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors, 0) : 0 }}</span>
+                        <span class="text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors, 0, '') : 0 }}</span>
                         <div class="flex items-center pb-1.5 gap-2">
                             <div v-if="currentInvestors" class="flex items-center gap-2">
                                 <div
