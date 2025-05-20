@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
+use Carbon\Carbon;
+use Inertia\Inertia;
 use App\Enums\MetaService;
 use App\Models\AccountType;
-use App\Models\TradingSubscription;
 use App\Models\Transaction;
+use Illuminate\Http\Request;
+use App\Models\TradingSubscription;
+use Illuminate\Support\Facades\Auth;
 use App\Services\RunningNumberService;
 use App\Services\TradingAccountService;
-use Auth;
-use Carbon\Carbon;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Inertia\Inertia;
-use Throwable;
+use Illuminate\Http\Client\ConnectionException;
 
 class PendingController extends Controller
 {
@@ -129,7 +129,7 @@ class PendingController extends Controller
                     $master = $investment->trading_master;
                     $master_account_type = AccountType::find($master->account_type_id);
 
-                    $deal = (new TradingAccountService())->createDeal($master, $investment->subscription_amount, "Login #$investment->meta_login", MetaService::DEPOSIT, $master_account_type);
+                    $deal = (new TradingAccountService())->createDeal($master, $investment->subscription_amount, "Login #$investment->meta_login", MetaService::DEPOSIT, $master_account_type, MetaService::DEAL_BALANCE);
 
                     Transaction::create([
                         'user_id' => $master->user_id,

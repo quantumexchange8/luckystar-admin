@@ -13,7 +13,7 @@ class AddMemberRequest extends FormRequest
         return [
             'first_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
             'last_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'username' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+            'username' => ['required', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:' . User::class],
             'dial_code' => ['required'],
             'phone' => ['required', 'max:255', 'unique:' . User::class],

@@ -2,17 +2,18 @@
 
 namespace App\Services;
 
+use Throwable;
 use App\Enums\MetaService;
 use App\Models\User as UserModel;
-use App\Services\Data\CreateTradingAccount;
-use App\Services\Data\CreateTradingUser;
-use App\Services\Data\UpdateTradingAccount;
-use App\Services\Data\UpdateTradingUser;
-use Auth;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Throwable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use App\Services\Data\CreateTradingUser;
+use App\Services\Data\UpdateTradingUser;
+use App\Services\Data\CreateTradingAccount;
+use App\Services\Data\UpdateTradingAccount;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Client\ConnectionException;
 
 class TradingAccountService {
     private string $port = "8443";
@@ -92,7 +93,7 @@ class TradingAccountService {
      * @throws ConnectionException
      * @throws Throwable
      */
-    public function createDeal($trading_account, $amount, $comment, $type, $account_type)
+    public function createDeal($trading_account, $amount, $comment, $type, $account_type, $deal_type)
     {
         if ($account_type->type == 'virtual') {
             $dealResponse = [
@@ -102,20 +103,40 @@ class TradingAccountService {
                 ]
             ];
 
+            $newBalance = $trading_account->balance;
+            $newCredit = $trading_account->credit ?? 0;
+        
+            switch ($deal_type) {
+                case MetaService::DEAL_BALANCE:
+                    $newBalance += $amount;
+                    break;
+        
+                case MetaService::DEAL_CREDIT:
+                    $newCredit += $amount;
+                    break;
+        
+                case MetaService::DEAL_BONUS:
+                    // if bonus affects balance or credit, modify as needed
+                    break;
+        
+                default:
+                    throw ValidationException::withMessages(['deal_type' => trans('public.invalid_type')]);
+            }
+        
             $userData = [
                 'group' => $account_type->name,
                 'name' => Auth::user()->full_name,
                 'company' => null,
                 'leverage' => $trading_account->margin_leverage,
-                'balance' => $trading_account->balance + $amount,
-                'credit' => $trading_account->credit ?? 0,
+                'balance' => $newBalance,
+                'credit' => $newCredit,
                 'rights' => 5
             ];
 
             $metaAccountData = [
-                'balance' => $trading_account->balance + $amount,
+                'balance' => $newBalance,
+                'credit' => $newCredit,
                 'currencyDigits' => 2,
-                'credit' => $trading_account->credit ?? 0,
                 'marginLeverage' => $trading_account->margin_leverage,
                 'equity' => $trading_account->equity + $amount,
                 'floating' => $trading_account->floating,
@@ -123,8 +144,8 @@ class TradingAccountService {
         } else {
             $dealResponse = Http::acceptJson()->post($this->baseURL . "/conduct_deal", [
                 'login' => $trading_account->meta_login,
-                'amount' => $amount,
-                'imtDeal_EnDealAction' => MetaService::DEAL_BALANCE,
+                'amount' => abs($amount),
+                'imtDeal_EnDealAction' => $deal_type,
                 'comment' => $comment,
                 'deposit' => $type,
             ]);
@@ -156,17 +177,44 @@ class TradingAccountService {
         return Http::acceptJson()->get($this->baseURL . "/deal_history/{$meta_login}&{$start_date}&{$end_date}")->json();
     }
 
-    public function updateLeverage($meta_login, $leverage)
+    public function updateLeverage($trading_account, $leverage, $account_type)
     {
-        $updatedResponse = Http::acceptJson()->patch($this->baseURL . "/update_leverage", [
-            'login' => $meta_login,
-            'leverage' => $leverage,
-        ]);
-        $updatedResponse = $updatedResponse->json();
-        $userData = $this->getMetaUser($meta_login);
-        $metaAccountData = $this->getMetaAccount($meta_login);
-        (new UpdateTradingAccount)->execute($meta_login, $metaAccountData);
-        (new UpdateTradingUser)->execute($meta_login, $userData);
+        if ($account_type->type == 'virtual') {
+            $updatedResponse = [
+                'login' => $trading_account->meta_login,
+                'leverage' => $leverage,
+            ];
+
+            $userData = [
+                'group' => $account_type->name,
+                'name' => Auth::user()->full_name,
+                'company' => null,
+                'leverage' => $leverage,
+                'balance' => $trading_account->balance,
+                'credit' => $trading_account->credit ?? 0,
+                'rights' => 5
+            ];
+
+            $metaAccountData = [
+                'balance' => $trading_account->balance,
+                'currencyDigits' => 2,
+                'credit' => $trading_account->credit ?? 0,
+                'marginLeverage' => $leverage,
+                'equity' => $trading_account->equity,
+                'floating' => $trading_account->floating,
+            ];
+
+        } else {
+            $updatedResponse = Http::acceptJson()->patch($this->baseURL . "/update_leverage", [
+                'login' => $trading_account->meta_login,
+                'leverage' => $leverage,
+            ]);
+            $updatedResponse = $updatedResponse->json();
+            $userData = $this->getMetaUser($trading_account->meta_login);
+            $metaAccountData = $this->getMetaAccount($trading_account->meta_login);
+        }
+        (new UpdateTradingAccount)->execute($trading_account->meta_login, $metaAccountData);
+        (new UpdateTradingUser)->execute($trading_account->meta_login, $userData);
 
         return $updatedResponse;
     }

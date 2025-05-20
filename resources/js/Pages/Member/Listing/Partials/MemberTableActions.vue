@@ -19,7 +19,6 @@ import {computed, h, ref, watch} from "vue";
 import {router} from "@inertiajs/vue3";
 import {trans} from "laravel-vue-i18n";
 import TransferUpline from "@/Pages/Member/Listing/Partials/TransferUpline.vue";
-import UpgradeToAgent from "@/Pages/Member/Listing/Partials/UpgradeToAgent.vue";
 import ResetPassword from "@/Pages/Member/Listing/Partials/ResetPassword.vue";
 
 const props = defineProps({
@@ -45,23 +44,14 @@ const items = ref([
     //         window.open(route('member.access_portal', props.member.id), '_blank');
     //     },
     // },
-    // {
-    //     label: 'transfer_upline',
-    //     icon: h(IconArrowsRightLeft),
-    //     command: () => {
-    //         visible.value = true;
-    //         dialogType.value = 'transfer_upline';
-    //     },
-    // },
-    // {
-    //     label: 'upgrade_to_ib',
-    //     icon: h(IconUserUp),
-    //     command: () => {
-    //         visible.value = true;
-    //         dialogType.value = 'upgrade_to_ib';
-    //     },
-    //     role: 'member', // Add a custom property to check the role
-    // },
+    {
+        label: 'transfer_upline',
+        icon: h(IconArrowsRightLeft),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'transfer_upline';
+        },
+    },
     {
         label: 'reset_password',
         icon: h(IconLockCog),
@@ -100,7 +90,7 @@ const confirm = useConfirm();
 const requireConfirmation = (action_type) => {
     const messages = {
         deactivate_member: {
-            group: 'headless-gray',
+            group: 'headless-surface',
             header: trans('public.deactivate_member'),
             text: trans('public.deactivate_member_caption'),
             cancelButton: trans('public.cancel'),
@@ -189,7 +179,7 @@ const handleMemberStatus = () => {
             aria-haspopup="true"
             aria-controls="overlay_tmenu"
         >
-            <IconDotsVertical size="16" stroke-width="1.25" class="text-gray-500 dark:text-white" />
+            <IconDotsVertical size="16" stroke-width="1.25" class="text-surface-500 dark:text-white" />
         </Button>
         <TieredMenu ref="menu" id="overlay_tmenu" :model="filteredItems" popup>
             <template #item="{ item, props, hasSubmenu }">
@@ -198,7 +188,7 @@ const handleMemberStatus = () => {
                     v-bind="props.action"
                 >
                     <component :is="item.icon" size="20" stroke-width="1.25" :color="item.label === 'delete_member' ? '#F04438' : '#667085'" />
-                    <span class="font-medium" :class="{'text-error-500': item.label === 'delete_member'}">{{ $t(`public.${item.label}`) }}</span>
+                    <span class="font-medium" :class="{'text-red-500': item.label === 'delete_member'}">{{ $t(`public.${item.label}`) }}</span>
                 </div>
             </template>
         </TieredMenu>
@@ -216,12 +206,6 @@ const handleMemberStatus = () => {
                 @update:visible="visible = false"
             />
         </template>
-        <template v-if="dialogType === 'upgrade_to_ib'">
-            <UpgradeToAgent
-                :member="member"
-                @update:visible="visible = false"
-            />
-        </template>
         <template v-if="dialogType === 'reset_password'">
             <ResetPassword
                 :member="member"
@@ -231,9 +215,9 @@ const handleMemberStatus = () => {
     </Dialog>
 <!--    <OverlayPanel ref="op">-->
 <!--        <div class="py-2 flex flex-col items-center">-->
-<!--            <Link :href="route('member.detail', member.id_number)" class="p-3 flex items-center gap-3 self-stretch hover:bg-gray-100 hover:cursor-pointer">-->
+<!--            <Link :href="route('member.detail', member.id_number)" class="p-3 flex items-center gap-3 self-stretch hover:bg-surface-100 hover:cursor-pointer">-->
 <!--                <IconId size="20" stroke-width="1.25" color="#667085" />-->
-<!--                <div class="text-gray-950 text-sm font-medium">-->
+<!--                <div class="text-surface-950 text-sm font-medium">-->
 <!--                    Member Details-->
 <!--                </div>-->
 <!--            </Link>-->

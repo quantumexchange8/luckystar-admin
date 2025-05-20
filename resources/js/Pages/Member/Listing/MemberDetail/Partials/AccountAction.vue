@@ -1,0 +1,184 @@
+<script setup>
+import {
+    TieredMenu,
+    Dialog,
+    useConfirm,
+    InputText,
+    Button,
+    Avatar
+} from "primevue";
+import { IconDots, IconTrash, IconDatabaseEdit, IconSettingsDollar, IconScale, IconContract, IconKey } from "@tabler/icons-vue";
+import { h, onMounted, ref } from "vue";
+import AccountAdjustment from "@/Pages/Member/Account/Partials/AccountAdjustment.vue";
+import ChangeLeverage from "@/Pages/Member/Account/Partials/ChangeLeverage.vue";
+// import ChangeAccountGroup from "@/Pages/Member/Account/Partials/ChangeAccountGroup.vue";
+import ChangePassword from "@/Pages/Member/Account/Partials/ChangePassword.vue";
+import { trans } from "laravel-vue-i18n";
+import { router } from "@inertiajs/vue3";
+
+const props = defineProps({
+    account: Object,
+})
+
+const toggle = (event) => {
+    menu.value.toggle(event);
+};
+
+const menu = ref();
+const visible = ref(false);
+const dialogType = ref('');
+const items = ref([
+    {
+        label: 'account_balance',
+        icon: h(IconDatabaseEdit),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'account_balance';
+        },
+    },
+    {
+        label: 'account_credit',
+        icon: h(IconSettingsDollar),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'account_credit';
+        },
+    },
+    {
+        label: 'change_leverage',
+        icon: h(IconScale),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'change_leverage';
+        },
+    },
+    // {
+    //     label: 'change_account_type',
+    //     icon: h(IconContract),
+    //     command: () => {
+    //         visible.value = true;
+    //         dialogType.value = 'change_account_type';
+    //     },
+    // },
+    {
+        label: 'change_password',
+        icon: h(IconKey),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'change_password';
+        },
+    },
+    {
+        separator: true
+    },
+    {
+        label: 'delete_account',
+        icon: h(IconTrash),
+        command: () => {
+            requireConfirmation('delete_account')
+        }
+    }
+]);
+
+const filteredItems = ref(
+    items.value.filter(item => item.label !== 'change_password' || props.account?.type !== 'virtual')
+);
+
+const confirm = useConfirm();
+
+const requireConfirmation = (action_type) => {
+    const messages = {
+        delete_account: {
+            group: 'headless-error',
+            header: trans('public.delete_trading_account_header'),
+            text: trans('public.delete_trading_account_message'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.delete_confirm'),
+            action: () => {
+                router.delete(route('member.accountDelete'), {
+                    data: {
+                        meta_login: props.account.meta_login,
+                    },
+                })
+            }
+        },
+    };
+
+    const { group, header, text, dynamicText, suffix, actionType, cancelButton, acceptButton, action } = messages[action_type];
+
+    confirm.require({
+        group,
+        header,
+        actionType,
+        text,
+        dynamicText,
+        suffix,
+        cancelButton,
+        acceptButton,
+        accept: action
+    });
+};
+</script>
+
+<template>
+    <div class="flex items-center justify-center gap-2">
+        <Button
+            type="button"
+            severity="secondary"
+            text
+            size="small"
+            icon="IconDots"
+            rounded
+            @click="toggle"
+            aria-haspopup="true"
+            aria-controls="overlay_tmenu"
+        >
+            <IconDots size="16" stroke-width="1.25" />
+        </Button>
+
+        <TieredMenu ref="menu" id="overlay_tmenu" :model="filteredItems" popup>
+            <template #item="{ item, props, hasSubmenu }">
+                <div
+                    class="flex items-center gap-3 self-stretch"
+                    v-bind="props.action"
+                >
+                    <component :is="item.icon" size="20" stroke-width="1.25" :color="item.label === 'delete_account' ? '#F04438' : '#667085'" />
+                    <span class="font-medium" :class="{'text-red-500': item.label === 'delete_account'}">{{ $t(`public.${item.label}`) }}</span>
+                </div>
+            </template>
+        </TieredMenu>
+    </div>
+
+    <Dialog
+        v-model:visible="visible"
+        modal
+        :header="dialogType === 'account_balance' || dialogType === 'account_credit' ? $t(`public.${dialogType + '_adjustment'}`) : $t(`public.${dialogType}`)"
+        class="dialog-xs sm:dialog-sm"
+    >
+        <template v-if="dialogType === 'account_balance'|| dialogType === 'account_credit' ">
+            <AccountAdjustment
+                :account="account"
+                :dialogType="dialogType"
+                @update:visible="visible = $event"
+            />
+        </template>
+        <template v-if="dialogType === 'change_leverage'">
+            <ChangeLeverage
+                :account="account"
+                @update:visible="visible = false"
+            />
+        </template>
+        <!-- <template v-if="dialogType === 'change_account_type'">
+            <ChangeAccountGroup
+                :account="account"
+                @update:visible="visible = false"
+            />
+        </template> -->
+        <template v-if="dialogType === 'change_password'">
+            <ChangePassword
+                :account="account"
+                @update:visible="visible = false"
+            />
+        </template>
+    </Dialog>
+</template>

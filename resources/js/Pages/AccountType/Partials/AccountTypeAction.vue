@@ -26,7 +26,7 @@ const confirm = useConfirm();
 const requireConfirmation = (action_type) => {
     const messages = {
         deactivate_account_type: {
-            group: 'headless-gray',
+            group: 'headless-surface',
             header: trans('public.deactivate_account_type_header'),
             message: trans('public.deactivate_account_type_content'),
             cancelButton: trans('public.cancel'),

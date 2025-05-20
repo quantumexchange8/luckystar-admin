@@ -138,7 +138,7 @@ const submit = () => {
                         class="group col-span-1 items-start py-3 px-4 gap-1 self-stretch rounded-lg border shadow-input transition-colors duration-300 select-none cursor-pointer w-full"
                         :class="{
                                 'bg-primary-50 border-primary-500': selectedPaymentAccountType === type,
-                                'bg-white border-gray-300 hover:bg-primary-50 hover:border-primary-500': selectedPaymentAccountType !== type,
+                                'bg-white border-surface-300 hover:bg-primary-50 hover:border-primary-500': selectedPaymentAccountType !== type,
                             }"
                     >
                         <div class="flex items-center gap-3 self-stretch">
@@ -146,7 +146,7 @@ const submit = () => {
                                     class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700"
                                     :class="{
                                         'text-primary-700': selectedPaymentAccountType === type,
-                                        'text-gray-950': selectedPaymentAccountType !== type
+                                        'text-surface-950': selectedPaymentAccountType !== type
                                     }"
                                 >
                                     {{ $t(`public.${type}`) }}
@@ -172,7 +172,7 @@ const submit = () => {
                         class="group col-span-1 items-start py-3 px-4 gap-1 self-stretch rounded-lg border shadow-input transition-colors duration-300 select-none cursor-pointer w-full"
                         :class="{
                                 'bg-primary-50 border-primary-500': selectedType === type,
-                                'bg-white border-gray-300 hover:bg-primary-50 hover:border-primary-500': selectedType !== type,
+                                'bg-white border-surface-300 hover:bg-primary-50 hover:border-primary-500': selectedType !== type,
                             }"
                     >
                         <div class="flex items-center gap-3 self-stretch">
@@ -180,7 +180,7 @@ const submit = () => {
                                     class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700"
                                     :class="{
                                         'text-primary-700': selectedType === type,
-                                        'text-gray-950': selectedType !== type
+                                        'text-surface-950': selectedType !== type
                                     }"
                                 >
                                     {{ $t(`public.${type}`) }}
@@ -206,7 +206,7 @@ const submit = () => {
                         class="group col-span-1 items-start py-3 px-4 gap-1 self-stretch rounded-lg border shadow-input transition-colors duration-300 select-none cursor-pointer w-full"
                         :class="{
                                 'bg-primary-50 border-primary-500': selectedCryptoNetwork === type,
-                                'bg-white border-gray-300 hover:bg-primary-50 hover:border-primary-500': selectedCryptoNetwork !== type,
+                                'bg-white border-surface-300 hover:bg-primary-50 hover:border-primary-500': selectedCryptoNetwork !== type,
                             }"
                     >
                         <div class="flex items-center gap-3 self-stretch">
@@ -214,7 +214,7 @@ const submit = () => {
                                     class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700"
                                     :class="{
                                         'text-primary-700': selectedCryptoNetwork === type,
-                                        'text-gray-950': selectedCryptoNetwork !== type
+                                        'text-surface-950': selectedCryptoNetwork !== type
                                     }"
                                 >
                                     <span class="uppercase">{{ type }}</span>
@@ -257,7 +257,7 @@ const submit = () => {
                     </template>
                     <template #option="slotProps">
                         <div class="flex items-center w-[250px] md:w-full overflow-x-auto">
-                            <div>{{ slotProps.option.bank_name }} <span class="text-gray-500">( {{ slotProps.option.bank_code }} )</span></div>
+                            <div>{{ slotProps.option.bank_name }} <span class="text-surface-500">( {{ slotProps.option.bank_code }} )</span></div>
                         </div>
                     </template>
                 </Select>

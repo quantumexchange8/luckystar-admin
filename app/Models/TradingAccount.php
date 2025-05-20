@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TradingAccount extends Model
 {
@@ -32,5 +33,12 @@ class TradingAccount extends Model
     public function active_subscriptions(): HasMany
     {
         return $this->hasMany(TradingSubscription::class, 'meta_login', 'meta_login')->where('status', 'active');
+    }
+
+    public function has_active_or_pending_subscriptions(): bool
+    {
+        return $this->hasMany(TradingSubscription::class, 'meta_login', 'meta_login')
+            ->whereIn('status', values: ['active', 'pending'])
+            ->exists();
     }
 }

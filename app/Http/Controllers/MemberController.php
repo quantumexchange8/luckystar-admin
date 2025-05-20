@@ -7,16 +7,23 @@ use Inertia\Inertia;
 use App\Models\Group;
 use App\Models\Wallet;
 use App\Models\Country;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\TradingAccount;
 use App\Services\GroupService;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\RunningNumberService;
 use App\Http\Requests\AddMemberRequest;
+use App\Services\TradingAccountService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
@@ -164,7 +171,7 @@ class MemberController extends Controller
 
     public function addNewMember(AddMemberRequest $request)
     {
-        $upline_id = $request->upline['id'];
+        $upline_id = $request->upline_id;
         $upline = User::find($upline_id);
 
         if(empty($upline->hierarchyList)) {
@@ -242,8 +249,6 @@ class MemberController extends Controller
 
     public function getAvailableUplines(Request $request)
     {
-        $role = $request->input('role', ['ib', 'member']);
-    
         $memberId = $request->input('id');
 
         // Fetch the member and get their children (downline) IDs
@@ -252,8 +257,7 @@ class MemberController extends Controller
         $excludedIds[] = $memberId;
     
         // Fetch uplines who are not in the excluded list
-        $uplines = User::whereIn('role', (array) $role)
-            ->whereNotIn('id', $excludedIds)
+        $uplines = User::whereNotIn('id', $excludedIds)
             ->get()
             ->map(function ($user) {
                 return [
@@ -268,6 +272,81 @@ class MemberController extends Controller
         // Return the uplines as JSON
         return response()->json([
             'uplines' => $uplines
+        ]);
+    }
+
+    public function transferUpline(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id'   => 'required|exists:users,id',
+            'upline_id' => 'required|exists:users,id',
+        ]);
+
+        // Find the user to be transferred
+        $user = User::findOrFail($request->input('user_id'));
+
+        // Check if the new upline is valid and not the same as the current one
+        if ($user->upline_id === $request->input('upline_id')) {
+            return back()->with('toast', [
+                'title' => trans('public.transfer_same_upline_warning'),
+                'type'  => 'warning',
+            ]);
+        }
+
+        // Find the new upline
+        $newUpline = User::findOrFail($request->input('upline_id'));
+
+        // Step 1: Update the user's hierarchyList to reflect the new upline's hierarchy and ID
+        $user->hierarchyList = $newUpline->hierarchyList . $newUpline->id . '-';
+        $user->upline_id = $newUpline->id;
+
+        // Update the user's group relationship
+        if ($newUpline->group) {
+            (new GroupService())->updateUserGroup($newUpline->group->group_id, $user->id);
+        }
+
+        // Save the updated hierarchyList and upline_id for the user
+        $user->save();
+
+        // Step 3: Update related users' hierarchyList
+        $relatedUsers = User::where('hierarchyList', 'like', '%-' . $user->id . '-%')->get();
+
+        foreach ($relatedUsers as $relatedUser) {
+            $userIdSegment = '-' . $user->id . '-';
+
+            // Find the position of `-user_id-` in the related user's hierarchyList
+            $pos = strpos($relatedUser->hierarchyList, $userIdSegment);
+
+            if ($pos !== false) {
+                // Extract the part after the user's ID segment (tail part)
+                $tailHierarchy = substr($relatedUser->hierarchyList, $pos + strlen($userIdSegment));
+
+                // Prepend the user's new hierarchyList + user ID to the tail part
+                $relatedUser->hierarchyList = $user->hierarchyList . $user->id . '-' . $tailHierarchy;
+            }
+
+            // Save the updated hierarchyList for the related user
+            $relatedUser->save();
+        }
+
+        // Step 4 update the related user group has user as transfer upline will change group as well
+        // Get the group_id from the new upline's group relationship
+        $group_id = $newUpline->group->group_id;
+
+        $relatedUserIds = $relatedUsers->pluck('id')->toArray();
+
+        // If the group_id is valid, update related users group
+        if ($group_id && !empty($relatedUserIds)) {
+            foreach ($relatedUserIds as $relatedUserId) {
+                (new GroupService())->updateUserGroup($group_id, $relatedUserId);
+            }
+        }
+        
+        // Return a success response
+        return back()->with('toast', [
+            'title' => trans('public.toast_transfer_upline_success'),
+            'type'  => 'success',
         ]);
     }
 
@@ -385,6 +464,152 @@ class MemberController extends Controller
             'title' => trans('public.update_contact_info_alert'),
             'type' => 'success'
         ]);
+    }
+
+    public function getFinancialInfoData(Request $request)
+    {
+        $query = Transaction::query()
+            ->where('user_id', $request->id)
+            ->where('category', 'trading_account')
+            ->where('status', 'successful');
+    
+        $transactions = $query->whereIn('transaction_type', ['deposit', 'withdrawal'])
+            ->latest()
+            ->get();
+    
+        $transaction_history = [];
+        foreach ($transactions as $transaction) {
+            $transaction_history[] = [
+                'category' => $transaction->category,
+                'transaction_type' => $transaction->transaction_type,
+                'from_meta_login' => $transaction->from_meta_login,
+                'to_meta_login' => $transaction->to_meta_login,
+                'amount' => $transaction->amount,
+                'transaction_charges' => $transaction->transaction_charges,
+                'transaction_amount' => $transaction->transaction_amount,
+                'status' => $transaction->status,
+                'comment' => $transaction->comment,
+                'remarks' => $transaction->remarks,
+                'created_at' => $transaction->created_at,
+                'approval_at' => $transaction->approval_at,
+            ];
+        }
+    
+        $wallets = Wallet::where('user_id', $request->id)
+            ->whereIn('type', ['cash_wallet', 'bonus_wallet'])
+            ->get();
+    
+        return response()->json([
+            'transactionHistory' => $transaction_history,
+            'wallets' => $wallets,
+        ]);
+    }
+    
+    public function walletAdjustment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'action' => ['required'],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'remarks' => ['nullable'],
+        ])->setAttributeNames([
+            'action' => trans('public.action'),
+            'amount' => trans('public.amount'),
+            'remarks' => trans('public.remarks'),
+        ]);
+        $validator->validate();
+    
+        $action = $request->action;
+        $amount = $request->amount;
+        $wallet = Wallet::findOrFail($request->id);
+    
+        // Validate balance for any *_out action
+        if (Str::endsWith($action, '_out') && $wallet->balance < $amount) {
+            throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
+        }
+    
+        $isOut = Str::endsWith($action, '_out');
+        $isIn = Str::endsWith($action, '_in');
+    
+        Transaction::create([
+            'user_id' => $wallet->user_id,
+            'category' => 'wallet',
+            'transaction_type' => $action,
+            'from_wallet_id' => $isOut ? $wallet->id : null,
+            'to_wallet_id' => $isIn ? $wallet->id : null,
+            'transaction_number' => RunningNumberService::getID('transaction'),
+            'amount' => $amount,
+            'transaction_charges' => 0,
+            'transaction_amount' => $amount,
+            'old_wallet_amount' => $wallet->balance,
+            'new_wallet_amount' => $isOut ? $wallet->balance - $amount : $wallet->balance + $amount,
+            'status' => 'successful',
+            'remarks' => $request->remarks,
+            'approval_at' => now(),
+            'handle_by' => Auth::id(),
+        ]);
+    
+        $wallet->balance = $isOut ? $wallet->balance - $amount : $wallet->balance + $amount;
+        $wallet->save();
+    
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.wallet_adjustment_success'),
+            'type' => 'success',
+        ]);
+    }
+    
+    public function getTradingAccounts(Request $request)
+    {
+        $metaLogins = TradingAccount::query()
+            ->where('user_id', $request->id)
+            ->pluck('meta_login');
+
+        if (App::environment(['production', 'staging'])) {
+            foreach ($metaLogins as $metaLogin) {
+                (new TradingAccountService())->getUserInfo((int) $metaLogin);
+            }
+        }
+
+        // Fetch trading accounts based on user ID
+        $tradingAccountsData = [];
+
+        $tradingAccounts = TradingAccount::query()
+            ->where('user_id', $request->id)
+            ->with('account_type')
+            ->get();
+
+        foreach ($tradingAccounts as $trading_account) {
+            $tradingAccountsData[] = [
+                'id' => $trading_account->id,
+                'meta_login' => $trading_account->meta_login,
+                'account_type_id' => $trading_account->account_type->id,
+                'account_type' => $trading_account->account_type->slug,
+                'account_group' => $trading_account->account_type->account_group,
+                'type' => $trading_account->account_type->type,
+                'balance' => $trading_account->balance,
+                'credit' => $trading_account->credit,
+                'equity' => $trading_account->equity,
+                'leverage' => $trading_account->margin_leverage,
+                'account_type_color' => $trading_account->account_type->color,
+                'updated_at' => $trading_account->updated_at,
+            ];
+        }
+
+        // Return the response as JSON
+        return response()->json([
+            'tradingAccounts' => $tradingAccountsData,
+        ]);
+    }
+
+    public function getAdjustmentHistoryData(Request $request)
+    {
+        $adjustment_history = Transaction::with('to_wallet:id,type', 'from_wallet:id,type')
+            ->where('user_id', $request->id)
+            ->whereIn('transaction_type', ['cash_in', 'cash_out', 'bonus_in', 'bonus_out', 'balance_in','balance_out','credit_in','credit_out',])
+            ->where('status', 'successful')
+            ->latest()
+            ->get();
+
+        return response()->json($adjustment_history);
     }
 
     public function deleteMember(Request $request)

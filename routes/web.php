@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\PendingController;
-use App\Http\Controllers\StrategyController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\PendingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelectOptionController;
 use App\Http\Controllers\TopUpProfileController;
@@ -78,6 +79,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
         Route::post('/updateMemberStatus', [MemberController::class, 'updateMemberStatus'])->name('member.updateMemberStatus');
+        Route::post('/transferUpline', [MemberController::class, 'transferUpline'])->name('member.transferUpline');
         Route::post('/resetPassword', [MemberController::class, 'resetPassword'])->name('member.resetPassword');
 
         Route::delete('/deleteMember', [MemberController::class, 'deleteMember'])->name('member.deleteMember');
@@ -85,8 +87,25 @@ Route::middleware('auth')->group(function () {
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
-
+        Route::get('/getFinancialInfoData', [MemberController::class, 'getFinancialInfoData'])->name('member.getFinancialInfoData');
+        Route::get('/getTradingAccounts', [MemberController::class, 'getTradingAccounts'])->name('member.getTradingAccounts');
+        Route::get('/getAdjustmentHistoryData', [MemberController::class, 'getAdjustmentHistoryData'])->name('member.getAdjustmentHistoryData');
+        
         Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
+        Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
+
+        // account listing
+        // Route::get('/account_listing', [AccountController::class, 'index'])->name('member.account_listing');
+        // Route::get('/getAccountListingData', [AccountController::class, 'getAccountListingData'])->name('member.getAccountListingData');
+        // Route::get('/getAccountListingPaginate', [AccountController::class, 'getAccountListingPaginate'])->name('member.getAccountListingPaginate');
+        Route::get('/getTradingAccountData', [AccountController::class, 'getTradingAccountData'])->name('member.getTradingAccountData');
+
+        Route::post('/accountAdjustment', [AccountController::class, 'accountAdjustment'])->name('member.accountAdjustment');
+        Route::post('/updateLeverage', [AccountController::class, 'updateLeverage'])->name('member.updateLeverage');
+        Route::post('/change_password', [AccountController::class, 'change_password'])->name('member.change_password');
+        // Route::post('/refreshAllAccount', [AccountController::class, 'refreshAllAccount'])->name('member.refreshAllAccount');
+        Route::delete('/accountDelete', [AccountController::class, 'accountDelete'])->name('member.accountDelete');
+        
     });
 
     /**

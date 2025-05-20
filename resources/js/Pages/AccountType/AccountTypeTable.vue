@@ -63,14 +63,6 @@ const filters = ref({
 
 // Watch for changes on the entire 'filters' object and debounce the API call
 watch(filters, debounce(() => {
-    // Count active filters, excluding null, undefined, empty strings, and empty arrays
-    filterCount.value = Object.values(filters.value).filter(filter => {
-        if (Array.isArray(filter)) {
-            return filter.length > 0;  // Check if the array is not empty
-        }
-        return filter !== null && filter !== '';  // Check if the value is not null or an empty string
-    }).length;
-
     page.value = 0; // Reset to first page when filters change
     loadLazyData(); // Call loadLazyData function to fetch the data
 }, 1000), { deep: true });
@@ -152,7 +144,6 @@ onMounted(() => {
 
 // overlay panel
 const op = ref();
-const filterCount = ref(0);
 
 const toggle = (event) => {
     op.value.toggle(event);
@@ -185,13 +176,13 @@ watchEffect(() => {
     <!-- toolbar -->
     <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
         <div class="relative w-full md:w-60">
-            <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
+            <div class="absolute top-2/4 -mt-[9px] left-4 text-surface-400">
                 <IconSearch size="20" stroke-width="1.25" />
             </div>
             <InputText v-model="filters['global']" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full md:w-60" />
             <div
                 v-if="filters['global'] !== null && filters['global'] !== ''"
-                class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
+                class="absolute top-2/4 -mt-2 right-4 text-surface-300 hover:text-surface-400 select-none cursor-pointer"
                 @click="clearFilterGlobal"
             >
                 <IconCircleXFilled size="16" />
@@ -203,12 +194,10 @@ watchEffect(() => {
                 severity="secondary"
                 outlined
                 class="flex gap-3 items-center"
+                @click="toggle"
             >
                 <IconAdjustments size="20" stroke-width="1.5" class="grow-0 shrink-0" />
                 {{ $t('public.filter') }}
-                <Badge severity="info">
-                    {{ filterCount }}
-                </Badge>
             </Button>
             <Select
                 v-model="sortType"
@@ -277,7 +266,7 @@ watchEffect(() => {
                         </div>
 
                         <div class="w-full grid grid-cols-2 pb-2 gap-3">
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.minimum_deposit') }}:</span>
                                 <Skeleton
                                     width="3rem"
@@ -285,7 +274,7 @@ watchEffect(() => {
                                     borderRadius="2rem"
                                 />
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.currency') }}:</span>
                                 <Skeleton
                                     width="3rem"
@@ -293,7 +282,7 @@ watchEffect(() => {
                                     borderRadius="2rem"
                                 />
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.maximum_account') }}:</span>
                                 <Skeleton
                                     width="3rem"
@@ -301,7 +290,7 @@ watchEffect(() => {
                                     borderRadius="2rem"
                                 />
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.total_account') }}:</span>
                                 <Skeleton
                                     width="3rem"
@@ -309,7 +298,7 @@ watchEffect(() => {
                                     borderRadius="2rem"
                                 />
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.allow_trade') }}:</span>
                                 <Skeleton
                                     width="3rem"
@@ -317,7 +306,7 @@ watchEffect(() => {
                                     borderRadius="2rem"
                                 />
                             </div>
-                            <div class="w-full flex items-start gap-2">
+                            <div class="w-full flex flex-col md:flex-row items-start gap-2">
                                 <span class="text-surface-500 text-xs">{{ $t('public.color') }}:</span>
                                 <Skeleton
                                     width="3rem"

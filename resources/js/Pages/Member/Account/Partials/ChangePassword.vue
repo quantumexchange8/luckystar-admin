@@ -1,22 +1,24 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import { useForm } from "@inertiajs/vue3";
 import {
-    Password,
     Button,
+    Password,
 } from "primevue";
+import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
-    member: Object,
+    account: Object,
 })
 
 const emit = defineEmits(['update:visible'])
 
 const form = useForm({
-    id: props.member.id,
-    password: '',
-    password_confirmation: '',
+    id: props.account.id,
+    master_password: '',
+    investor_password: '',
+    meta_login: props.account.meta_login,
+    user_id: props.account.user_id,
 })
 
 const closeDialog = () => {
@@ -24,7 +26,7 @@ const closeDialog = () => {
 }
 
 const submitForm = () => {
-    form.post(route('member.resetPassword'), {
+    form.post(route('member.change_password'), {
         onSuccess: () => {
             closeDialog();
             form.reset();
@@ -37,27 +39,28 @@ const submitForm = () => {
     <form>
         <div class="flex flex-col gap-5 items-center self-stretch py-4 md:py-6">
             <div class="flex flex-col items-start gap-2 self-stretch">
-                <InputLabel for="password" :value="$t('public.password')" :invalid="!!form.errors.password" />
+                <InputLabel for="master_password" :value="$t('public.master_password')" :invalid="!!form.errors.master_password" />
                 <Password
-                    v-model="form.password"
+                    v-model="form.master_password"
                     toggleMask
                     :feedback="false"
                     placeholder="••••••••"
-                    :invalid="!!form.errors.password"
+                    :invalid="!!form.errors.master_password"
                 />
-                <InputError :message="form.errors.password" />
+                <InputError :message="form.errors.master_password" />
                 <span class="self-stretch text-surface-500 text-xs">{{ $t('public.password_desc') }}</span>
             </div>
             <div class="flex flex-col items-start gap-2 self-stretch">
-                <InputLabel for="password_confirmation" :value="$t('public.confirm_password')" :invalid="!!form.errors.password_confirmation" />
+                <InputLabel for="investor_password" :value="$t('public.investor_password')" :invalid="!!form.errors.investor_password" />
                 <Password
-                    v-model="form.password_confirmation"
+                    v-model="form.investor_password"
                     toggleMask
                     :feedback="false"
                     placeholder="••••••••"
-                    :invalid="!!form.errors.password_confirmation"
+                    :invalid="!!form.errors.investor_password"
                 />
-                <InputError :message="form.errors.password_confirmation" />
+                <InputError :message="form.errors.investor_password" />
+                <span class="self-stretch text-surface-500 text-xs">{{ $t('public.password_desc') }}</span>
             </div>
         </div>
 
