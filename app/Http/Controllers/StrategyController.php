@@ -317,10 +317,7 @@ class StrategyController extends Controller
 
             $query = TradingSubscription::with([
                 'user',
-                'user.upline',
                 'user.group.group:id,name,color',
-                'trading_master',
-                'trading_master.account_type',
             ])
                 ->where('status', $status)
                 ->where('master_meta_login', $strategy);

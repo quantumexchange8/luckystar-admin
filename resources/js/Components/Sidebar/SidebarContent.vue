@@ -9,7 +9,7 @@ import {
     IconLayoutDashboard,
     IconUsers,
     IconUsersGroup,
-    IconTemplate,
+    IconDatabaseDollar,
     IconCategory,
     IconCoinMonero,
     IconHistory,
@@ -128,6 +128,17 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
         >
             <template #icon>
                 <IconCoinMonero :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
+
+        <!-- Investment -->
+        <SidebarLink
+            :title="$t('public.investment')"
+            :href="route('investment.listing')"
+            :active="route().current('investment.listing')"
+        >
+            <template #icon>
+                <IconDatabaseDollar :size="20" stroke-width="1.5" />
             </template>
         </SidebarLink>
 

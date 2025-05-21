@@ -343,4 +343,11 @@ return [
     "join_date" => "Join Date",
     "status" => "Status",
     "revoked_date" => "Revoked Date",
+    "investment_number" => "Investment Number",
+    "loading_investments_caption" => "Loading investments data. Please wait.",
+    "calculating" => "Calculating",
+    "demo_fund" => "Demo Fund",
+    "fund_type" => "Fund Type",
+    "filter_strategy" => "Filter by strategy",
+    "select_strategy" => "Select strategy",
 ];

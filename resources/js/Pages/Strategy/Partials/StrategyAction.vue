@@ -76,12 +76,16 @@ const toggle = (event) => {
     <Dialog
         v-model:visible="visible"
         modal
-        :header="$t(`public.${dialogType}`)"
         :class="{
             'dialog-xs md:dialog-md': dialogType !== 'investment_report',
             'dialog-xs md:dialog-lg': dialogType === 'investment_report'
         }"
     >
+        <template #header>
+            <div class="font-semibold text-lg">
+                {{ $t(`public.${dialogType}`) }}<span v-if="dialogType === 'investment_report'"> - {{ strategy.master_name }}</span>
+            </div>
+        </template>
         <template v-if="dialogType === 'investment_report'">
             <InvestmentReport
                 :strategy="strategy"

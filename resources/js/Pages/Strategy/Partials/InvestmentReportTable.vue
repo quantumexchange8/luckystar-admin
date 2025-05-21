@@ -114,21 +114,6 @@ const getGroupLeaders = async () => {
     }
 };
 
-const referrers = ref([]);
-const loadingReferrers = ref(false);
-
-const getGroupMembers = async () => {
-    loadingReferrers.value = true;
-    try {
-        const response = await axios.get(`/getGroupMembers?group_id=${filters.value['group_id'].value.id}`);
-        referrers.value = response.data;
-    } catch (error) {
-        console.error('Error fetching referrers:', error);
-    } finally {
-        loadingReferrers.value = false;
-    }
-};
-
 const selectedDate = ref([]);
 
 const clearDate = () => {
@@ -173,9 +158,6 @@ watch(() => props.status, (newStatus) => {
 })
 
 watch([filters.value['status'], filters.value['group_id'], filters.value['referrers']], () => {
-    if (filters.value['group_id'].value !== null) {
-        getGroupMembers();
-    }
     loadLazyData()
 });
 
@@ -338,6 +320,16 @@ const clearFilterGlobal = () => {
                                 -
                             </div>
                         </div>
+                    </template>
+                </Column>
+                <Column
+                    field="meta_login"
+                    class="table-cell"
+                    sortable
+                    :header="$t('public.account')"
+                >
+                    <template #body="{data}">
+                        {{ data.meta_login }}
                     </template>
                 </Column>
                 <Column

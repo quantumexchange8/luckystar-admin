@@ -50,8 +50,6 @@ watch(activeIndex, (newIndex) => {
 watch(activeTab, (newVal) => {
     const tab = tabs.value.find((t) => t.value === newVal);
     if (tab && tab.load) tab.load = true;
-
-    console.log(tab.load);
 });
 </script>
 

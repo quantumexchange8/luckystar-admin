@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AccountTypeHasLeverage;
 use App\Models\GroupHasUser;
 use App\Models\GroupRankSetting;
+use App\Models\TradingMaster;
 use App\Models\User;
 use App\Models\Country;
 use App\Models\Group;
@@ -133,5 +134,12 @@ class SelectOptionController extends Controller
             ->get();
 
         return response()->json($groups);
+    }
+
+    public function getStrategies(Request $request)
+    {
+        $strategies = TradingMaster::get();
+
+        return response()->json($strategies);
     }
 }

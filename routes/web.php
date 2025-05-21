@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvestmentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -32,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/getLeverages/{id}', [SelectOptionController::class, 'getLeverages'])->name('getLeverages');
     Route::get('/getGroupLeaders', [SelectOptionController::class, 'getGroupLeaders'])->name('getGroupLeaders');
     Route::get('/getGroupMembers', [SelectOptionController::class, 'getGroupMembers'])->name('getGroupMembers');
+    Route::get('/getStrategies', [SelectOptionController::class, 'getStrategies'])->name('getStrategies');
 
     /**
      * ==============================
@@ -90,7 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/getFinancialInfoData', [MemberController::class, 'getFinancialInfoData'])->name('member.getFinancialInfoData');
         Route::get('/getTradingAccounts', [MemberController::class, 'getTradingAccounts'])->name('member.getTradingAccounts');
         Route::get('/getAdjustmentHistoryData', [MemberController::class, 'getAdjustmentHistoryData'])->name('member.getAdjustmentHistoryData');
-        
+
         Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
 
@@ -105,7 +107,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/change_password', [AccountController::class, 'change_password'])->name('member.change_password');
         // Route::post('/refreshAllAccount', [AccountController::class, 'refreshAllAccount'])->name('member.refreshAllAccount');
         Route::delete('/accountDelete', [AccountController::class, 'accountDelete'])->name('member.accountDelete');
-        
+
     });
 
     /**
@@ -132,6 +134,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/getInvestmentDataByStrategy', [StrategyController::class, 'getInvestmentDataByStrategy'])->name('strategy.getInvestmentDataByStrategy');
 
         Route::post('/addStrategy', [StrategyController::class, 'addStrategy'])->name('strategy.addStrategy');
+    });
+
+    /**
+     * ==============================
+     *          Investment
+     * ==============================
+     */
+    Route::prefix('investment')->group(function () {
+        Route::get('/listing', [InvestmentController::class, 'index'])->name('investment.listing');
+        Route::get('/getInvestmentsData', [InvestmentController::class, 'getInvestmentsData'])->name('investment.getInvestmentsData');
     });
 
     /**
