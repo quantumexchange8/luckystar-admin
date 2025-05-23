@@ -17,6 +17,7 @@ import {
     IconCircleXFilled,
     IconAdjustments,
     IconAlertCircleFilled,
+    IconCloudDownload,
 } from '@tabler/icons-vue';
 import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
 import { generalFormat } from "@/Composables/format.js";
@@ -295,10 +296,11 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                         </Button>
                         <div class="w-full flex justify-end">
                             <Button
-                                outlined
+                                severity="secondary"
                                 @click="exportMember"
                                 class="w-full md:w-auto"
                             >
+                                <IconCloudDownload size="20" stroke-width="1.5" />
                                 {{ $t('public.export') }}
                             </Button>
                         </div>
