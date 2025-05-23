@@ -171,7 +171,7 @@ const submitForm = () => {
 
             <!-- remarks -->
             <div class="flex flex-col items-start gap-3 self-stretch">
-                <InputLabel for="remarks">Remarks (optional)</InputLabel>
+                <InputLabel for="remarks">{{ $t('public.remarks_optional')}}</InputLabel>
                 <div class="flex items-center content-center gap-2 self-stretch flex-wrap">
                     <div v-for="(chip, index) in chips" :key="index">
                         <Chip

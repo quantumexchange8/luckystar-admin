@@ -89,11 +89,13 @@ Route::middleware('auth')->group(function () {
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
+        Route::get('/media/download/{media}', [MemberController::class, 'downloadMedia'])->name('member.downloadMedia');
         Route::get('/getFinancialInfoData', [MemberController::class, 'getFinancialInfoData'])->name('member.getFinancialInfoData');
         Route::get('/getTradingAccounts', [MemberController::class, 'getTradingAccounts'])->name('member.getTradingAccounts');
         Route::get('/getAdjustmentHistoryData', [MemberController::class, 'getAdjustmentHistoryData'])->name('member.getAdjustmentHistoryData');
 
         Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
+        Route::post('/updateKycStatus', [MemberController::class, 'updateKycStatus'])->name('member.updateKycStatus');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
 
         // account listing

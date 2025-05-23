@@ -358,7 +358,7 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                                 v-else
                                 :label="formatNameLabel(slotProps.data.full_name)"
                                 shape="circle"
-                                class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0"
+                                class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0 text-sm"
                             />
                             <div class="flex flex-col items-start">
                                 <div class="font-medium">
@@ -419,7 +419,7 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                                 v-else
                                 :label="formatNameLabel(slotProps.data.upline_name)"
                                 shape="circle"
-                                class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0"
+                                class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0 text-sm"
                             />
                             <div class="flex flex-col items-start">
                                 <div class="font-medium">
@@ -489,7 +489,7 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                                         v-else
                                         :label="formatNameLabel(slotProps.data.full_name)"
                                         shape="circle"
-                                        class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0"
+                                        class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0 text-sm"
                                     />
 
                                     <div class="flex flex-col items-start">

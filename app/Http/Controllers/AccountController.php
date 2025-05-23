@@ -151,7 +151,7 @@ class AccountController extends Controller
             $transaction->update([
                 'ticket' => $deal['deal_Id'],
                 'approval_at' => now(),
-                'status' => 'successful',
+                'status' => 'success',
             ]);
 
             return redirect()->back()->with('toast', [

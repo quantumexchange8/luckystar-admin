@@ -2,6 +2,7 @@
     @apply inline-flex items-center rounded-2xl gap-2 px-3 py-2
         bg-surface-100 dark:bg-surface-800
         text-surface-800 dark:text-surface-0
+        cursor-pointer
 }
 
 .p-chip-icon {

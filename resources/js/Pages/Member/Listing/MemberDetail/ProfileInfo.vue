@@ -6,7 +6,8 @@ import {
     InputText,
     Button,
     useConfirm,
-    Avatar
+    Avatar,
+    Tag,
 } from "primevue";
 import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
@@ -26,7 +27,7 @@ const checked = ref(false)
 const visible = ref(false)
 const countries = ref()
 const selectedCountry = ref();
-const { formatRgbaColor, formatNameLabel } = generalFormat();
+const { formatRgbaColor, formatNameLabel, formatSeverity } = generalFormat();
 
 watch(() => props.userDetail, (user) => {
     checked.value = user.status === 'active';
@@ -143,7 +144,7 @@ const handleMemberStatus = () => {
     <div class="bg-white dark:bg-surface-800 w-full xl:min-w-[540px] flex flex-col gap-6 md:gap-5 xl:gap-8 p-4 md:py-6 md:px-8 rounded-2xl shadow-toast self-stretch">
         <div class="flex flex-col pb-6 md:pb-5 xl:pb-8 items-start gap-4 self-stretch border-b border-surface-200 dark:border-surface-500">
             <div class="flex justify-between items-start self-stretch">
-                <div v-if="userDetail">
+                <template v-if="userDetail">
                     <Avatar
                         v-if="userDetail.profile_photo"
                         :image="userDetail.profile_photo"
@@ -154,15 +155,16 @@ const handleMemberStatus = () => {
                         v-else
                         :label="formatNameLabel(userDetail.name)"
                         shape="circle"
+                        size="xlarge"
                         class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
                     />
-                </div>
-                <div v-else class="animate-pulse">
+                </template>
+                <template v-else class="animate-pulse">
                     <Avatar
                         shape="circle"
                         class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
                     />
-                </div>
+                </template>
 
                 <div class="flex gap-2 items-center">
                     <div class="p-2.5 flex items-center hover:bg-surface-100 dark:hover:bg-surface-600 rounded-full">
@@ -201,7 +203,7 @@ const handleMemberStatus = () => {
                         {{ userDetail.name }}
                     </div>
                     <IconCircleCheckFilled v-if="userDetail.kyc_status == 'approved'" size="20" stroke-width="1.25" class="text-green-700 grow-0 shrink-0" />
-                    <!-- <StatusBadge :variant="userDetail.role" :value="$t('public.' + userDetail.role)"/> -->
+                    <Tag :severity="formatSeverity('primary')" :value="$t('public.' + userDetail.rank_name)"/>
                 </div>
                 <div class="text-surface-700 dark:text-surface-300 text-sm md:text-base">{{ userDetail.id_number }}</div>
             </div>
@@ -261,13 +263,13 @@ const handleMemberStatus = () => {
                         v-else
                         :label="formatNameLabel(userDetail.upline_name)"
                         shape="circle"
-                        class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white"
+                        class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white text-sm"
                     />
                     <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.upline_name ?? '-' }}</div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2 w-full">
+            <!-- <div class="flex flex-col gap-2 w-full">
                 <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.total_referred_member') }}</div>
                 <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.total_direct_member }}</div>
             </div>
@@ -275,7 +277,7 @@ const handleMemberStatus = () => {
             <div class="flex flex-col gap-2 w-full">
                 <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.total_referred_ib') }}</div>
                 <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.total_direct_ib }}</div>
-            </div>
+            </div> -->
         </div>
         <div v-else class="grid grid-cols-2 gap-5 w-full animate-pulse">
             <div class="flex flex-col gap-2 w-full">
@@ -307,7 +309,7 @@ const handleMemberStatus = () => {
                 <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-1 mb-1.5"></div>
             </div>
             
-            <div class="flex flex-col gap-2 w-full">
+            <!-- <div class="flex flex-col gap-2 w-full">
                 <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.total_referred_member') }}</div>
                 <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-2 mb-1"></div>
             </div>
@@ -315,7 +317,7 @@ const handleMemberStatus = () => {
             <div class="flex flex-col gap-2 w-full">
                 <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.total_referred_ib') }}</div>
                 <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-2 mb-1"></div>
-            </div>
+            </div> -->
         </div>
     </div>
 

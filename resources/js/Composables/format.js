@@ -45,10 +45,22 @@ export function generalFormat() {
             .slice(0, 2);
     };
 
+    function formatSeverity(value) {
+        if (['success', 'verified', 'approved', 'completed'].includes(value)) return 'success';
+        if (['danger', 'unverified', 'rejected', 'failed'].includes(value)) return 'danger';
+        if (['warn', 'pending', 'processing'].includes(value)) return 'warn';
+        if (['info'].includes(value)) return 'info';
+        if (['contrast'].includes(value)) return 'contrast';
+        if (['secondary'].includes(value)) return 'secondary';
+        if (['primary'].includes(value)) return 'primary';
+        return null;
+    }
+
     return {
         formatDateTime,
         formatAmount,
         formatRgbaColor,
-        formatNameLabel
+        formatNameLabel,
+        formatSeverity,
     };
 }

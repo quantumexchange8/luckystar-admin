@@ -43,7 +43,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div class="flex flex-col xl:flex-row items-start justify-center gap-5 self-stretch">
+    <div class="flex flex-col xl:flex-row items-center xl:items-start justify-center gap-5 self-stretch">
         <Loader v-if="isLoading" />
 
         <template v-else>
@@ -66,7 +66,7 @@ watchEffect(() => {
                                 >
                                     <IconCoins size="20" stroke-width="1.25" />
                                 </div>
-                                <span class="text-surface-100">
+                                <span class="text-surface-100 font-medium">
                                     {{ $t('public.' + (wallets?.[index - 1]?.type || '-')) }}
                                 </span>
                             </div>

@@ -7,25 +7,35 @@ import {usePage} from '@inertiajs/vue3';
 import FinancialInfo from "@/Pages/Member/Listing/MemberDetail/FinancialInfo.vue";
 import TradingAccount from "@/Pages/Member/Listing/MemberDetail/TradingAccount.vue";
 import ProfileInfo from "@/Pages/Member/Listing/MemberDetail/ProfileInfo.vue";
-// import KycVerification from "@/Pages/Member/Listing/MemberDetail/KycVerification.vue";
+import KycVerification from "@/Pages/Member/Listing/MemberDetail/KycVerification.vue";
 import PaymentAccount from "@/Pages/Member/Listing/MemberDetail/Partials/PaymentAccount.vue";
 import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
+// import BackgroundInfo from "@/Pages/Member/Listing/MemberDetail/BackgroundInfo.vue";
+// import BeneficiaryInfo from "@/Pages/Member/Listing/MemberDetail/BeneficiaryInfo.vue";
 
 const props = defineProps({
     user: Object
 })
 
+const isLoading = ref(false);
 const userDetail = ref();
 const paymentAccounts = ref();
+const kycIdentity = ref();
+const kycResidency = ref();
 
 const getUserData = async () => {
+    isLoading.value = true;
     try {
         const response = await axios.get(`/member/getUserData?id=` + props.user.id);
 
         userDetail.value = response.data.userDetail;
         paymentAccounts.value = response.data.paymentAccounts;
+        kycIdentity.value = response.data.proof_of_identity;
+        kycResidency.value = response.data.proof_of_residency;
     } catch (error) {
         console.error('Error get network:', error);
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -48,16 +58,24 @@ const tabs = ref([
         component: h(TradingAccount, {user_id: props.user.id}),
         value: 1
     },
-    {
-        title: 'adjustment_history',
-        component: h(AdjustmentHistory, {user_id: props.user.id}),
-        value: 2
-    },
+    // {
+    //     title: 'adjustment_history',
+    //     component: h(AdjustmentHistory, {user_id: props.user.id}),
+    //     value: 2
+    // },
+    // {
+    //     title: 'background_info',
+    //     component: h(BackgroundInfo, {user_id: props.user.id}),
+    //     value: 3
+    // },
+    // {
+    //     title: 'beneficiary_info',
+    //     component: h(BeneficiaryInfo, {user_id: props.user.id}),
+    //     value: 4
+    // },
 ]);
 
-const selectedType = ref('financial_info');
 const activeIndex = ref(0);
-
 </script>
 
 <template>
@@ -88,11 +106,13 @@ const activeIndex = ref(0);
                     :userDetail="userDetail"
                 />
                 <div class="flex flex-col w-full gap-5 self-stretch">
-                    <!-- <KycVerification
+                    <KycVerification
                         :userDetail="userDetail"
-                    /> -->
+                        :kycIdentity="kycIdentity"
+                        :kycResidency="kycResidency"
+                        :isLoading="isLoading"
+                    />
                     <!-- <PaymentAccount
-                        :userDetail="userDetail"
                         :paymentAccounts="paymentAccounts"
                     /> -->
                 </div>

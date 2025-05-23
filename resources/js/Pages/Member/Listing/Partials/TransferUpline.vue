@@ -103,7 +103,7 @@ const submitForm = () => {
                                     v-else
                                     :label="formatNameLabel(slotProps.value.name)"
                                     shape="circle"
-                                    class="w-5 h-5 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
+                                    class="w-5 h-5 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white text-xs"
                                 />
                                 <div>{{ slotProps.value.name }}</div>
                             </div>
@@ -122,7 +122,7 @@ const submitForm = () => {
                                 v-else
                                 :label="formatNameLabel(slotProps.option.name)"
                                 shape="circle"
-                                class="w-5 h-5 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
+                                class="w-5 h-5 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white text-xs"
                             />
                             <div>{{ slotProps.option.name }}</div>
                         </div>

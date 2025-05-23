@@ -27,7 +27,7 @@ const loadingBank = ref(false);
 const getResults = async () => {
     loadingBank.value = true;
     try {
-        const response = await axios.get('/member/getFilterData');
+        const response = await axios.get('/get_banks');
         banks.value = response.data.banks;
 
         if (props.paymentAccount.payment_platform === 'bank') {
@@ -43,7 +43,7 @@ const getResults = async () => {
     }
 };
 
-getResults();
+// getResults();
 
 const form = useForm({
     payment_account_id: props.paymentAccount.id,

@@ -9,7 +9,7 @@
 
 .p-radiobutton-box {
     @apply flex justify-center items-center rounded-full
-        border border-surface-300 dark:border-surface-700
+        border border-surface-300 dark:border-surface-500
         bg-surface-0 dark:bg-surface-950
         w-full h-full
         transition-colors duration-200

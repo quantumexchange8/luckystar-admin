@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kyc;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Group;
@@ -21,9 +22,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\RunningNumberService;
 use App\Http\Requests\AddMemberRequest;
 use App\Services\TradingAccountService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MemberController extends Controller
 {
@@ -422,12 +425,102 @@ class MemberController extends Controller
             ->latest()
             ->get();
     
+        $kycs = $user->kycs
+            ->whereIn('category', ['proof_of_identity', 'proof_of_residency'])
+            ->keyBy('category');
+    
+        $identity = $kycs->get('proof_of_identity');
+        $residency = $kycs->get('proof_of_residency');
+    
+        if ($identity) {
+            $identity->front_image = $identity->getFirstMediaUrl('front_identity');
+            $identity->back_image = $identity->getFirstMediaUrl('back_identity');
+            $identity->passport_image = $identity->getFirstMediaUrl('passport_identity');
+        }
+    
+        if ($residency) {
+            $residency->residency_proof = $residency->getFirstMediaUrl('residency_proof');
+        }
+    
         return response()->json([
             'userDetail' => $userData,
-            'paymentAccounts' => $paymentAccounts
+            'paymentAccounts' => $paymentAccounts,
+            'proof_of_identity' => $identity,
+            'proof_of_residency' => $residency,
+        ]);
+        }
+    
+    public function getKycDetails(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+    
+        $kycs = Kyc::where('user_id', $request->user_id)
+            ->whereIn('category', ['proof_of_identity', 'proof_of_residency'])
+            ->get()
+            ->keyBy('category');
+    
+        $identity = $kycs->get('proof_of_identity');
+        $residency = $kycs->get('proof_of_residency');
+    
+        if ($identity) {
+            $identity->front_image = $identity->getFirstMediaUrl('front_identity');
+            $identity->back_image = $identity->getFirstMediaUrl('back_identity');
+            $identity->passport_image = $identity->getFirstMediaUrl('passport_identity');
+        }
+    
+        if ($residency) {
+            $residency->residency_proof = $residency->getFirstMediaUrl('residency_proof');
+        }
+    
+        return response()->json([
+            'proof_of_identity' => $identity,
+            'proof_of_residency' => $residency,
         ]);
     }
+                
+    public function downloadMedia($mediaId)
+    {
+        // $media = Media::findOrFail($mediaId);
+        // return Storage::disk('s3')->download($media->getPath(), $media->file_name);
+
+        $media = Media::findOrFail($mediaId);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('s3');
     
+        return $disk->download($media->getPath(), $media->file_name);
+    }
+        
+    public function updateKycStatus(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:kycs,id',
+            'action' => 'required|string|in:approve,reject',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $action = $request->input('action');
+        $kyc = Kyc::findOrFail($request->id);
+
+        if ($request->action === 'approve') {
+            $kyc->kyc_status = 'verified';
+            $kyc->kyc_approval_at = now();
+            $kyc->kyc_approval_description = $request->remarks ?? null;
+        } else if ($request->action === 'reject') {
+            $kyc->kyc_status = 'unverified';
+            $kyc->kyc_approval_at = now();
+            $kyc->kyc_approval_description = $request->remarks ?? null;
+        }
+
+        $kyc->save();
+
+        return redirect()->back()->with('toast', [
+            'title' => $action == 'approve' ? trans('public.toast_kyc_approved') : trans('public.toast_kyc_rejected'),
+            'type' => 'success'
+        ]);
+    }
+
     public function updateProfileInfo(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -471,7 +564,7 @@ class MemberController extends Controller
         $query = Transaction::query()
             ->where('user_id', $request->id)
             ->where('category', 'trading_account')
-            ->where('status', 'successful');
+            ->where('status', 'success');
     
         $transactions = $query->whereIn('transaction_type', ['deposit', 'withdrawal'])
             ->latest()
@@ -542,7 +635,7 @@ class MemberController extends Controller
             'transaction_amount' => $amount,
             'old_wallet_amount' => $wallet->balance,
             'new_wallet_amount' => $isOut ? $wallet->balance - $amount : $wallet->balance + $amount,
-            'status' => 'successful',
+            'status' => 'success',
             'remarks' => $request->remarks,
             'approval_at' => now(),
             'handle_by' => Auth::id(),
@@ -605,7 +698,7 @@ class MemberController extends Controller
         $adjustment_history = Transaction::with('to_wallet:id,type', 'from_wallet:id,type')
             ->where('user_id', $request->id)
             ->whereIn('transaction_type', ['cash_in', 'cash_out', 'bonus_in', 'bonus_out', 'balance_in','balance_out','credit_in','credit_out',])
-            ->where('status', 'successful')
+            ->where('status', 'success')
             ->latest()
             ->get();
 

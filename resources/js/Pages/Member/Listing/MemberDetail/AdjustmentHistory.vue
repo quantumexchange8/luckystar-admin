@@ -4,8 +4,9 @@ import {
     Column,
     Dialog,
 } from "primevue";
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import { generalFormat } from "@/Composables/format.js";
+import { usePage } from "@inertiajs/vue3";
 import Loader from "@/Components/Loader.vue";
 import Empty from "@/Components/Empty.vue";
 
@@ -38,10 +39,17 @@ const rowClicked = (data) => {
     visible.value = true;
     selected_row.value = data;
 }
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getAdjustmentHistoryData();
+    }
+});
+
 </script>
 
 <template>
-    <div class="flex flex-col xl:flex-row items-start justify-center gap-5 self-stretch">
+    <div class="flex flex-col items-center justify-center gap-5 self-stretch">
         <Loader v-if="isLoading" />
 
         <template v-else>
@@ -103,7 +111,7 @@ const rowClicked = (data) => {
                         </template>
                         <template #body="slotProps">
                             <div class="py-1">
-                                {{ formatAmount(slotProps.data.transaction_amount) }}
+                                {{ formatAmount(slotProps.data.transaction_amount,2,'') }}
                             </div>
                         </template>
                     </Column>
