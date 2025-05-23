@@ -3,11 +3,11 @@ import {
     DataTable,
     Column,
     Dialog,
+    ProgressSpinner
 } from "primevue";
 import { ref, watchEffect } from "vue";
 import { generalFormat } from "@/Composables/format.js";
 import { usePage } from "@inertiajs/vue3";
-import Loader from "@/Components/Loader.vue";
 import Empty from "@/Components/Empty.vue";
 
 const props = defineProps({
@@ -50,7 +50,7 @@ watchEffect(() => {
 
 <template>
     <div class="flex flex-col items-center justify-center gap-5 self-stretch">
-        <Loader v-if="isLoading" />
+        <ProgressSpinner v-if="isLoading" strokeWidth="4" />
 
         <template v-else>
             <div v-if="adjustmentHistories?.length <= 0" class="w-full flex flex-col items-center flex-1 self-stretch">
@@ -70,7 +70,7 @@ watchEffect(() => {
                 >
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
-                            <Loader />
+                            <ProgressSpinner strokeWidth="4" />
                             <span class="text-sm text-surface-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>

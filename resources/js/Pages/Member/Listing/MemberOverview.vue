@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { generalFormat } from "@/Composables/format.js"
 import { MemberIcon, IBIcon, UserIcon } from '@/Components/Icons/solid';
 import { trans, wTrans } from "laravel-vue-i18n";
+import { Card, ProgressSpinner } from "primevue";
 
 const props = defineProps({
   totalVerified: Number,
@@ -33,18 +34,22 @@ const dataOverviews = computed(() => [
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 w-full gap-3 md:gap-5">
-    <div
+    <Card
       v-for="(item, index) in dataOverviews"
       :key="index"
-      class="flex justify-center items-center px-6 py-4 md:p-6 gap-5 self-stretch rounded-2xl bg-white dark:bg-surface-700 shadow-toast"
+      class="w-full"
     >
-      <component :is="item.icon" class="w-12 h-12 grow-0 shrink-0" />
-      <div class="flex flex-col items-start gap-1 w-full">
-        <div class="text-surface-950 dark:text-white text-lg md:text-2xl font-semibold">
-          {{ formatAmount(item.total, 0, '') }}
+      <template #content>
+        <div class="flex justify-center items-center gap-5 self-stretch">
+          <component :is="item.icon" class="w-12 h-12 grow-0 shrink-0" />
+          <div class="flex flex-col items-start gap-1 w-full">
+            <div class="text-surface-950 dark:text-white text-lg md:text-2xl font-semibold">
+              {{ formatAmount(item.total, 0, '') }}
+            </div>
+            <span class="text-surface-500 dark:text-white text-xs md:text-sm">{{ item.label }}</span>
+          </div>
         </div>
-        <span class="text-surface-500 dark:text-white text-xs md:text-sm">{{ item.label }}</span>
-      </div>
-    </div>
+      </template>
+    </Card>
   </div>
 </template>

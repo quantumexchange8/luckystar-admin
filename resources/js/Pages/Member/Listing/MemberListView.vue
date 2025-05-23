@@ -9,10 +9,9 @@ import {
     Select,
     Avatar,
     Button,
-    Badge,
+    ProgressSpinner,
 } from "primevue";
 import { usePage } from '@inertiajs/vue3';
-import Loader from "@/Components/Loader.vue";
 import {
     IconSearch,
     IconCircleXFilled,
@@ -23,6 +22,7 @@ import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActio
 import { generalFormat } from "@/Composables/format.js";
 import Empty from "@/Components/Empty.vue";
 import debounce from "lodash/debounce.js";
+import { useLangObserver } from "@/Composables/localeObserver.js";
 
 const props = defineProps({
     groups: Array,
@@ -42,6 +42,7 @@ const page = ref(0);
 const sortField = ref(null);  
 const sortOrder = ref(null);  // (1 for ascending, -1 for descending)
 const { formatRgbaColor, formatAmount, formatNameLabel } = generalFormat();
+const { locale } = useLangObserver();
 
 const group_id = ref(null)
 const upline_id = ref(null)
@@ -285,9 +286,8 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                     <div class="grid grid-cols-2 w-full gap-3">
                         <Button
                             type="button"
-                            severity="secondary"
+                            severity="contrast"
                             @click="toggle"
-                            outlined
                             class="flex w-fit gap-3 items-center"
                         >
                             <IconAdjustments size="20" stroke-width="1.5" class="grow-0 shrink-0" />
@@ -308,7 +308,7 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
             <template #empty><Empty :title="$t('public.empty_user_title')" :message="$t('public.empty_user_message')" /></template>
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
-                    <Loader />
+                    <ProgressSpinner strokeWidth="4" />
                     <span class="text-sm text-surface-700 dark:text-white">{{ $t('public.loading_users_caption') }}</span>
                 </div>
             </template>
@@ -441,7 +441,11 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                     class="hidden md:table-cell"
                 >
                     <template #body="slotProps">
-                        {{ slotProps.data.country_name ?? '-' }}
+                        {{
+                            slotProps.data.country_translations
+                                ? (JSON.parse(slotProps.data.country_translations)[locale] || slotProps.data.country_name || '-')
+                                : (slotProps.data.country_name || '-')
+                        }}
                     </template>
                 </Column>
                 <Column

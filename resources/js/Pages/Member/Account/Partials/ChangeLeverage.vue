@@ -19,7 +19,7 @@ const emit = defineEmits(['update:visible'])
 
 const form = useForm({
     meta_login: props.account.meta_login,
-    leverage: props.account.leverage,
+    leverage: props.account.margin_leverage,
 })
 
 const getOptions = async () => {
@@ -28,7 +28,7 @@ const getOptions = async () => {
     try {
         const response = await axios.get(route('getLeverages', props.account.account_type_id));
         leverages.value = response.data.leverages;
-        selectedLeverage.value = leverages.value.find(leverage => leverage.setting_leverage?.value === props.account.leverage) || null;
+        selectedLeverage.value = leverages.value.find(leverage => leverage.setting_leverage?.value === props.account.margin_leverage) || null;
     } catch (error) {
         console.error('Error changing locale:', error);
     } finally {

@@ -7,7 +7,7 @@ import WalletAdjustment from '@/Pages/Member/Listing/MemberDetail/Partials/Walle
 import { wTrans } from "laravel-vue-i18n";
 import { generalFormat } from "@/Composables/format.js";
 import { usePage } from "@inertiajs/vue3";
-import Loader from '@/Components/Loader.vue';
+import { Card, ProgressSpinner } from "primevue";
 
 const props = defineProps({
     user_id: Number
@@ -44,7 +44,7 @@ watchEffect(() => {
 
 <template>
     <div class="flex flex-col xl:flex-row items-center xl:items-start justify-center gap-5 self-stretch">
-        <Loader v-if="isLoading" />
+        <ProgressSpinner v-if="isLoading" strokeWidth="4" />
 
         <template v-else>
             <div class="flex flex-col md:flex-row xl:flex-col gap-5 w-full xl:max-w-[438px]">
@@ -92,40 +92,44 @@ watchEffect(() => {
             </div>
 
             <!-- Transaction History -->
-            <div class="bg-white dark:bg-surface-800 flex flex-col p-4 md:py-6 md:px-8 gap-3 w-full self-stretch shadow-toast rounded-2xl max-h-[360px] md:max-h-[420px]">
-                <div class="flex py-2 items-center self-stretch">
-                    <div class="text-surface-950 dark:text-white text-sm font-bold">{{ $t('public.recent_transaction') }}</div>
-                </div>
+            <Card class="flex flex-col w-full self-stretch max-h-[360px] md:max-h-[420px]">
+                <template #title>
+                    <div class="flex py-2 items-center self-stretch">
+                        <div class="text-surface-950 dark:text-white text-sm font-bold">{{ $t('public.recent_transaction') }}</div>
+                    </div>
+                </template>
 
-                <div v-if="transactionHistory?.length <= 0" class="flex flex-col items-center flex-1 self-stretch">
-                    <Empty :message="$t('public.empty_transaction_message')" />
-                </div>
-                <div v-else 
-                    class="flex flex-col items-center flex-1 self-stretch overflow-auto"
-                    style="-ms-overflow-style: none; scrollbar-width: none;"
-                >
-                    <div v-for="(transaction, index) in transactionHistory" :key="index"
-                        class="flex py-2 items-center gap-5 self-stretch border-b border-surface-200"
-                        :class="{ 'border-transparent': index === transactionHistory.length - 1 }"
+                <template #content>
+                    <div v-if="transactionHistory?.length <= 0" class="flex flex-col items-center flex-1 self-stretch">
+                        <Empty :message="$t('public.empty_transaction_message')" />
+                    </div>
+                    <div v-else 
+                        class="flex flex-col items-center flex-1 self-stretch overflow-auto"
+                        style="-ms-overflow-style: none; scrollbar-width: none;"
                     >
-                        <div class="flex flex-col items-start justify-center gap-1 w-full">
-                            <span class="text-surface-950 dark:text-white text-sm font-semibold">
-                                {{ transaction.transaction_type === 'deposit' ? transaction.to_meta_login : transaction.from_meta_login }}
-                            </span>
-                            <span class="text-surface-500 dark:text-surface-300 text-xs">{{ formatDateTime(transaction.approval_at) }}</span>
-                        </div>
-                        <div 
-                            class="w-[120px] truncate text-right font-semibold" 
-                            :class="{
-                                'text-green-500': transaction.transaction_type === 'deposit',
-                                'text-red-500': transaction.transaction_type === 'withdrawal',
-                            }"
+                        <div v-for="(transaction, index) in transactionHistory" :key="index"
+                            class="flex py-2 items-center gap-5 self-stretch border-b border-surface-200"
+                            :class="{ 'border-transparent': index === transactionHistory.length - 1 }"
                         >
-                            {{ formatAmount(transaction.transaction_type === 'deposit' ? transaction.transaction_amount : transaction.amount) }}
+                            <div class="flex flex-col items-start justify-center gap-1 w-full">
+                                <span class="text-surface-950 dark:text-white text-sm font-semibold">
+                                    {{ transaction.transaction_type === 'deposit' ? transaction.to_meta_login : transaction.from_meta_login }}
+                                </span>
+                                <span class="text-surface-500 dark:text-surface-300 text-xs">{{ formatDateTime(transaction.approval_at) }}</span>
+                            </div>
+                            <div 
+                                class="w-[120px] truncate text-right font-semibold" 
+                                :class="{
+                                    'text-green-500': transaction.transaction_type === 'deposit',
+                                    'text-red-500': transaction.transaction_type === 'withdrawal',
+                                }"
+                            >
+                                {{ formatAmount(transaction.transaction_type === 'deposit' ? transaction.transaction_amount : transaction.amount) }}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </Card>
         </template>
     </div>
 </template>

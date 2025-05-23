@@ -5,7 +5,7 @@ import Empty from '@/Components/Empty.vue';
 import { generalFormat } from "@/Composables/format.js";
 import { usePage } from "@inertiajs/vue3";
 import AccountAction from "@/Pages/Member/Listing/MemberDetail/Partials/AccountAction.vue";
-import Loader from '@/Components/Loader.vue';
+import { Tag, Card, ProgressSpinner } from "primevue";
 
 const props = defineProps({
     user_id: Number
@@ -56,14 +56,96 @@ watchEffect(() => {
 
 <template>
     <div v-if="isLoading" class="flex flex-col gap-2 items-center justify-center">
-        <Loader />
+        <ProgressSpinner strokeWidth="4" />
     </div>
 
     <div v-else-if="!isLoading && tradingAccounts?.length <= 0">
         <Empty :message="$t('public.empty_trading_account_message')" />
     </div>
     <div v-else class="grid md:grid-cols-2 gap-5">
-        <div
+        <Card
+            class="w-full"
+            v-for="(account, index) in tradingAccounts"
+            :key="index"
+        >
+            <template #content>
+                <div class="flex gap-3 items-center self-stretch relative">
+                    <div
+                        class="absolute -left-2 w-2.5 rounded-full h-full"
+                        :style="{'backgroundColor': `#${account.account_type_color}`}"
+                    ></div>
+                    <div class="flex flex-col gap-5 w-full self-stretch pl-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex flex-col items-center self-stretch">
+                                <div class="flex items-center gap-2 self-stretch">
+                                    <div class="self-stretch flex items-center gap-4 truncate text-sm text-surface-600 dark:text-surface-500">
+                                        <span class="font-semibold text-lg">
+                                            #{{ account.meta_login }}
+                                        </span>
+                                        <Tag
+                                            :style="{
+                                            backgroundColor: formatRgbaColor(account.account_type_color, 0.2),
+                                            color: `#${account.account_type_color}`,
+                                        }"
+                                            :value="account.account_type_name"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="flex flex-row gap-2 items-center self-stretch text-xs">
+                                    <span class="text-surface-500">{{ $t('public.name') }}:</span>
+                                    <span class="font-medium">{{ account.user_name }}</span>
+                                </div>
+                            </div>
+                            <AccountAction
+                                :account="account"
+                            />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 w-full">
+                            <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">{{ $t('public.balance') }}:</span>
+                                <span class="font-medium">{{ formatAmount(account.balance, 2)}}</span>
+                            </div>
+
+                            <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">{{ $t('public.equity') }}:</span>
+                                <span class="font-medium">{{ formatAmount(account.equity, 2) }}</span>
+                            </div>
+
+                            <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">{{ $t('public.credit') }}:</span>
+                                <span class="font-medium">{{ formatAmount(account.credit, 2) }}</span>
+                            </div>
+
+                            <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">{{ $t('public.leverage') }}:</span>
+                                <span class="font-medium">1:{{ account.margin_leverage }}</span>
+                            </div>
+
+                            <!-- <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">
+                                    {{ account.account_category === 'managed' ? $t('public.pamm') : $t('public.credit') }}:
+                                </span>
+                                <span class="font-medium">
+                                    {{ account.account_category === 'managed' ? account.pamm : formatAmount(account.credit, 2) }}
+                                </span>
+                            </div>
+
+                            <div class="flex flex-row gap-1 items-center self-stretch text-xs">
+                                <span class="text-surface-500 w-20">
+                                    {{ account.account_category === 'managed' ? $t('public.mature_in') : $t('public.leverage') }}:
+                                </span>
+                                <span class="font-medium">
+                                    {{ account.account_category === 'managed' ? account.mature_in : '1:' + account.margin_leverage }}
+                                </span>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <!-- <div
             v-for="tradingAccount in tradingAccounts" :key="tradingAccount.id"
             class="flex flex-col min-w-[300px] items-center px-5 py-4 gap-3 rounded-2xl border-l-8 bg-white dark:bg-surface-800 shadow-toast"
             :style="{'borderColor': `#${tradingAccount.account_type_color}`}"
@@ -110,6 +192,6 @@ watchEffect(() => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>

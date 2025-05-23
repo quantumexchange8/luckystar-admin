@@ -44,7 +44,7 @@ class MemberController extends Controller
         if ($request->has('lazyEvent')) {
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true); //only() extract parameters in lazyEvent
 
-            $query = User::with('group.group:id,name,color', 'country:id,name', 'upline:id,first_name,last_name,email,id_number', 'rank:id,rank_name')
+            $query = User::with('group.group:id,name,color', 'country:id,name,translations', 'upline:id,first_name,last_name,email,id_number', 'rank:id,rank_name')
                 ->withSum('active_subscriptions', 'subscription_amount')
                 ->whereNot('role', 'super_admin');
 
@@ -143,6 +143,7 @@ class MemberController extends Controller
                 $user->profile_photo = $user?->getFirstMediaUrl('profile_photo');
 
                 $user->country_name = $country?->name;
+                $user->country_translations = $country?->translations;
 
                 $user->group_id = $group?->id;
                 $user->group_name = $group?->name;
@@ -403,14 +404,18 @@ class MemberController extends Controller
             'dial_code' => $user->dial_code,
             'phone' => $user->phone,
             'phone_number' => $user->phone_number,
-            'country' => $user->country->name ?? null,
+            'country_id' => $user->country->id ?? null,
+            'country_name' => $user->country->name ?? null,
+            'country_translations' => $user->country->translations ?? null,
             'nationality' => $user->nationality,
+            'address' => $user->address,
             'upline_name' => $user->upline->full_name ?? null,
             'upline_id_number' => $user->upline->id_number ?? null,
             'upline_email' => $user->upline->email ?? null,
             'upline_profile_photo' => $user->upline ? $user->upline->getFirstMediaUrl('profile_photo') : null,
             'id_number' => $user->id_number,
             'status' => $user->status,
+            'gender' => $user->gender,
             'rank_name' => $user->rank->rank_name ?? null,
             'profile_photo' => $user->getFirstMediaUrl('profile_photo'),
             'capital' => $capital,
@@ -527,10 +532,13 @@ class MemberController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique(User::class)->ignore($request->user_id)],
             'first_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
             'last_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'username' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+            'username' => ['required', 'max:255', Rule::unique('users', 'username')->ignore($request->user_id),],
             'dial_code' => ['required'],
             'phone' => ['required', 'max:255'],
             'phone_number' => ['required', 'max:255', Rule::unique(User::class)->ignore($request->user_id)],
+            'country_id' => ['required'],
+            'gender' => ['required'],
+            'address' => ['required'],
         ])->setAttributeNames([
             'email' => trans('public.email'),
             'first_name' => trans('public.first_name'),
@@ -539,22 +547,30 @@ class MemberController extends Controller
             'dial_code' => trans('public.phone_code'),
             'phone' => trans('public.phone'),
             'phone_number' => trans('public.phone_number'),
+            'country_id' => trans('public.nationality'),
+            'gender' => trans('public.gender'),
+            'address' => trans('public.address'),
         ]);
         $validator->validate();
 
         $user = User::find($request->user_id);
+        $country = Country::find($request->country_id);
 
         // Update user contact information
         $user->update([
             'email' => $request->email,
             'name' => $request->name,
-            'dial_code' => $request->dial_code['phone_code'],
+            'dial_code' => $request->dial_code,
             'phone' => $request->phone,
             'phone_number' => $request->phone_number,
+            'country_id' => $country->id,
+            'nationality' => $country->nationality,
+            'gender' => $request->gender,
+            'address' => $request->address,
         ]);
 
         return redirect()->back()->with('toast', [
-            'title' => trans('public.update_contact_info_alert'),
+            'title' => trans('public.toast_update_profile_success'),
             'type' => 'success'
         ]);
     }
@@ -667,7 +683,7 @@ class MemberController extends Controller
 
         $tradingAccounts = TradingAccount::query()
             ->where('user_id', $request->id)
-            ->with('account_type')
+            ->with('account_type', 'trading_user')
             ->get();
 
         foreach ($tradingAccounts as $trading_account) {
@@ -675,14 +691,15 @@ class MemberController extends Controller
                 'id' => $trading_account->id,
                 'meta_login' => $trading_account->meta_login,
                 'account_type_id' => $trading_account->account_type->id,
-                'account_type' => $trading_account->account_type->slug,
-                'account_group' => $trading_account->account_type->account_group,
+                'account_type_name' => $trading_account->account_type->name,
+                'account_category' => $trading_account->account_type->category,
                 'type' => $trading_account->account_type->type,
                 'balance' => $trading_account->balance,
                 'credit' => $trading_account->credit,
                 'equity' => $trading_account->equity,
-                'leverage' => $trading_account->margin_leverage,
+                'margin_leverage' => $trading_account->margin_leverage,
                 'account_type_color' => $trading_account->account_type->color,
+                'user_name' => $trading_account->trading_user->name,
                 'updated_at' => $trading_account->updated_at,
             ];
         }

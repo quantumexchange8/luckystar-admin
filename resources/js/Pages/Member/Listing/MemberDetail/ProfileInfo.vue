@@ -8,6 +8,7 @@ import {
     useConfirm,
     Avatar,
     Tag,
+    Card,
 } from "primevue";
 import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
@@ -18,6 +19,8 @@ import { useForm } from "@inertiajs/vue3";
 import { generalFormat } from "@/Composables/format.js";
 import { trans } from "laravel-vue-i18n";
 import { router } from "@inertiajs/vue3";
+import { useLangObserver } from "@/Composables/localeObserver.js";
+import SelectChipGroup from "@/Components/SelectChipGroup.vue";
 
 const props = defineProps({
     userDetail: Object,
@@ -26,8 +29,15 @@ const props = defineProps({
 const checked = ref(false)
 const visible = ref(false)
 const countries = ref()
+const selectedPhoneCode = ref();
 const selectedCountry = ref();
+const loadingCountries = ref(false);
 const { formatRgbaColor, formatNameLabel, formatSeverity } = generalFormat();
+const { locale } = useLangObserver();
+const genders = [
+    'male',
+    'female',
+]
 
 watch(() => props.userDetail, (user) => {
     checked.value = user.status === 'active';
@@ -37,10 +47,9 @@ watch(() => props.userDetail, (user) => {
     form.last_name = props.userDetail.last_name
     form.email = props.userDetail.email
     form.phone = props.userDetail.phone
-});
-
-watch(countries, () => {
-    selectedCountry.value = countries.value.find(country => country.phone_code === props.userDetail?.dial_code);
+    form.country_id = props.userDetail.country_id
+    form.gender = props.userDetail.gender
+    form.address = props.userDetail.address
 });
 
 const openDialog = () => {
@@ -49,30 +58,48 @@ const openDialog = () => {
 
 const form = useForm({
     user_id: '',
-    name: '',
+    username: '',
+    first_name: '',
+    last_name: '',
     email: '',
     dial_code: '',
     phone: '',
     phone_number: '',
+    country_id: '',
+    gender: '',
+    address: '',
 });
 
-const getResults = async () => {
+const getCountries = async () => {
+    loadingCountries.value = true;
     try {
         const response = await axios.get('/get_countries');
         countries.value = response.data.countries;
-    } catch (error) {
-        console.error('Error changing locale:', error);
-    }
-};
 
-getResults();
+        selectedCountry.value = countries.value.find(
+            (country) => country.id === props.userDetail.country_id
+        ) || null;
+
+        selectedPhoneCode.value = countries.value.find(
+            (country) => country.phone_code === props.userDetail.dial_code
+        ) || null;
+    } catch (error) {
+        console.error('Error fetching selectedCountry:', error);
+    } finally {
+        loadingCountries.value = false;
+    }
+}
+
+getCountries();
 
 const submitForm = () => {
-    form.dial_code = selectedCountry.value;
+    form.dial_code = selectedPhoneCode.value.phone_code;
 
-    if (selectedCountry.value) {
-        form.phone_number = selectedCountry.value.phone_code + form.phone;
+    if (selectedPhoneCode.value) {
+        form.phone_number = selectedPhoneCode.value.phone_code + form.phone;
     }
+
+    form.country_id = selectedCountry.value?.id;
 
     form.post(route('member.updateProfileInfo'), {
         onSuccess: () => {
@@ -141,223 +168,211 @@ const handleMemberStatus = () => {
 </script>
 
 <template>
-    <div class="bg-white dark:bg-surface-800 w-full xl:min-w-[540px] flex flex-col gap-6 md:gap-5 xl:gap-8 p-4 md:py-6 md:px-8 rounded-2xl shadow-toast self-stretch">
-        <div class="flex flex-col pb-6 md:pb-5 xl:pb-8 items-start gap-4 self-stretch border-b border-surface-200 dark:border-surface-500">
-            <div class="flex justify-between items-start self-stretch">
-                <template v-if="userDetail">
-                    <Avatar
-                        v-if="userDetail.profile_photo"
-                        :image="userDetail.profile_photo"
-                        shape="circle"
-                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
-                    />
-                    <Avatar
-                        v-else
-                        :label="formatNameLabel(userDetail.name)"
-                        shape="circle"
-                        size="xlarge"
-                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
-                    />
-                </template>
-                <template v-else class="animate-pulse">
-                    <Avatar
-                        shape="circle"
-                        class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
-                    />
-                </template>
+    <Card class="w-full h-full">
+        <template #content>
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-col items-start gap-4 self-stretch">
+                    <div class="flex justify-between items-start self-stretch">
+                        <template v-if="userDetail">
+                            <Avatar
+                                v-if="userDetail.profile_photo"
+                                :image="userDetail.profile_photo"
+                                shape="circle"
+                                class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
+                            />
+                            <Avatar
+                                v-else
+                                :label="formatNameLabel(userDetail.name)"
+                                shape="circle"
+                                size="xlarge"
+                                class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
+                            />
+                        </template>
+                        <template v-else class="animate-pulse">
+                            <Avatar
+                                shape="circle"
+                                class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden dark:text-white"
+                            />
+                        </template>
 
-                <div class="flex gap-2 items-center">
-                    <div class="p-2.5 flex items-center hover:bg-surface-100 dark:hover:bg-surface-600 rounded-full">
-                        <ToggleSwitch
-                            v-model="checked"
-                            readonly
-                            @click="handleMemberStatus"
-                        />
+                        <div class="flex gap-2 items-center">
+                            <div class="p-2.5 flex items-center hover:bg-surface-100 dark:hover:bg-surface-600 rounded-full">
+                                <ToggleSwitch
+                                    v-model="checked"
+                                    readonly
+                                    @click="handleMemberStatus"
+                                />
+                            </div>
+                            <Button
+                                type="button"
+                                severity="secondary"
+                                text
+                                icon="Edit01Icon"
+                                size="small"
+                                rounded
+                                @click="openDialog()"
+                                :disabled="!userDetail"
+                            >
+                            <!-- <Button
+                                type="button"
+                                severity="secondary"
+                                text
+                                icon="Edit01Icon"
+                                size="small"
+                                rounded
+                                :disabled="!userDetail"
+                            > -->
+                                <Edit01Icon class="w-4 h-4 text-surface-500 dark:text-surface-300"/>
+                            </Button>
+                        </div>
                     </div>
-                    <Button
-                        type="button"
-                        severity="secondary"
-                        text
-                        icon="Edit01Icon"
-                        size="small"
-                        rounded
-                        @click="openDialog()"
-                        :disabled="!userDetail"
-                    >
-                    <!-- <Button
-                        type="button"
-                        severity="secondary"
-                        text
-                        icon="Edit01Icon"
-                        size="small"
-                        rounded
-                        :disabled="!userDetail"
-                    > -->
-                        <Edit01Icon class="w-4 h-4 text-surface-500 dark:text-surface-300"/>
-                    </Button>
-                </div>
-            </div>
-            <div v-if="userDetail" class="flex flex-col items-start gap-1.5 self-stretch">
-                <div class="flex items-center gap-3 self-stretch">
-                    <div class="truncate text-surface-950 dark:text-white md:text-lg font-semibold">
-                        {{ userDetail.name }}
+                    <div v-if="userDetail" class="flex flex-col items-start gap-1.5 self-stretch">
+                        <div class="flex items-center gap-3 self-stretch">
+                            <div class="truncate text-surface-950 dark:text-white md:text-lg font-semibold">
+                                {{ userDetail.name }}
+                            </div>
+                            <IconCircleCheckFilled v-if="userDetail.kyc_status == 'approved'" size="20" stroke-width="1.25" class="text-green-700 grow-0 shrink-0" />
+                            <Tag :severity="formatSeverity('primary')" :value="$t('public.' + userDetail.rank_name)"/>
+                        </div>
+                        <div class="text-surface-700 dark:text-surface-300 text-sm md:text-base">{{ userDetail.id_number }}</div>
                     </div>
-                    <IconCircleCheckFilled v-if="userDetail.kyc_status == 'approved'" size="20" stroke-width="1.25" class="text-green-700 grow-0 shrink-0" />
-                    <Tag :severity="formatSeverity('primary')" :value="$t('public.' + userDetail.rank_name)"/>
-                </div>
-                <div class="text-surface-700 dark:text-surface-300 text-sm md:text-base">{{ userDetail.id_number }}</div>
-            </div>
-            <div v-else class="animate-pulse flex flex-col items-start gap-1.5 self-stretch">
-                <div class="h-4 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2 md:my-3"></div>
-                <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mb-1"></div>
-            </div>
-        </div>
-        <div v-if="userDetail" class="grid grid-cols-2 gap-5 w-full">
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.username') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.username }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.email_address') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.email }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.phone_number') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.dial_code }} {{ userDetail.phone }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.country') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.country ?? '-' }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.nationality') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.nationality ?? '-' }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.group') }}</div>
-                <div v-if="userDetail.group_id" class="flex items-center gap-2 py-1 px-2 rounded"
-                    :style="{ backgroundColor: formatRgbaColor(userDetail.group_color, 0.1) }">
-                    <div class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: `#${userDetail.group_color}` }"></div>
-                    <div class="text-xs font-semibold" :style="{ color: `#${userDetail.group_color}` }">
-                        {{ userDetail.group_name }}
+                    <div v-else class="animate-pulse flex flex-col items-start gap-1.5 self-stretch">
+                        <div class="h-4 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2 md:my-3"></div>
+                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mb-1"></div>
                     </div>
                 </div>
-                <div v-else>-</div>
-            </div>
 
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.upline') }}</div>
-                <div class="flex items-center gap-2">
-                    <Avatar
-                        v-if="userDetail.upline_profile_photo"
-                        :image="userDetail.upline_profile_photo"
-                        shape="circle"
-                        class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white"
-                    />
-                    <Avatar
-                        v-else
-                        :label="formatNameLabel(userDetail.upline_name)"
-                        shape="circle"
-                        class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white text-sm"
-                    />
-                    <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.upline_name ?? '-' }}</div>
+                <div class="w-full border border-surface-200 dark:border-surface-500"></div>
+                
+                <div v-if="userDetail" class="grid grid-cols-2 gap-5 w-full">
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.username') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.username }}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.email_address') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.email }}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.phone_number') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.dial_code }} {{ userDetail.phone }}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.country') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">
+                            {{
+                                userDetail.country_translations
+                                    ? (JSON.parse(userDetail.country_translations)[locale] || userDetail.country_name || '-')
+                                    : (userDetail.country_name || '-')
+                            }}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.nationality') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.nationality ?? '-' }}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.gender') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ $t('public.' + userDetail.gender) ?? '-' }}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.group') }}</div>
+                        <div v-if="userDetail.group_id" class="flex items-center gap-2 py-1 px-2 rounded"
+                            :style="{ backgroundColor: formatRgbaColor(userDetail.group_color, 0.1) }">
+                            <div class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: `#${userDetail.group_color}` }"></div>
+                            <div class="text-xs font-semibold" :style="{ color: `#${userDetail.group_color}` }">
+                                {{ userDetail.group_name }}
+                            </div>
+                        </div>
+                        <div v-else>-</div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.upline') }}</div>
+                        <div class="flex items-center gap-2">
+                            <Avatar
+                                v-if="userDetail.upline_profile_photo"
+                                :image="userDetail.upline_profile_photo"
+                                shape="circle"
+                                class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white"
+                            />
+                            <Avatar
+                                v-else
+                                :label="formatNameLabel(userDetail.upline_name)"
+                                shape="circle"
+                                class="w-[26px] h-[26px] rounded-full overflow-hidden grow-0 shrink-0 dark:text-white text-sm"
+                            />
+                            <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.upline_name ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.address') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.address ?? '-' }}</div>
+                    </div>
+
+                </div>
+                <div v-else class="grid grid-cols-2 gap-5 w-full animate-pulse">
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.username') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
+                            <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.email_address') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
+                            <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.phone_number') }}</div>
+                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.gender') }}</div>
+                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.group') }}</div>
+                        <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mt-1 mb-1.5"></div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.upline') }}</div>
+                        <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-1 mb-1.5"></div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.address') }}</div>
+                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                    </div>
                 </div>
             </div>
-
-            <!-- <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.total_referred_member') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.total_direct_member }}</div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.total_referred_ib') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.total_direct_ib }}</div>
-            </div> -->
-        </div>
-        <div v-else class="grid grid-cols-2 gap-5 w-full animate-pulse">
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.username') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
-                    <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.email_address') }}</div>
-                <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
-                    <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.phone_number') }}</div>
-                <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.group') }}</div>
-                <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mt-1 mb-1.5"></div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.upline') }}</div>
-                <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-1 mb-1.5"></div>
-            </div>
-            
-            <!-- <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.total_referred_member') }}</div>
-                <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-2 mb-1"></div>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.total_referred_ib') }}</div>
-                <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-2 mb-1"></div>
-            </div> -->
-        </div>
-    </div>
+        </template>
+    </Card>
 
     <!-- edit contact info -->
     <Dialog
         v-model:visible="visible"
         modal
         :header="$t('public.profile_information')"
-        class="dialog-xs md:dialog-sm"
+        class="dialog-xs md:dialog-lg"
     >
         <form>
-            <div class="flex flex-col gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="flex flex-col gap-1">
-                    <InputLabel for="username" :value="$t('public.username')" />
-                    <InputText
-                        id="username"
-                        type="text"
-                        class="block w-full"
-                        v-model="form.username"
-                        :placeholder="$t('public.enter_name')"
-                        :invalid="!!form.errors.username"
-                        autocomplete="username"
-                    />
-                    <InputError :message="form.errors.username" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <InputLabel for="email" :value="$t('public.email')" />
-                    <InputText
-                        id="email"
-                        type="email"
-                        class="block w-full"
-                        v-model="form.email"
-                        :placeholder="$t('public.enter_email')"
-                        :invalid="!!form.errors.email"
-                        autocomplete="email"
-                    />
-                    <InputError :message="form.errors.email" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <InputLabel for="first_name" :value="$t('public.first_name')" />
+                    <InputLabel for="first_name" :value="$t('public.first_name')" :invalid="!!form.errors.first_name" />
                     <InputText
                         id="first_name"
                         type="text"
@@ -370,7 +385,7 @@ const handleMemberStatus = () => {
                     <InputError :message="form.errors.first_name" />
                 </div>
                 <div class="flex flex-col gap-1">
-                    <InputLabel for="last_name" :value="$t('public.last_name')" />
+                    <InputLabel for="last_name" :value="$t('public.last_name')" :invalid="!!form.errors.last_name" />
                     <InputText
                         id="last_name"
                         type="text"
@@ -382,11 +397,39 @@ const handleMemberStatus = () => {
                     />
                     <InputError :message="form.errors.last_name" />
                 </div>
+
+                <div class="flex flex-col gap-1">
+                    <InputLabel for="username" :value="$t('public.username')" :invalid="!!form.errors.username" />
+                    <InputText
+                        id="username"
+                        type="text"
+                        class="block w-full"
+                        v-model="form.username"
+                        :placeholder="$t('public.enter_name')"
+                        :invalid="!!form.errors.username"
+                        autocomplete="username"
+                    />
+                    <InputError :message="form.errors.username" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <InputLabel for="email" :value="$t('public.email')" :invalid="!!form.errors.email" />
+                    <InputText
+                        id="email"
+                        type="email"
+                        class="block w-full"
+                        v-model="form.email"
+                        :placeholder="$t('public.enter_email')"
+                        :invalid="!!form.errors.email"
+                        autocomplete="email"
+                    />
+                    <InputError :message="form.errors.email" />
+                </div>
+                
                 <div class="flex flex-col gap-1 items-start self-stretch">
-                    <InputLabel for="phone" :value="$t('public.phone_number')" />
+                    <InputLabel for="phone" :value="$t('public.phone_number')" :invalid="!!form.errors.phone" />
                     <div class="flex gap-2 items-center self-stretch relative">
                         <Select
-                            v-model="selectedCountry"
+                            v-model="selectedPhoneCode"
                             :options="countries"
                             filter
                             :filterFields="['name', 'phone_code']"
@@ -422,6 +465,68 @@ const handleMemberStatus = () => {
                     </div>
                     <InputError :message="form.errors.phone" />
                 </div>
+                <div class="flex flex-col gap-1 items-start self-stretch">
+                    <InputLabel for="country" :value="$t('public.nationality')" :invalid="!!form.errors.country_id"/>
+                    <Select
+                        v-model="selectedCountry"
+                        :options="countries"
+                        :loading="loadingCountries"
+                        optionLabel="name"
+                        :placeholder="$t('public.select_nationality')"
+                        class="w-full"
+                        :invalid="!!form.errors.country_id"
+                        filter
+                        :filter-fields="['name', 'iso2']"
+                    >
+                        <template #value="slotProps">
+                            <div v-if="slotProps.value" class="flex items-center">
+                                <div class="leading-tight w-full">{{ JSON.parse(slotProps.value.translations)[locale] || slotProps.value.name }}</div>
+                            </div>
+                            <span v-else class="text-surface-400 dark:text-surface-700">{{ slotProps.placeholder }}</span>
+                        </template>
+                        <template #option="slotProps">
+                            <div class="flex items-center gap-1">
+                                <img
+                                    v-if="slotProps.option.iso2"
+                                    :src="`https://flagcdn.com/w40/${slotProps.option.iso2.toLowerCase()}.png`"
+                                    :alt="slotProps.option.iso2"
+                                    width="18"
+                                    height="12"
+                                />
+                                <div class="max-w-[200px] truncate">{{ JSON.parse(slotProps.option.translations)[locale] || slotProps.option.name }}</div>
+                            </div>
+                        </template>
+                    </Select>
+                    <InputError :message="form.errors.country_id" />
+                </div>
+
+                <div class="flex flex-col gap-1 items-start self-stretch">
+                    <InputLabel
+                        for="gender"
+                        :value="$t('public.gender')"
+                        :invalid="!!form.errors.gender"
+                    />
+                    <SelectChipGroup
+                        :items="genders"
+                        v-model="form.gender"
+                    />
+                    <InputError :message="form.errors.gender" />
+                </div>
+
+                <div class="col-span-2 flex flex-col gap-1">
+                    <InputLabel for="address" :value="$t('public.address')" :invalid="!!form.errors.address" />
+                    <InputText
+                        id="address"
+                        type="text"
+                        class="block w-full"
+                        v-model="form.address"
+                        :placeholder="$t('public.enter_name')"
+                        :invalid="!!form.errors.address"
+                        autocomplete="address"
+                    />
+                    <InputError :message="form.errors.address" />
+                </div>
+
             </div>
             <div class="flex justify-end items-center pt-10 md:pt-7 gap-4 self-stretch">
                 <Button
