@@ -24,26 +24,28 @@ import {
     IconSettingsDollar
 } from '@tabler/icons-vue';
 import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue";
-//
-// const page = usePage();
-// const pendingDepositCounts = ref(page.props.getPendingDepositCount);
-// const pendingWithdrawalCounts = ref(page.props.pendingWithdrawalCounts);
-//
-// const getPendingCounts = async () => {
-//     try {
-//         const response = await axios.get(route('dashboard.getPendingCounts'));
-//         pendingDepositCounts.value = response.data.pendingDepositCounts;
-//         pendingWithdrawalCounts.value = response.data.pendingWithdrawalCounts;
-//     } catch (error) {
-//         console.error('Error pending counts:', error);
-//     }
-// };
-//
-// watchEffect(() => {
-//     if (usePage().props.toast !== null) {
-//         getPendingCounts();
-//     }
-// });
+
+const page = usePage();
+const pendingKYC = ref(0);
+
+const getPendingCounts = async () => {
+    try {
+        const response = await axios.get('/getPendingCounts');
+        pendingKYC.value = response.data.pendingKYC
+    } catch (error) {
+        console.error('Error pending counts:', error);
+    }
+};
+
+onMounted(() => {
+    getPendingCounts();
+})
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getPendingCounts();
+    }
+});
 </script>
 
 <template>
@@ -102,6 +104,13 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
                 :title="$t('public.sidebar_listing')"
                 :href="route('member.listing')"
                 :active="route().current('member.listing') || route().current('member.detail')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.sidebar_kyc')"
+                :href="route('member.pending_kyc')"
+                :active="route().current('member.pending_kyc')"
+                :pendingCounts="pendingKYC"
             />
         </SidebarCollapsible>
 
