@@ -77,10 +77,10 @@ class GroupController extends Controller
             foreach ($groups as $group) {
                 $userIds = $group->group_has_user->pluck('user_id')->toArray();
 
-                $group->wallet_top_up = $this->sumTransactionAmount($userIds, 'cash_wallet', 'top_up', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
-                $group->wallet_withdrawal = $this->sumTransactionAmount($userIds, 'cash_wallet', 'withdrawal', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
-                $group->account_deposit = $this->sumTransactionAmount($userIds, 'trading_account', 'deposit', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
-                $group->account_withdrawal = $this->sumTransactionAmount($userIds, 'trading_account', 'withdrawal', 'success', 'approval_at', $hasDateFilter, $start_date, $end_date);
+                $group->wallet_top_up = $this->sumTransactionAmount($userIds, 'cash_wallet', 'top_up', $hasDateFilter, $start_date, $end_date);
+                $group->wallet_withdrawal = $this->sumTransactionAmount($userIds, 'cash_wallet', 'withdrawal', $hasDateFilter, $start_date, $end_date);
+                $group->account_deposit = $this->sumTransactionAmount($userIds, 'trading_account', ['deposit', 'balance_in'], $hasDateFilter, $start_date, $end_date);
+                $group->account_withdrawal = $this->sumTransactionAmount($userIds, 'trading_account', ['withdrawal', 'balance_out'], $hasDateFilter, $start_date, $end_date);
 
                 $group->active_capital = TradingSubscription::whereIn('user_id', $userIds)
                     ->where('status', 'active')
@@ -102,16 +102,23 @@ class GroupController extends Controller
         return response()->json(['success' => false, 'data' => []]);
     }
 
-    private function sumTransactionAmount($userIds, $category, $type, $status, $dateField, $hasDateFilter, $start_date = null, $end_date = null)
+    private function sumTransactionAmount($userIds, $category, $types, $hasDateFilter, $start_date = null, $end_date = null)
     {
-        return Transaction::whereIn('user_id', $userIds)
+        $dateField = 'approval_at';
+        $query = Transaction::whereIn('user_id', $userIds)
             ->where('category', $category)
-            ->where('transaction_type', $type)
-            ->where('status', $status)
+            ->where('status', 'success')
             ->when($hasDateFilter, function ($query) use ($start_date, $end_date, $dateField) {
                 $query->whereBetween($dateField, [$start_date, $end_date]);
-            })
-            ->sum('amount');
+            });
+
+        if (is_array($types)) {
+            $query->whereIn('transaction_type', $types);
+        } else {
+            $query->where('transaction_type', $types);
+        }
+
+        return $query->sum('amount');
     }
 
     public function addGroup(Request $request)

@@ -7,6 +7,7 @@ import {
     Textarea,
     Chip,
     Button,
+    Skeleton,
 } from "primevue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -19,15 +20,18 @@ const props = defineProps({
 })
 
 const isLoading = ref(false);
-const currentAmount = ref(null);
+const data = ref([]);
 const { formatAmount } = generalFormat();
-const emit = defineEmits(['update:visible'])
+const emit = defineEmits(['update:visible']);
+
 const getTradingAccountData = async () => {
     isLoading.value = true;
-
     try {
-        const response = await axios.get(`/member/getTradingAccountData?meta_login=${props.account.meta_login}`);
-        currentAmount.value = response.data.currentAmount;
+        const response = await axios.get(route('member.getTradingAccountData', {
+            meta_login: props.account.meta_login,
+            type: props.account.account_type.type,
+        }));
+        data.value = response.data.data;
     } catch (error) {
         console.error('Error update account:', error);
     } finally {
@@ -40,10 +44,9 @@ onMounted(getTradingAccountData);
 const form = useForm({
     meta_login: props.account.meta_login,
     action: '',
-    amount: 0,
+    amount: null,
     remarks: '',
     type: props.dialogType,
-    account_type: props.account.account_type_type,
 })
 
 const radioOptions = computed(() => {
@@ -67,11 +70,11 @@ const chips = computed(() => {
     const chipsMapping = {
         account_balance: [
             { label: 'Fix account balance' },
-            { label: '修改帳戶餘額' },
+            { label: '修改账户余额' },
         ],
         account_credit: [
             { label: 'Fix account credit' },
-            { label: '修改信用餘額' },
+            { label: '修改信用余额' },
         ],
     };
 
@@ -113,37 +116,37 @@ const submitForm = () => {
 <template>
     <form>
         <div class="flex flex-col gap-5 items-center self-stretch">
-            <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-surface-200 dark:bg-surface-700">
-                <div class="text-surface-500 dark:text-surface-200 text-center text-xs font-medium">
+            <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-surface-200 dark:bg-surface-800">
+                <div class="text-surface-500 text-center text-xs font-medium">
                     #{{ account.meta_login }} - {{ dialogType === 'account_balance' ? $t('public.available_account_balance') : $t('public.available_account_credit') }}
                 </div>
-                <div v-if="currentAmount === null" class="animate-pulse">
-                    <div class="h-3 bg-surface-400 dark:bg-surface-200 rounded-full w-28 my-1"></div>
+                <div v-if="isLoading" class="text-center text-xl font-semibold">
+                    {{ $t('public.loading') }}..
                 </div>
-                <div v-else class="text-surface-950 dark:text-white text-center text-xl font-semibold">
-                    <span v-if="dialogType === 'account_balance'">{{ formatAmount(currentAmount['account_balance']) }}</span>
-                    <span v-else>{{ formatAmount(currentAmount[dialogType]) }}</span>
+                <div v-else class="text-center text-xl font-semibold">
+                    <span v-if="dialogType === 'account_balance'">{{ formatAmount(data.balance) }}</span>
+                    <span v-else-if="dialogType === 'account_credit'">{{ formatAmount(data.credit) }}</span>
                 </div>
             </div>
 
             <!-- action -->
             <div class="flex flex-col items-start gap-1 self-stretch">
-                <InputLabel for="action" :value="$t('public.action')" />
-                <div class="flex items-center gap-10">
+                <InputLabel
+                    for="action"
+                    :value="$t('public.action')"
+                    :invalid="!!form.errors.action"
+                />
+                <div class="flex items-center gap-5">
                     <div
-                        v-for="(action, index) in radioOptions"
-                        :key="index"
-                        class="flex items-center gap-2 text-sm text-surface-950 dark:text-white"
+                        v-for="action in radioOptions"
+                        class="flex items-center gap-2 text-sm"
                     >
-                        <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-surface-100 dark:hover:bg-surface-700">
-                            <RadioButton
-                                v-model="form.action"
-                                :inputId="action.value"
-                                :name="action.value"
-                                :value="action.value"
-                                class="w-4 h-4"
-                            />
-                        </div>
+                        <RadioButton
+                            v-model="form.action"
+                            :inputId="action.value"
+                            :name="action.value"
+                            :value="action.value"
+                        />
                         <label :for="action.value">{{ $t(`public.${action.label}`) }}</label>
                     </div>
                 </div>
@@ -152,18 +155,19 @@ const submitForm = () => {
 
             <!-- amount -->
             <div class="flex flex-col items-start gap-1 self-stretch">
-                <InputLabel for="amount" :value="$t('public.amount')" />
+                <InputLabel
+                    for="amount"
+                    :value="$t('public.amount')"
+                    :invalid="!!form.errors.amount"
+                />
                 <InputNumber
                     v-model="form.amount"
-                    inputId="currency-us"
-                    prefix="$ "
-                    class="w-full"
-                    inputClass="py-3 px-4"
-                    :min="0"
-                    :step="100"
-                    :minFractionDigits="2"
+                    inputId="amount"
+                    mode="currency"
+                    currency="USD"
+                    locale="en-US"
                     fluid
-                    autofocus
+                    placeholder="$0.00"
                     :invalid="!!form.errors.amount"
                 />
                 <InputError :message="form.errors.amount" />
@@ -171,16 +175,18 @@ const submitForm = () => {
 
             <!-- remarks -->
             <div class="flex flex-col items-start gap-3 self-stretch">
-                <InputLabel for="remarks">{{ $t('public.remarks_optional')}}</InputLabel>
+                <InputLabel for="remarks">
+                    {{ $t('public.remarks_optional')}}
+                </InputLabel>
                 <div class="flex items-center content-center gap-2 self-stretch flex-wrap">
                     <div v-for="(chip, index) in chips" :key="index">
                         <Chip
                             :label="chip.label"
-                            class="hover:bg-surface-50"
+                            class="text-xs transition-all duration-200 border"
                             :class="{
-                                    'border-primary-300 bg-primary-50 hover:bg-primary-25 text-primary-500': form.remarks === chip.label,
-                                    'text-surface-950': form.remarks !== chip.label,
-                                }"
+                                'border-primary-300 bg-primary-50 text-primary-600 dark:bg-primary-950 dark:border-primary-900': form.remarks === chip.label,
+                                'border-transparent hover:bg-surface-200 dark:hover:bg-surface-700': form.remarks !== chip.label,
+                            }"
                             @click="handleChipClick(chip.label)"
                         />
                     </div>
@@ -210,7 +216,7 @@ const submitForm = () => {
             </Button>
             <Button
                 class="flex flex-1 md:flex-none md:w-[120px]"
-                :disabled="form.processing || currentAmount === null"
+                :disabled="form.processing || isLoading"
                 @click.prevent="submitForm"
             >
                 {{ $t('public.confirm') }}

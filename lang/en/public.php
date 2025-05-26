@@ -259,7 +259,7 @@ return [
     "full_name" => "Full Name",
     "relationship" => "Relationship",
     "ic_passport_no" => "IC/Passport No",
-    
+
     "main_menu" => "Main Menu",
     "member_management" => "Member Management",
     "total_net_balance" => "Total Net Balance",
@@ -400,4 +400,15 @@ return [
     "kyc_request_caption_2" => " the KYC request. If unchanged, the default remark will be used.",
     "toast_kyc_approved" => "KYC submission verification success.",
     "toast_kyc_rejected" => "KYC submission verification failed!",
+    "today_profit_sharing" => "Today Profit Sharing",
+    "accounts" => "Accounts",
+    "loading_accounts_caption" => "Loading accounts data. Please wait.",
+    "last_update" => "Last Update",
+    "empty_account_title" => "No Account Found",
+    "empty_account_message" => "There are no accounts in the listing yet. Once user created, you'll see their details here.",
+    "account_details" => "Account Details",
+    "account_balance_is_insufficient" => "Account balance is insufficient",
+    "account_credit_is_insufficient" => "Account credit is insufficient",
+    "filter_account_type" => "Filter by account type",
+    "select_account_type" => "Select account type",
 ];

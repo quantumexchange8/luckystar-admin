@@ -120,6 +120,17 @@ import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue"
             :title="$t('public.trading')"
         />
 
+        <!-- Account -->
+        <SidebarLink
+            :title="$t('public.accounts')"
+            :href="route('account.listing')"
+            :active="route().current('account.listing')"
+        >
+            <template #icon>
+                <IconId :size="20" stroke-width="1.5" />
+            </template>
+        </SidebarLink>
+
         <!-- Master -->
         <SidebarLink
             :title="$t('public.strategy')"

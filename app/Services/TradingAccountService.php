@@ -28,7 +28,9 @@ class TradingAccountService {
     public function getConnectionStatus()
     {
         try {
-            return 0;
+            return Http::acceptJson()->timeout(10)
+                ->get($this->baseURL . "/connect_status")
+                ->json();
         } catch (ConnectionException $exception) {
             // Handle the connection timeout error
             // For example, returning an empty array as a default response
@@ -46,6 +48,9 @@ class TradingAccountService {
         return Http::acceptJson()->get($this->baseURL . "/trade_acc/{$meta_login}")->json();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function getUserInfo($meta_login): void
     {
         $userData = $this->getMetaUser($meta_login);
@@ -105,24 +110,24 @@ class TradingAccountService {
 
             $newBalance = $trading_account->balance;
             $newCredit = $trading_account->credit ?? 0;
-        
+
             switch ($deal_type) {
                 case MetaService::DEAL_BALANCE:
                     $newBalance += $amount;
                     break;
-        
+
                 case MetaService::DEAL_CREDIT:
                     $newCredit += $amount;
                     break;
-        
+
                 case MetaService::DEAL_BONUS:
                     // if bonus affects balance or credit, modify as needed
                     break;
-        
+
                 default:
                     throw ValidationException::withMessages(['deal_type' => trans('public.invalid_type')]);
             }
-        
+
             $userData = [
                 'group' => $account_type->name,
                 'name' => Auth::user()->full_name,

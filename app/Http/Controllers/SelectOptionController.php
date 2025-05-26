@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccountType;
 use App\Models\AccountTypeHasLeverage;
 use App\Models\GroupHasUser;
 use App\Models\GroupRankSetting;
@@ -141,5 +142,13 @@ class SelectOptionController extends Controller
         $strategies = TradingMaster::get();
 
         return response()->json($strategies);
+    }
+
+
+    public function getAccountTypes()
+    {
+        $accountTypes = AccountType::get();
+
+        return response()->json($accountTypes);
     }
 }

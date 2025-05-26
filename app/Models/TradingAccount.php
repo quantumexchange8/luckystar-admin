@@ -41,4 +41,9 @@ class TradingAccount extends Model
             ->whereIn('status', values: ['active', 'pending'])
             ->exists();
     }
+
+    public function trading_master(): HasOne
+    {
+        return $this->hasOne(TradingMaster::class, 'meta_login', 'meta_login');
+    }
 }

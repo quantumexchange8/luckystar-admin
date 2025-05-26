@@ -1,24 +1,24 @@
 .p-radiobutton {
-    @apply relative inline-flex select-none w-full h-full
+    @apply relative inline-flex select-none w-5 h-5
 }
 
 .p-radiobutton-input {
     @apply cursor-pointer disabled:cursor-default appearance-none absolute start-0 top-0 w-full h-full m-0 p-0 opacity-0 z-10
-        border border-transparent rounded-full
+    border border-transparent rounded-full
 }
 
 .p-radiobutton-box {
     @apply flex justify-center items-center rounded-full
-        border border-surface-300 dark:border-surface-500
-        bg-surface-0 dark:bg-surface-950
-        w-full h-full
-        transition-colors duration-200
-        shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
+    border border-surface-300 dark:border-surface-700
+    bg-surface-0 dark:bg-surface-950
+    w-5 h-5
+    transition-colors duration-200
+    shadow-input
 }
 
 .p-radiobutton-icon {
     @apply bg-transparent text-xs w-3 h-3 rounded-full
-        transition-all duration-200 backface-hidden
+    transition-all duration-200 backface-hidden
 }
 
 .p-radiobutton-icon {
@@ -38,7 +38,7 @@
 }
 
 .p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
-    @apply scale-100
+    @apply scale-100 bg-white dark:bg-surface-950
 }
 
 .p-radiobutton-checked:not(.p-disabled):has(.p-radiobutton-input:hover) .p-radiobutton-box {
@@ -46,7 +46,7 @@
 }
 
 .p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:hover).p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
-    @apply bg-primary-contrast
+    @apply bg-primary-100 dark:bg-primary-900
 }
 
 .p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:focus-visible) .p-radiobutton-box {
@@ -67,7 +67,7 @@
 
 .p-radiobutton.p-disabled .p-radiobutton-box {
     @apply bg-surface-200 dark:bg-surface-400
-        border-surface-300 dark:border-surface-700
+    border-surface-300 dark:border-surface-700
 }
 
 .p-radiobutton-checked.p-disabled .p-radiobutton-box .p-radiobutton-icon {

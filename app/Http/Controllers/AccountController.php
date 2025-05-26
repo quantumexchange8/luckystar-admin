@@ -6,6 +6,7 @@ use App\Enums\MetaService;
 use App\Models\AccountType;
 use App\Models\TradingUser;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\TradingAccount;
 use Illuminate\Support\Facades\Log;
@@ -15,44 +16,44 @@ use App\Services\TradingAccountService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Exception;
+use Throwable;
 
 class AccountController extends Controller
 {
     public function getTradingAccountData(Request $request)
     {
         try {
-            $account = TradingAccount::with('account_type')->where('meta_login', $request->meta_login)->first();
-    
-            if (!$account) {
-                return response()->json([
-                    'message' => 'Account not found.',
-                ], 404);
+            if ($request->type != 'virtual') {
+                $service = new TradingAccountService();
+
+                if ($service->getConnectionStatus() != 0) {
+                    return back()->with('toast', [
+                        'title' => trans("public.connection_error"),
+                        'message' => trans("public.toast_connection_error"),
+                        'type' => 'error',
+                    ]);
+                }
+
+                $service->getUserInfo($request->meta_login);
             }
-    
-            // Check if account type is virtual
-            if ($account->account_type && $account->account_type->type !== 'virtual') {
-                // Only fetch external info if not virtual
-                (new TradingAccountService)->getUserInfo((int) $request->meta_login);
-    
-                // Refresh to get updated values
-                $account = TradingAccount::where('meta_login', $request->meta_login)->first();
-            }
-    
+
+            $account = TradingAccount::firstWhere('meta_login', $request->meta_login);
+
             return response()->json([
-                'currentAmount' => [
-                    'account_balance' => $account->balance,
-                    'account_credit' => $account->credit,
-                ],
+                'data' => $account
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error("Error updating account {$request->meta_login}: {$e->getMessage()}");
-    
+
             return response()->json([
                 'message' => 'An error occurred while fetching account data.',
             ], 500);
         }
     }
-        
+
     public function accountAdjustment(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -80,24 +81,24 @@ class AccountController extends Controller
             ]);
         }
 
-        if ($accountType->type !== 'virtual') {
+        if ($accountType->type != 'virtual') {
             try {
                 // Fetch and update user info using TradingAccountService
                 (new TradingAccountService)->getUserInfo((int) $request->meta_login);
-        
+
                 // Retrieve the updated account data
                 $trading_account = TradingAccount::with('account_type')->where('meta_login', $request->meta_login)->first();
-        
+
                 if (!$trading_account) {
                     return back()->with('toast', [
                             'title' => trans('public.no_account_found'),
                             'type' => 'error'
                         ]);
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Log any errors during the process
                 Log::error("Error updating account {$request->meta_login}: {$e->getMessage()}");
-        
+
                 return back()
                         ->with('toast', [
                             'title' => trans('public.no_account_found'),
@@ -105,13 +106,13 @@ class AccountController extends Controller
                         ]);
             }
         }
-        
-        if ($type === 'account_balance' && $action === 'balance_out' && $trading_account->balance < $amount) {
-            throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
+
+        if ($type == 'account_balance' && $action == 'balance_out' && $trading_account->balance < $amount) {
+            throw ValidationException::withMessages(['amount' => trans('public.account_balance_is_insufficient')]);
         }
 
         if ($type === 'account_credit' && $action === 'credit_out' && $trading_account->credit < $amount) {
-            throw ValidationException::withMessages(['amount' => trans('public.insufficient_credit')]);
+            throw ValidationException::withMessages(['amount' => trans('public.account_credit_is_insufficient')]);
         }
 
         $transaction = Transaction::create([
@@ -133,14 +134,13 @@ class AccountController extends Controller
             'balance_out', 'credit_out' => MetaService::WITHDRAW,
             default => throw ValidationException::withMessages(['action' => trans('public.invalid_type')]),
         };
-        
+
         $dealType = match($type) {
             'account_balance' => MetaService::DEAL_BALANCE,
             'account_credit' => MetaService::DEAL_CREDIT,
             default => throw ValidationException::withMessages(['type' => trans('public.invalid_type')]),
         };
-                
-        
+
         if (($action === 'balance_out' || $action === 'credit_out')) {
             $amount = -abs($amount);
         }
@@ -158,7 +158,7 @@ class AccountController extends Controller
                 'title' => $type == 'account_balance' ? trans('public.toast_balance_adjustment_success') : trans('public.toast_credit_adjustment_success'),
                 'type' => 'success'
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Update transaction status to failed on error
             $transaction->update([
                 'approval_at' => now(),
@@ -195,7 +195,7 @@ class AccountController extends Controller
 
         $tradingAccount = TradingAccount::where('meta_login', $request->meta_login)->first();
         $accountType = AccountType::find($tradingAccount->account_type_id);
-        
+
         // Check if editing is locked due to active or pending subscriptions
         if ($tradingAccount->has_active_or_pending_subscriptions()) {
             return back()->with('toast', [
@@ -211,7 +211,7 @@ class AccountController extends Controller
                 'title' => trans('public.toast_change_leverage_success'),
                 'type' => 'success'
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log the main error
             Log::error('Error updating leverage: ' . $e->getMessage());
 
@@ -271,7 +271,7 @@ class AccountController extends Controller
         $investor_password = $request->investor_password;
         $tradingAccount = TradingAccount::where('meta_login', $request->meta_login)->first();
         $accountType = AccountType::find($tradingAccount->account_type_id);
-        
+
         // Check if editing is locked due to active or pending subscriptions
         if ($tradingAccount->has_active_or_pending_subscriptions()) {
             return back()->with('toast', [
@@ -302,7 +302,7 @@ class AccountController extends Controller
                 'type' => 'success',
             ]);
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log the error
             Log::error('Error updating trading account password: ' . $e->getMessage());
 
@@ -318,7 +318,7 @@ class AccountController extends Controller
     {
         $trading_account = TradingAccount::where('meta_login', $request->meta_login)->first();
         $accountType = AccountType::find($trading_account->account_type_id);
-        
+
         // Check if editing is locked due to active or pending subscriptions
         if ($trading_account->has_active_or_pending_subscriptions()) {
             return back()->with('toast', [
@@ -331,20 +331,20 @@ class AccountController extends Controller
             try {
                 // Fetch and update user info using TradingAccountService
                 (new TradingAccountService)->getUserInfo((int) $request->meta_login);
-        
+
                 // Retrieve the updated account data
                 $trading_account = TradingAccount::with('account_type')->where('meta_login', $request->meta_login)->first();
-        
+
                 if (!$trading_account) {
                     return back()->with('toast', [
                             'title' => trans('public.no_account_found'),
                             'type' => 'error'
                         ]);
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Log any errors during the process
                 Log::error("Error updating account {$request->meta_login}: {$e->getMessage()}");
-        
+
                 return back()
                         ->with('toast', [
                             'title' => trans('public.no_account_found'),
@@ -382,5 +382,100 @@ class AccountController extends Controller
         //             'type' => 'error'
         //         ]);
         // }
+    }
+
+    public function account_listing()
+    {
+        return Inertia::render('Account/AccountListing');
+    }
+
+    /**
+     * @throws Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function getAccountsData(Request $request)
+    {
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
+
+            $query = TradingAccount::with([
+                'user',
+                'user.media',
+                'user.upline',
+                'user.group.group:id,name,group_leader_id,color',
+                'account_type',
+                'active_subscriptions',
+                'active_subscriptions.trading_master',
+                'trading_master:meta_login',
+            ])->withSum('active_subscriptions', 'subscription_amount');
+
+            if ($data['filters']['global']['value']) {
+                $keyword = $data['filters']['global']['value'];
+
+                $query->where(function ($q) use ($keyword) {
+                    $q->whereHas('user', function ($query) use ($keyword) {
+                        $query->where(function ($q) use ($keyword) {
+                            $q->where('first_name', 'like', '%' . $keyword . '%')
+                                ->orWhere('last_name', 'like', '%' . $keyword . '%')
+                                ->orWhere('email', 'like', '%' . $keyword . '%')
+                                ->orWhere('username', 'like', '%' . $keyword . '%');
+                        });
+                    })->orWhere('meta_login', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay();
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                $query->whereBetween('updated_at', [$start_date, $end_date]);
+            }
+
+            if (!empty($data['filters']['group_id']['value'])) {
+                $query->whereHas('user.group', function ($q) use ($data) {
+                    $q->where('group_id', $data['filters']['group_id']['value']['id']);
+                });
+            }
+
+            if (!empty($data['filters']['account_type']['value'])) {
+                $query->where('account_type_id', $data['filters']['account_type']['value']['id']);
+            }
+
+            if (!empty($data['filters']['referrers']['value'])) {
+                $query->whereHas('user', function ($q) use ($data) {
+                    $selected_referrers = $data['filters']['referrers']['value'];
+                    $userIds = array_column($selected_referrers, 'user_id');
+
+                    $q->whereIn('upline_id', $userIds);
+                });
+            }
+
+            //sort field/order
+            if ($data['sortField'] && $data['sortOrder']) {
+                $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
+                $query->orderBy($data['sortField'], $order);
+            } else {
+                $query->orderByDesc('updated_at')
+                    ->orderByDesc('id');
+            }
+
+//            if ($request->has('exportStatus')) {
+//                return Excel::download(new InvestmentExport($query, $status), now() . '-investment-report.xlsx');
+//            }
+
+            $accounts = $query->paginate($data['rows']);
+
+            $accounts->getCollection()->transform(function ($account) {
+                $account->has_active_or_pending_subscriptions = $account->has_active_or_pending_subscriptions();
+                return $account;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $accounts,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'data' => []]);
     }
 }

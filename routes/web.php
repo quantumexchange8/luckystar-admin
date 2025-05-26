@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/getGroupLeaders', [SelectOptionController::class, 'getGroupLeaders'])->name('getGroupLeaders');
     Route::get('/getGroupMembers', [SelectOptionController::class, 'getGroupMembers'])->name('getGroupMembers');
     Route::get('/getStrategies', [SelectOptionController::class, 'getStrategies'])->name('getStrategies');
+    Route::get('/getAccountTypes', [SelectOptionController::class, 'getAccountTypes'])->name('getAccountTypes');
 
     /**
      * ==============================
@@ -122,6 +123,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/getGroupsData', [GroupController::class, 'getGroupsData'])->name('group.getGroupsData');
 
         Route::post('/addGroup', [GroupController::class, 'addGroup'])->name('group.addGroup');
+    });
+
+    /**
+     * ==============================
+     *           Accounts
+     * ==============================
+     */
+    Route::prefix('account')->group(function () {
+        Route::get('/listing', [AccountController::class, 'account_listing'])->name('account.listing');
+        Route::get('/getAccountsData', [AccountController::class, 'getAccountsData'])->name('account.getAccountsData');
     });
 
     /**

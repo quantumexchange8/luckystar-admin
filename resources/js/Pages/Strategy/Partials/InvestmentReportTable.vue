@@ -1,6 +1,5 @@
 <script setup>
 import {
-    Card,
     DataTable,
     Column,
     InputText,
@@ -9,11 +8,10 @@ import {
     Popover,
     DatePicker,
     Select,
-    MultiSelect,
     ProgressSpinner
 } from "primevue";
 import Empty from "@/Components/Empty.vue";
-import {onMounted, ref, watch, watchEffect} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {generalFormat} from "@/Composables/format.js";
 import {FilterMatchMode} from "@primevue/core/api";
 import dayjs from "dayjs";
@@ -23,9 +21,7 @@ import {
     IconSearch,
     IconXboxX,
 } from "@tabler/icons-vue";
-import PendingInvestmentAction from "@/Pages/Pending/Investment/PendingInvestmentAction.vue";
 import debounce from "lodash/debounce.js";
-import {usePage} from "@inertiajs/vue3";
 
 const props = defineProps({
     strategy: Object,

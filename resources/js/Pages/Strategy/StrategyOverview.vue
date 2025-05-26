@@ -47,13 +47,13 @@ const calculatePercentage = (fund) => {
     <div class="w-full flex flex-col md:flex-row gap-5 self-stretch">
         <Card class="w-full">
             <template #content>
-                <div class="flex flex-col items-start gap-5">
+                <div class="flex flex-col items-start gap-3">
                     <div class="flex flex-col gap-2 items-start self-stretch md:flex-shrink-0">
                         <div class="flex justify-center items-center">
                             <span class="text-surface-500 text-sm">{{ $t('public.total_active_capital') + `($)` }}</span>
                         </div>
                         <div class="flex items-end gap-5">
-                            <span class="text-surface-950 dark:text-white text-xl font-semibold md:text-xxl">{{ currentAssets ? formatAmount(currentAssets) : formatAmount(0) }}</span>
+                            <span class="text-surface-950 dark:text-white text-xl font-semibold md:text-xxl">{{ currentAssets ? formatAmount(currentAssets) : $t('public.calculating') }}</span>
                             <div class="flex items-center pb-1.5 gap-2">
                                 <div v-if="currentAssets" class="flex items-center gap-2">
                                     <div
@@ -74,7 +74,7 @@ const calculatePercentage = (fund) => {
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-3 items-center self-stretch w-full">
+                    <div class="flex flex-col gap-1 items-center self-stretch w-full">
                         <div v-for="index in 3" :key="index" class="flex items-center py-2 gap-3 md:gap-4 w-full">
                             <div class="w-full flex items-center min-w-[140px] md:min-w-[180px] md:max-w-[240px] gap-3 md:gap-4">
                                 <Avatar
@@ -138,9 +138,9 @@ const calculatePercentage = (fund) => {
 
             <Card>
                 <template #content>
-                    <span class="self-stretch text-surface-500 text-sm">{{ $t('public.current_joining_investors') }}</span>
+                    <span class="self-stretch text-surface-500 text-sm">{{ $t('public.today_profit_sharing') }}</span>
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <span class="text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors, 0, '') : 0 }}</span>
+                        <span class="text-xl font-semibold md:text-xxl">{{ currentInvestors ? formatAmount(currentInvestors) : $t('public.calculating') }}</span>
                         <div class="flex items-center pb-1.5 gap-2">
                             <div v-if="currentInvestors" class="flex items-center gap-2">
                                 <div
