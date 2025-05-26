@@ -21,7 +21,6 @@ import {
     Badge,
 } from "primevue";
 import Empty from '@/Components/Empty.vue';
-import Loader from "@/Components/Loader.vue";
 import AccountTypeAction from '@/Pages/AccountType/Partials/AccountTypeAction.vue';
 
 const props = defineProps({

@@ -8,10 +8,8 @@ import FinancialInfo from "@/Pages/Member/Listing/MemberDetail/FinancialInfo.vue
 import TradingAccount from "@/Pages/Member/Listing/MemberDetail/TradingAccount.vue";
 import ProfileInfo from "@/Pages/Member/Listing/MemberDetail/ProfileInfo.vue";
 import KycVerification from "@/Pages/Member/Listing/MemberDetail/KycVerification.vue";
-import PaymentAccount from "@/Pages/Member/Listing/MemberDetail/Partials/PaymentAccount.vue";
+import PaymentAccount from "@/Pages/Member/Listing/MemberDetail/PaymentAccount.vue";
 import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
-// import BackgroundInfo from "@/Pages/Member/Listing/MemberDetail/BackgroundInfo.vue";
-// import BeneficiaryInfo from "@/Pages/Member/Listing/MemberDetail/BeneficiaryInfo.vue";
 
 const props = defineProps({
     user: Object
@@ -58,20 +56,15 @@ const tabs = ref([
         component: h(TradingAccount, {user_id: props.user.id}),
         value: 1
     },
+    {
+        title: 'payment_account',
+        component: h(PaymentAccount, {user_id: props.user.id}),
+        value: 2
+    },
     // {
     //     title: 'adjustment_history',
     //     component: h(AdjustmentHistory, {user_id: props.user.id}),
     //     value: 2
-    // },
-    // {
-    //     title: 'background_info',
-    //     component: h(BackgroundInfo, {user_id: props.user.id}),
-    //     value: 3
-    // },
-    // {
-    //     title: 'beneficiary_info',
-    //     component: h(BeneficiaryInfo, {user_id: props.user.id}),
-    //     value: 4
     // },
 ]);
 

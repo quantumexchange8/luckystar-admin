@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\InvestmentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -11,6 +10,8 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StrategyController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelectOptionController;
 use App\Http\Controllers\TopUpProfileController;
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/getGroupMembers', [SelectOptionController::class, 'getGroupMembers'])->name('getGroupMembers');
     Route::get('/getStrategies', [SelectOptionController::class, 'getStrategies'])->name('getStrategies');
     Route::get('/getAccountTypes', [SelectOptionController::class, 'getAccountTypes'])->name('getAccountTypes');
+
+    Route::get('/getPendingCounts', [DashboardController::class, 'getPendingCounts'])->name('dashboard.getPendingCounts');
+
 
     /**
      * ==============================
@@ -98,6 +102,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/updateProfileInfo', [MemberController::class, 'updateProfileInfo'])->name('member.updateProfileInfo');
         Route::post('/updateKycStatus', [MemberController::class, 'updateKycStatus'])->name('member.updateKycStatus');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
+
+        // Pending Kyc
+        Route::get('/pending_kyc', [PendingController::class, 'pending_kyc'])->name('member.pending_kyc');
+        Route::get('/getPendingKycRequest', [PendingController::class, 'getPendingKycRequest'])->name('member.getPendingKycRequest');
+
+        Route::post('/pendingKycApproval', [PendingController::class, 'pendingKycApproval'])->name('member.pendingKycApproval');
 
         // account listing
         // Route::get('/account_listing', [AccountController::class, 'index'])->name('member.account_listing');

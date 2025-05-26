@@ -95,7 +95,7 @@ class User extends Authenticatable implements HasMedia
             return 'unverified';
         }
 
-        return $this->kycs->every(fn ($kyc) => $kyc->kyc_status === 'verified') ? 'verified' : 'unverified';
+        return $this->kycs()->where('kyc_status', '!=', 'verified')->exists() ? 'unverified' : 'verified';
     }
 
     public function country(): BelongsTo
