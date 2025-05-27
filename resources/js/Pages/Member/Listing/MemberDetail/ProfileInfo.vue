@@ -9,6 +9,8 @@ import {
     Avatar,
     Tag,
     Card,
+    Divider,
+    Skeleton
 } from "primevue";
 import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import { IconCircleCheckFilled } from "@tabler/icons-vue";
@@ -54,6 +56,7 @@ watch(() => props.userDetail, (user) => {
 
 const openDialog = () => {
     visible.value = true
+    getCountries();
 }
 
 const form = useForm({
@@ -89,8 +92,6 @@ const getCountries = async () => {
         loadingCountries.value = false;
     }
 }
-
-getCountries();
 
 const submitForm = () => {
     form.dial_code = selectedPhoneCode.value.phone_code;
@@ -170,7 +171,7 @@ const handleMemberStatus = () => {
 <template>
     <Card class="w-full h-full">
         <template #content>
-            <div class="flex flex-col gap-5">
+            <div class="flex flex-col">
                 <div class="flex flex-col items-start gap-4 self-stretch">
                     <div class="flex justify-between items-start self-stretch">
                         <template v-if="userDetail">
@@ -213,15 +214,6 @@ const handleMemberStatus = () => {
                                 @click="openDialog()"
                                 :disabled="!userDetail"
                             >
-                            <!-- <Button
-                                type="button"
-                                severity="secondary"
-                                text
-                                icon="Edit01Icon"
-                                size="small"
-                                rounded
-                                :disabled="!userDetail"
-                            > -->
                                 <Edit01Icon class="w-4 h-4 text-surface-500 dark:text-surface-300"/>
                             </Button>
                         </div>
@@ -231,19 +223,28 @@ const handleMemberStatus = () => {
                             <div class="truncate text-surface-950 dark:text-white md:text-lg font-semibold">
                                 {{ userDetail.name }}
                             </div>
-                            <IconCircleCheckFilled v-if="userDetail.kyc_status == 'approved'" size="20" stroke-width="1.25" class="text-green-700 grow-0 shrink-0" />
+                            <IconCircleCheckFilled v-if="userDetail.kyc_status === 'approved'" size="20" stroke-width="1.25" class="text-green-700 grow-0 shrink-0" />
                             <Tag :severity="formatSeverity('primary')" :value="$t('public.' + userDetail.rank_name)"/>
                         </div>
                         <div class="text-surface-700 dark:text-surface-300 text-sm md:text-base">{{ userDetail.id_number }}</div>
                     </div>
                     <div v-else class="animate-pulse flex flex-col items-start gap-1.5 self-stretch">
-                        <div class="h-4 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2 md:my-3"></div>
-                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mb-1"></div>
+                        <Skeleton
+                            width="12rem"
+                            height="1.25rem"
+                            class="my-1.5"
+                            borderRadius="2rem"
+                        />
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
                 </div>
 
-                <div class="w-full border border-surface-200 dark:border-surface-500"></div>
-                
+                <Divider />
+
                 <div v-if="userDetail" class="grid grid-cols-2 gap-5 w-full">
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.username') }}</div>
@@ -262,28 +263,37 @@ const handleMemberStatus = () => {
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.country') }}</div>
-                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">
-                            {{
-                                userDetail.country_translations
-                                    ? (JSON.parse(userDetail.country_translations)[locale] || userDetail.country_name || '-')
-                                    : (userDetail.country_name || '-')
-                            }}
+                        <div class="flex items-center gap-1">
+                            <img
+                                v-if="userDetail.country_iso2"
+                                :src="`https://flagcdn.com/w40/${userDetail.country_iso2.toLowerCase()}.png`"
+                                :alt="userDetail.country_iso2"
+                                width="18"
+                                height="12"
+                            />
+                            <div class="truncate text-surface-950 dark:text-white text-sm font-medium">
+                                {{
+                                    userDetail.country_translations
+                                        ? (JSON.parse(userDetail.country_translations)[locale] || userDetail.country_name || '-')
+                                        : (userDetail.country_name || '-')
+                                }}
+                            </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
-                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.nationality') }}</div>
-                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.nationality ?? '-' }}</div>
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.ic_passport_no') }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.identity_number ?? '-' }}</div>
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.gender') }}</div>
-                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ $t('public.' + userDetail.gender) ?? '-' }}</div>
+                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium">{{ userDetail.gender ? $t('public.' + userDetail.gender) : '-' }}</div>
                     </div>
 
-                    <div class="flex flex-col gap-2 w-full">
+                    <div class="flex flex-col items-start gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.group') }}</div>
-                        <div v-if="userDetail.group_id" class="flex items-center gap-2 py-1 px-2 rounded"
+                        <div v-if="userDetail.group_name" class="flex items-center gap-2 py-1 px-2 rounded"
                             :style="{ backgroundColor: formatRgbaColor(userDetail.group_color, 0.1) }">
                             <div class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: `#${userDetail.group_color}` }"></div>
                             <div class="text-xs font-semibold" :style="{ color: `#${userDetail.group_color}` }">
@@ -321,41 +331,85 @@ const handleMemberStatus = () => {
                 <div v-else class="grid grid-cols-2 gap-5 w-full animate-pulse">
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.username') }}</div>
-                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
-                            <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
-                        </div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.email_address') }}</div>
-                        <div class="truncate text-surface-950 dark:text-white text-sm font-medium w-full">
-                            <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-48 my-2"></div>
-                        </div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.phone_number') }}</div>
-                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.country') }}</div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.ic_passport_no') }}</div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.gender') }}</div>
-                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.group') }}</div>
-                        <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-20 mt-1 mb-1.5"></div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            height="1.5rem"
+                            borderRadius="2rem"
+                        />
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs w-full truncate">{{ $t('public.upline') }}</div>
-                        <div class="h-3 bg-surface-200 dark:bg-surface-500 rounded-full w-36 mt-1 mb-1.5"></div>
+                        <Skeleton
+                            width="8rem"
+                            class="my-0.5"
+                            height="1.5rem"
+                            borderRadius="2rem"
+                        />
                     </div>
-                    
+
                     <div class="flex flex-col gap-2 w-full">
                         <div class="text-surface-500 dark:text-surface-300 text-xs truncate">{{ $t('public.address') }}</div>
-                        <div class="h-2 bg-surface-200 dark:bg-surface-500 rounded-full w-36 my-2"></div>
+                        <Skeleton
+                            width="10rem"
+                            class="my-0.5"
+                            borderRadius="2rem"
+                        />
                     </div>
                 </div>
             </div>
@@ -424,7 +478,7 @@ const handleMemberStatus = () => {
                     />
                     <InputError :message="form.errors.email" />
                 </div>
-                
+
                 <div class="flex flex-col gap-1 items-start self-stretch">
                     <InputLabel for="phone" :value="$t('public.phone_number')" :invalid="!!form.errors.phone" />
                     <div class="flex gap-2 items-center self-stretch relative">

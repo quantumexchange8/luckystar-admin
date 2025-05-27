@@ -1,10 +1,10 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { Card, Button, Dialog, Image, Tag, Avatar, Chip, Textarea } from 'primevue'
+import { Card, Button, Dialog, Image, Tag, Avatar, Chip, Textarea, ProgressSpinner } from 'primevue'
 import InputLabel from '@/Components/InputLabel.vue'
 import { generalFormat } from "@/Composables/format.js";
-import { useForm, usePage } from "@inertiajs/vue3";
-import axios from 'axios';
+import { useForm } from "@inertiajs/vue3";
+import {IconCloudDownload, IconImageInPicture} from '@tabler/icons-vue';
 
 const props = defineProps({
     userDetail: Object,
@@ -91,19 +91,33 @@ const submit = (kycId) => {
                         :value="$t(`public.${kycIdentity?.kyc_status}`)"
                         :severity="formatSeverity(kycIdentity?.kyc_status)"
                     />
+                    <Tag
+                        v-else-if="isLoading"
+                        severity="secondary"
+                        :value="$t('public.loading')"
+                    />
+                    <Tag
+                        v-else
+                        severity="danger"
+                        :value="$t('public.unverified')"
+                    />
                 </div>
             </div>
         </template>
 
         <template #content>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-5">
                 <!-- Photo ID -->
                 <div v-if="props.isLoading || kycIdentity?.proof_type === 'photo_id'" class="grid grid-cols-2 gap-2">
                     <div class="w-full flex flex-col items-start gap-1">
                         <InputLabel for="front_identity">{{ $t('public.front_identity') }}</InputLabel>
-                        <div class="w-full flex flex-col gap-3 items-center p-3 rounded-md border-2 border-dashed">
-                            <Avatar v-if="props.isLoading" class="w-full h-[100px] animate-pulse" />
-                            <template v-else="kycIdentity?.front_image">
+                        <div
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                        >
+                            <div v-if="isLoading" class="w-full flex items-center justify-center h-[100px]">
+                                <ProgressSpinner />
+                            </div>
+                            <template v-else>
                                 <Image
                                     :src="kycIdentity?.front_image"
                                     alt="front_identity"
@@ -115,9 +129,13 @@ const submit = (kycId) => {
                     </div>
                     <div class="w-full flex flex-col items-start gap-1">
                         <InputLabel for="back_identity">{{ $t('public.back_identity') }}</InputLabel>
-                        <div class="w-full flex flex-col gap-3 items-center p-3 rounded-md border-2 border-dashed">
-                            <Avatar v-if="props.isLoading" class="w-full h-[100px] animate-pulse" />
-                            <template v-else="kycIdentity?.back_image">
+                        <div
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                        >
+                            <div v-if="isLoading" class="w-full flex items-center justify-center h-[100px]">
+                                <ProgressSpinner />
+                            </div>
+                            <template v-else>
                                 <Image
                                     :src="kycIdentity?.back_image"
                                     alt="back_identity"
@@ -130,12 +148,12 @@ const submit = (kycId) => {
                 </div>
 
                 <!-- Passport -->
-                <div v-else-if="props.isLoading || kycIdentity?.proof_type === 'passport'" class="grid grid-cols-1 gap-2">
+                <div v-else-if="isLoading || kycIdentity?.proof_type === 'passport'" class="grid grid-cols-1 gap-2">
                     <div class="w-full flex flex-col items-start gap-1">
                         <InputLabel for="passport">{{ $t('public.passport') }}</InputLabel>
                         <div class="w-full flex flex-col gap-3 items-center p-3 rounded-md border-2 border-dashed">
-                            <Avatar v-if="props.isLoading" class="w-full h-[100px] animate-pulse" />
-                            <template v-else="kycIdentity?.passport_image">
+                            <Avatar v-if="isLoading" class="w-full h-[100px] animate-pulse" />
+                            <template v-else>
                                 <Image
                                     :src="kycIdentity?.passport_image"
                                     alt="passport"
@@ -147,33 +165,59 @@ const submit = (kycId) => {
                     </div>
                 </div>
 
-                <div v-else="!kycIdentity" class="grid grid-cols-1 gap-2">
-                    <div class="w-full flex flex-col items-start gap-1">
-                        {{ $t('public.kyc_documents_pending') }}
+                <div v-else class="w-full flex flex-col items-start gap-1">
+                    <InputLabel>{{ $t('public.file') }}</InputLabel>
+                    <div
+                        class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                    >
+                        <div class="w-full flex flex-col items-center gap-3 justify-center h-[100px] text-sm">
+                            <div
+                                class="rounded-lg w-8 h-8 shrink-0 grow-0 border border-surface-300 dark:border-surface-600 flex items-center justify-center text-surface-500 dark:text-surface-400"
+                            >
+                                <IconImageInPicture size="20" stroke-width="1.5" />
+                            </div>
+                            {{ $t('public.kyc_documents_pending') }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-5">
+                <div v-if="kycIdentity" class="flex items-center justify-end gap-3">
                     <Button
-                        v-if="kycIdentity"
                         type="button"
+                        size="small"
                         severity="danger"
                         class="w-[120px] disabled:cursor-not-allowed"
-                        :disabled="props.isLoading || !kycIdentity?.media || kycIdentity?.kyc_status !== 'pending'"
+                        :disabled="isLoading || !kycIdentity?.media || kycIdentity?.kyc_status !== 'pending'"
                         @click="openDialog('reject', kycIdentity.id)"
-                        >
-                        {{ $t('public.reject') }}
-                    </Button>
+                        :label="$t('public.reject')"
+                    />
                     <Button
-                        v-if="kycIdentity"
                         type="button"
-                        severity="primary"
+                        size="small"
+                        severity="success"
                         class="w-[120px] disabled:cursor-not-allowed"
-                        :disabled="props.isLoading || !kycIdentity?.media || kycIdentity?.kyc_status !== 'pending'"
+                        :disabled="isLoading || !kycIdentity?.media || kycIdentity?.kyc_status !== 'pending'"
                         @click="openDialog('approve', kycIdentity.id)"
-                        >
-                        {{ $t('public.approve') }}
-                    </Button>
+                        :label="$t('public.approve')"
+                    />
+                </div>
+                <div v-else class="flex items-center justify-end gap-3">
+                    <Button
+                        type="button"
+                        size="small"
+                        severity="danger"
+                        class="w-[120px]"
+                        disabled
+                        :label="$t('public.reject')"
+                    />
+                    <Button
+                        type="button"
+                        size="small"
+                        severity="success"
+                        class="w-[120px]"
+                        disabled
+                        :label="$t('public.approve')"
+                    />
                 </div>
             </div>
         </template>
@@ -189,12 +233,22 @@ const submit = (kycId) => {
                             :value="$t(`public.${kycResidency?.kyc_status}`)"
                             :severity="formatSeverity(kycResidency?.kyc_status)"
                         />
+                        <Tag
+                            v-else-if="isLoading"
+                            severity="secondary"
+                            :value="$t('public.loading')"
+                        />
+                        <Tag
+                            v-else
+                            severity="danger"
+                            :value="$t('public.unverified')"
+                        />
                     </div>
                 </div>
         </template>
-        
+
         <template #content>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-5">
                 <div class="grid grid-cols-1 gap-2">
                     <template v-if="props.isLoading || kycResidency">
                         <InputLabel for="residency_image">
@@ -203,74 +257,113 @@ const submit = (kycId) => {
                             <template v-else-if="kycResidency?.proof_type === 'residence_certificate'">{{ $t('public.residence_certificate') }}</template>
                             <template v-else>{{ $t('public.residency_proof') }}</template>
                         </InputLabel>
-                        <Avatar v-if="props.isLoading" class="w-full h-[50px] animate-pulse" />
+                        <div
+                            v-if="isLoading"
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                        >
+                            <div class="w-full flex items-center justify-center h-[40px]">
+                                <ProgressSpinner />
+                            </div>
+                        </div>
                         <template v-else-if="kycResidency?.media?.length">
-                            <a
-                                v-for="file in kycResidency?.media"
-                                :key="file.id"
-                                :href="`/member/media/download/${file.id}`"
-                                class="flex items-center px-4 py-3 gap-3 self-stretch select-none cursor-pointer rounded border border-surface-200 dark:border-surface-500 hover:bg-surface-200 dark:hover:bg-surface-500"
+                            <div
+                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                             >
-                                <span class="truncate text-surface-950 dark:text-white font-medium w-full">
-                                    {{ file.file_name }}
-                                </span>
-                            </a>
+                                <div class="w-full flex flex-col items-center gap-1 justify-center h-[40px] text-sm">
+                                    <span class="text-xs">{{ kycResidency?.media[0].file_name }}</span>
+                                    <Button
+                                        type="button"
+                                        as="a"
+                                        :href="`/member/media/download/${kycResidency?.media[0].id}`"
+                                        size="small"
+                                        severity="info"
+                                        class="w-[120px]"
+                                    >
+                                        <IconCloudDownload size="20" stroke-width="1.5"/>
+                                        <span class="text-xs">
+                                            {{ $t('public.download') }}
+                                        </span>
+                                    </Button>
+                                </div>
+                            </div>
                         </template>
                     </template>
 
-                    <div v-else="!kycResidency" class="grid grid-cols-1 gap-2">
-                        <div class="w-full flex flex-col items-start gap-1">
-                            {{ $t('public.kyc_documents_pending') }}
+                    <div v-else class="w-full flex flex-col items-start gap-1">
+                        <InputLabel>{{ $t('public.file') }}</InputLabel>
+                        <div
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                        >
+                            <div class="w-full flex flex-col items-center gap-3 justify-center h-[40px] text-sm">
+                                {{ $t('public.kyc_documents_pending') }}
+                            </div>
                         </div>
                     </div>
-
                 </div>
 
-                <div class="flex items-center justify-end gap-5">
+                <div v-if="kycResidency" class="flex items-center justify-end gap-3">
                     <Button
                         v-if="kycResidency"
                         type="button"
+                        size="small"
                         severity="danger"
-                        class="w-[120px] disabled:cursor-not-allowed"
+                        class="w-[120px]"
                         :disabled="props.isLoading || !kycResidency?.media || kycResidency?.kyc_status !== 'pending'"
                         @click="openDialog('reject', kycResidency.id)"
-                    >
-                        {{ $t('public.reject') }}
-                    </Button>
+                        :label="$t('public.reject')"
+                    />
                     <Button
                         v-if="kycResidency"
                         type="button"
-                        severity="primary"
-                        class="w-[120px] disabled:cursor-not-allowed"
+                        size="small"
+                        severity="success"
+                        class="w-[120px]"
                         :disabled="props.isLoading || !kycResidency?.media || kycResidency?.kyc_status !== 'pending'"
                         @click="openDialog('approve', kycResidency.id)"
-                    >
-                        {{ $t('public.approve') }}
-                    </Button>
+                        :label="$t('public.approve')"
+                    />
+                </div>
+                <div v-else class="flex items-center justify-end gap-3">
+                    <Button
+                        type="button"
+                        size="small"
+                        severity="danger"
+                        class="w-[120px]"
+                        disabled
+                        :label="$t('public.reject')"
+                    />
+                    <Button
+                        type="button"
+                        size="small"
+                        severity="success"
+                        class="w-[120px]"
+                        disabled
+                        :label="$t('public.approve')"
+                    />
                 </div>
             </div>
         </template>
     </Card>
 
     <!-- Dialog -->
-    <Dialog 
+    <Dialog
         v-model:visible="visible"
         modal
-        class="dialog-xs md:dialog-lg"
+        class="dialog-xs md:dialog-md"
     >
         <template #header>
             <div class="flex flex-col gap-1">
                 <span class="font-semibold text-lg">{{ approvalAction === 'reject' ? $t('public.reject_kyc_request') : $t('public.approve_kyc_request') }}</span>
                 <div class="text-surface-500 dark:text-surface-200 text-sm">
                     {{ $t('public.kyc_request_caption_1') }}
-                    <span class="font-semibold lowercase" :class="[approvalAction === 'approve' ? 'text-success-500' : 'text-error-500']">
+                    <span class="font-semibold lowercase" :class="[approvalAction === 'approve' ? 'text-green-500' : 'text-red-500']">
                         {{ $t(`public.${approvalAction}`) }}
                     </span>
                     {{ $t('public.kyc_request_caption_2') }}
                 </div>
             </div>
         </template>
-        
+
         <div class="flex flex-col gap-5">
             <div class="flex flex-col items-start gap-3 h-40 self-stretch">
                 <InputLabel for="remarks">{{ $t('public.remarks') }}</InputLabel>
@@ -278,9 +371,10 @@ const submit = (kycId) => {
                     <div v-for="(chip, index) in chips[approvalAction]" :key="index">
                         <Chip
                             :label="chip.label"
-                            class="w-full text-gray-950 whitespace-nowrap overflow-hidden"
+                            class="text-xs transition-all duration-200 border"
                             :class="{
-                                'border-primary-300 bg-primary-50 text-primary-500 hover:bg-primary-50': form.remarks === chip.label,
+                                'border-primary-300 bg-primary-50 text-primary-600 dark:bg-primary-950 dark:border-primary-900': form.remarks === chip.label,
+                                'border-transparent hover:bg-surface-200 dark:hover:bg-surface-700': form.remarks !== chip.label,
                             }"
                             @click="handleChipClick(chip.label)"
                         />
@@ -299,7 +393,7 @@ const submit = (kycId) => {
             </div>
 
             <div class="flex items-center justify-end gap-5">
-                <Button 
+                <Button
                     type="button"
                     severity="secondary"
                     class="w-[120px]"
@@ -307,7 +401,7 @@ const submit = (kycId) => {
                 >
                     {{ $t('public.cancel') }}
                 </Button>
-                <Button 
+                <Button
                     type="button"
                     severity="primary"
                     class="w-[120px]"

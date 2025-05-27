@@ -61,7 +61,7 @@ class MemberController extends Controller
                             $q->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
                                 ->orWhere('email', 'like', '%' . $keyword . '%')
                                 ->orWhere('id_number', 'like', '%' . $keyword . '%');
-                        });            
+                        });
                 });
             }
 
@@ -70,7 +70,7 @@ class MemberController extends Controller
                     $query->where('group_id', $data['filters']['group_id']);
                 });
             }
-    
+
             if ($data['filters']['upline_id']) {
                 $query->where('upline_id', $data['filters']['upline_id']);
             }
@@ -78,10 +78,10 @@ class MemberController extends Controller
             if ($data['filters']['status']) {
                 $query->where('status', $data['filters']['status']);
             }
-    
+
             if ($data['filters']['kyc_status']) {
                 $kycStatus = $data['filters']['kyc_status'];
-    
+
                 if ($kycStatus == 'verified') {
                     // Include users who have all KYC records verified
                     $query->whereHas('kycs', function ($kycQuery) {
@@ -105,7 +105,7 @@ class MemberController extends Controller
                     });
                 }
             }
-            
+
             // Handle sorting
             if ($data['sortField'] && $data['sortOrder']) {
                 $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
@@ -119,10 +119,10 @@ class MemberController extends Controller
             } else {
                 $query->orderByDesc('created_at');
             }
-    
+
             // Handle pagination
             $rowsPerPage = $data['rows'] ?? 15; // Default to 15 if 'rows' not provided
-            
+
             // // Export logic
             // if ($request->has('exportStatus') && $request->exportStatus) {
             //     $members = $query; // Fetch all members for export
@@ -138,7 +138,7 @@ class MemberController extends Controller
                 $group = $user->group->group ?? null;
                 $upline = $user->upline ?? null;
                 $rank = $user->rank ?? null;
-            
+
                 $user->capital = $user->active_subscriptions_sum_subscription_amount;
                 $user->profile_photo = $user?->getFirstMediaUrl('profile_photo');
 
@@ -148,7 +148,7 @@ class MemberController extends Controller
                 $user->group_id = $group?->id;
                 $user->group_name = $group?->name;
                 $user->group_color = $group?->color;
-            
+
                 $user->upline_id = $upline?->id;
                 $user->upline_name = $upline?->full_name;
                 $user->upline_email = $upline?->email;
@@ -164,7 +164,7 @@ class MemberController extends Controller
                 unset($user->upline);
                 unset($user->rank);
             }
-            
+
         }
 
         return response()->json([
@@ -207,7 +207,7 @@ class MemberController extends Controller
         $id_no = 'LID' . Str::padLeft($user->id, 6, "0");
         $user->id_number = $id_no;
         $user->save();
-        
+
         if ($upline->group){
             (new GroupService())->addUserToGroup($upline->group->group_id, $user->id);
             $group_rank_setting = $upline->group->group->group_rank_settings()->first();
@@ -231,7 +231,7 @@ class MemberController extends Controller
             'currency' => 'USD',
             'currency_symbol' => '$'
         ]);
-        
+
         return back()->with('toast', [
             'title' => trans("public.toast_create_member_success"),
             'type' => 'success',
@@ -259,7 +259,7 @@ class MemberController extends Controller
         $member = User::findOrFail($memberId);
         $excludedIds = $member->getChildrenIds();
         $excludedIds[] = $memberId;
-    
+
         // Fetch uplines who are not in the excluded list
         $uplines = User::whereNotIn('id', $excludedIds)
             ->get()
@@ -272,7 +272,7 @@ class MemberController extends Controller
                     // 'profile_photo' => $user->getFirstMediaUrl('profile_photo')
                 ];
             });
-    
+
         // Return the uplines as JSON
         return response()->json([
             'uplines' => $uplines
@@ -346,7 +346,7 @@ class MemberController extends Controller
                 (new GroupService())->updateUserGroup($group_id, $relatedUserId);
             }
         }
-        
+
         // Return a success response
         return back()->with('toast', [
             'title' => trans('public.toast_transfer_upline_success'),
@@ -391,9 +391,9 @@ class MemberController extends Controller
     {
         $user = User::with('country', 'group.group', 'upline', 'rank', 'active_subscriptions')
             ->findOrFail($request->id);
-    
+
         $capital = $user->active_subscriptions->sum('subscription_amount');
-    
+
         $userData = [
             'id' => $user->id,
             'username' => $user->username,
@@ -405,9 +405,11 @@ class MemberController extends Controller
             'phone' => $user->phone,
             'phone_number' => $user->phone_number,
             'country_id' => $user->country->id ?? null,
+            'country_iso2' => $user->country->iso2 ?? null,
             'country_name' => $user->country->name ?? null,
             'country_translations' => $user->country->translations ?? null,
             'nationality' => $user->nationality,
+            'identity_number' => $user->identity_number,
             'address' => $user->address,
             'upline_name' => $user->upline->full_name ?? null,
             'upline_id_number' => $user->upline->id_number ?? null,
@@ -425,66 +427,66 @@ class MemberController extends Controller
             'total_direct_ib' => $user->directChildren->where('role', 'ib')->count(),
             'kyc_status' => $user->kyc_status,
         ];
-    
+
         $paymentAccounts = $user->paymentAccounts()
             ->latest()
             ->get();
-    
+
         $kycs = $user->kycs
             ->whereIn('category', ['proof_of_identity', 'proof_of_residency'])
             ->keyBy('category');
-    
+
         $identity = $kycs->get('proof_of_identity');
         $residency = $kycs->get('proof_of_residency');
-    
+
         if ($identity) {
             $identity->front_image = $identity->getFirstMediaUrl('front_identity');
             $identity->back_image = $identity->getFirstMediaUrl('back_identity');
             $identity->passport_image = $identity->getFirstMediaUrl('passport_identity');
         }
-    
+
         if ($residency) {
             $residency->residency_proof = $residency->getFirstMediaUrl('residency_proof');
         }
-    
+
         return response()->json([
             'userDetail' => $userData,
             'paymentAccounts' => $paymentAccounts,
             'proof_of_identity' => $identity,
             'proof_of_residency' => $residency,
         ]);
-        }
-    
+    }
+
     public function getKycDetails(Request $request)
     {
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
         ]);
-    
+
         $kycs = Kyc::where('user_id', $request->user_id)
             ->whereIn('category', ['proof_of_identity', 'proof_of_residency'])
             ->get()
             ->keyBy('category');
-    
+
         $identity = $kycs->get('proof_of_identity');
         $residency = $kycs->get('proof_of_residency');
-    
+
         if ($identity) {
             $identity->front_image = $identity->getFirstMediaUrl('front_identity');
             $identity->back_image = $identity->getFirstMediaUrl('back_identity');
             $identity->passport_image = $identity->getFirstMediaUrl('passport_identity');
         }
-    
+
         if ($residency) {
             $residency->residency_proof = $residency->getFirstMediaUrl('residency_proof');
         }
-    
+
         return response()->json([
             'proof_of_identity' => $identity,
             'proof_of_residency' => $residency,
         ]);
     }
-                
+
     public function downloadMedia($mediaId)
     {
         // $media = Media::findOrFail($mediaId);
@@ -493,10 +495,10 @@ class MemberController extends Controller
         $media = Media::findOrFail($mediaId);
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
-    
+
         return $disk->download($media->getPath(), $media->file_name);
     }
-        
+
     public function updateKycStatus(Request $request)
     {
         $request->validate([
@@ -581,11 +583,11 @@ class MemberController extends Controller
             ->where('user_id', $request->id)
             ->where('category', 'trading_account')
             ->where('status', 'success');
-    
+
         $transactions = $query->whereIn('transaction_type', ['deposit', 'withdrawal'])
             ->latest()
             ->get();
-    
+
         $transaction_history = [];
         foreach ($transactions as $transaction) {
             $transaction_history[] = [
@@ -603,17 +605,17 @@ class MemberController extends Controller
                 'approval_at' => $transaction->approval_at,
             ];
         }
-    
+
         $wallets = Wallet::where('user_id', $request->id)
             ->whereIn('type', ['cash_wallet', 'bonus_wallet'])
             ->get();
-    
+
         return response()->json([
             'transactionHistory' => $transaction_history,
             'wallets' => $wallets,
         ]);
     }
-    
+
     public function walletAdjustment(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -626,19 +628,19 @@ class MemberController extends Controller
             'remarks' => trans('public.remarks'),
         ]);
         $validator->validate();
-    
+
         $action = $request->action;
         $amount = $request->amount;
         $wallet = Wallet::findOrFail($request->id);
-    
+
         // Validate balance for any *_out action
         if (Str::endsWith($action, '_out') && $wallet->balance < $amount) {
             throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
         }
-    
+
         $isOut = Str::endsWith($action, '_out');
         $isIn = Str::endsWith($action, '_in');
-    
+
         Transaction::create([
             'user_id' => $wallet->user_id,
             'category' => 'wallet',
@@ -656,16 +658,16 @@ class MemberController extends Controller
             'approval_at' => now(),
             'handle_by' => Auth::id(),
         ]);
-    
+
         $wallet->balance = $isOut ? $wallet->balance - $amount : $wallet->balance + $amount;
         $wallet->save();
-    
+
         return redirect()->back()->with('toast', [
             'title' => trans('public.wallet_adjustment_success'),
             'type' => 'success',
         ]);
     }
-    
+
     public function getTradingAccounts(Request $request)
     {
         $metaLogins = TradingAccount::query()
@@ -787,7 +789,7 @@ class MemberController extends Controller
         //         }
         //     }
         // }
-        
+
         // // Get the upline's group ID using the upline relationship
         // $groupId = $user->upline?->group->group_id ?? 1;
 

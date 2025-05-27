@@ -105,9 +105,6 @@ const activeIndex = ref(0);
                         :kycResidency="kycResidency"
                         :isLoading="isLoading"
                     />
-                    <!-- <PaymentAccount
-                        :paymentAccounts="paymentAccounts"
-                    /> -->
                 </div>
             </div>
 
