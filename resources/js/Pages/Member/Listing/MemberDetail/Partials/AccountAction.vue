@@ -3,31 +3,41 @@ import {
     TieredMenu,
     Dialog,
     useConfirm,
-    InputText,
     Button,
-    Avatar
 } from "primevue";
-import { IconDots, IconTrash, IconDatabaseEdit, IconSettingsDollar, IconScale, IconContract, IconKey } from "@tabler/icons-vue";
-import { h, onMounted, ref } from "vue";
+import {
+    IconDots,
+    IconTrash,
+    IconDatabaseEdit,
+    IconSettingsDollar,
+    IconScale,
+    IconKey,
+    IconListSearch
+} from "@tabler/icons-vue";
+import {computed, h, ref} from "vue";
 import AccountAdjustment from "@/Pages/Member/Account/Partials/AccountAdjustment.vue";
 import ChangeLeverage from "@/Pages/Member/Account/Partials/ChangeLeverage.vue";
-// import ChangeAccountGroup from "@/Pages/Member/Account/Partials/ChangeAccountGroup.vue";
 import ChangePassword from "@/Pages/Member/Account/Partials/ChangePassword.vue";
 import { trans } from "laravel-vue-i18n";
 import { router } from "@inertiajs/vue3";
+import AccountDetail from "@/Pages/Account/Partials/AccountDetail.vue";
 
 const props = defineProps({
     account: Object,
 })
 
-const toggle = (event) => {
-    menu.value.toggle(event);
-};
-
 const menu = ref();
 const visible = ref(false);
 const dialogType = ref('');
 const items = ref([
+    {
+        label: 'account_details',
+        icon: h(IconListSearch),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'account_details';
+        },
+    },
     {
         label: 'account_balance',
         icon: h(IconDatabaseEdit),
@@ -52,14 +62,6 @@ const items = ref([
             dialogType.value = 'change_leverage';
         },
     },
-    // {
-    //     label: 'change_account_type',
-    //     icon: h(IconContract),
-    //     command: () => {
-    //         visible.value = true;
-    //         dialogType.value = 'change_account_type';
-    //     },
-    // },
     {
         label: 'change_password',
         icon: h(IconKey),
@@ -68,21 +70,27 @@ const items = ref([
             dialogType.value = 'change_password';
         },
     },
-    {
-        separator: true
-    },
-    {
-        label: 'delete_account',
-        icon: h(IconTrash),
-        command: () => {
-            requireConfirmation('delete_account')
-        }
-    }
 ]);
 
-const filteredItems = ref(
-    items.value.filter(item => item.label !== 'change_password' || props.account?.type !== 'virtual')
-);
+const filteredItems = computed(() => {
+    return items.value.filter(item => {
+        if (item.label === 'change_password' && props.account.account_type.type === 'virtual') {
+            return false;
+        }
+
+        if (['account_balance', 'account_credit', 'change_leverage'].includes(item.label)) {
+            if (props.account.trading_master || props.account.has_active_or_pending_subscriptions) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+});
+
+const toggle = (event) => {
+    menu.value.toggle(event);
+};
 
 const confirm = useConfirm();
 
@@ -133,7 +141,7 @@ const requireConfirmation = (action_type) => {
             aria-haspopup="true"
             aria-controls="overlay_tmenu"
         >
-            <IconDots size="16" stroke-width="1.25" />
+            <IconDots size="16" stroke-width="1.5" />
         </Button>
 
         <TieredMenu ref="menu" id="overlay_tmenu" :model="filteredItems" popup>
@@ -142,7 +150,7 @@ const requireConfirmation = (action_type) => {
                     class="flex items-center gap-3 self-stretch"
                     v-bind="props.action"
                 >
-                    <component :is="item.icon" size="20" stroke-width="1.25" :color="item.label === 'delete_account' ? '#F04438' : '#667085'" />
+                    <component :is="item.icon" size="20" stroke-width="1.5" :color="item.label === 'delete_account' ? '#F04438' : '#71717a'" />
                     <span class="font-medium" :class="{'text-red-500': item.label === 'delete_account'}">{{ $t(`public.${item.label}`) }}</span>
                 </div>
             </template>
@@ -155,6 +163,11 @@ const requireConfirmation = (action_type) => {
         :header="dialogType === 'account_balance' || dialogType === 'account_credit' ? $t(`public.${dialogType + '_adjustment'}`) : $t(`public.${dialogType}`)"
         class="dialog-xs sm:dialog-sm"
     >
+        <template v-if="dialogType === 'account_details'">
+            <AccountDetail
+                :account="account"
+            />
+        </template>
         <template v-if="dialogType === 'account_balance'|| dialogType === 'account_credit' ">
             <AccountAdjustment
                 :account="account"
@@ -168,12 +181,6 @@ const requireConfirmation = (action_type) => {
                 @update:visible="visible = false"
             />
         </template>
-        <!-- <template v-if="dialogType === 'change_account_type'">
-            <ChangeAccountGroup
-                :account="account"
-                @update:visible="visible = false"
-            />
-        </template> -->
         <template v-if="dialogType === 'change_password'">
             <ChangePassword
                 :account="account"

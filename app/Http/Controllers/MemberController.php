@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Throwable;
 
 class MemberController extends Controller
 {
@@ -383,7 +384,8 @@ class MemberController extends Controller
         $user = User::where('id_number', $id_number)->select('id')->first();
 
         return Inertia::render('Member/Listing/MemberDetail/MemberDetail', [
-            'user' => $user
+            'user' => $user,
+            'tradingAccountsCount' => $user->active_trading_accounts()->count(),
         ]);
     }
 
@@ -668,6 +670,9 @@ class MemberController extends Controller
         ]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function getTradingAccounts(Request $request)
     {
         $metaLogins = TradingAccount::query()
@@ -680,35 +685,26 @@ class MemberController extends Controller
             }
         }
 
-        // Fetch trading accounts based on user ID
-        $tradingAccountsData = [];
-
-        $tradingAccounts = TradingAccount::query()
+        $tradingAccounts = TradingAccount::with([
+            'user',
+            'user.media',
+            'account_type',
+            'active_subscriptions:meta_login,master_meta_login,approval_at',
+            'active_subscriptions.trading_master:meta_login,master_name',
+            'trading_master:meta_login',
+            'trading_user'
+        ])
+            ->withSum('active_subscriptions', 'subscription_amount')
             ->where('user_id', $request->id)
-            ->with('account_type', 'trading_user')
             ->get();
 
-        foreach ($tradingAccounts as $trading_account) {
-            $tradingAccountsData[] = [
-                'id' => $trading_account->id,
-                'meta_login' => $trading_account->meta_login,
-                'account_type_id' => $trading_account->account_type->id,
-                'account_type_name' => $trading_account->account_type->name,
-                'account_category' => $trading_account->account_type->category,
-                'type' => $trading_account->account_type->type,
-                'balance' => $trading_account->balance,
-                'credit' => $trading_account->credit,
-                'equity' => $trading_account->equity,
-                'margin_leverage' => $trading_account->margin_leverage,
-                'account_type_color' => $trading_account->account_type->color,
-                'user_name' => $trading_account->trading_user->name,
-                'updated_at' => $trading_account->updated_at,
-            ];
-        }
+        $tradingAccounts->transform(function ($account) {
+            $account->has_active_or_pending_subscriptions = $account->has_active_or_pending_subscriptions();
+            return $account;
+        });
 
-        // Return the response as JSON
         return response()->json([
-            'tradingAccounts' => $tradingAccountsData,
+            'tradingAccounts' => $tradingAccounts,
         ]);
     }
 

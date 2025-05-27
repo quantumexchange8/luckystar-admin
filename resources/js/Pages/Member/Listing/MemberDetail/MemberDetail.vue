@@ -12,7 +12,8 @@ import PaymentAccount from "@/Pages/Member/Listing/MemberDetail/PaymentAccount.v
 import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
 
 const props = defineProps({
-    user: Object
+    user: Object,
+    tradingAccountsCount: Number
 })
 
 const isLoading = ref(false);
@@ -53,7 +54,10 @@ const tabs = ref([
     },
     {
         title: 'trading_accounts',
-        component: h(TradingAccount, {user_id: props.user.id}),
+        component: h(TradingAccount, {
+            user_id: props.user.id,
+            tradingAccountsCount: props.tradingAccountsCount
+        }),
         value: 1
     },
     {
@@ -87,7 +91,7 @@ const activeIndex = ref(0);
                 </Button>
                 <IconChevronRight
                     :size="16"
-                    stroke-width="1.25"
+                    stroke-width="1.5"
                     class="dark:text-white"
                 />
                 <span class="flex px-4 py-2 text-surface-400 dark:text-surface-200 items-center justify-center text-sm font-medium">{{ userDetail?.name }} - {{ $t('public.view_member_details') }}</span>
