@@ -259,7 +259,7 @@ const submit = (kycId) => {
                         </InputLabel>
                         <div
                             v-if="isLoading"
-                            class="flex flex-col items-center justify-center self-stretch"
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                         >
                             <div class="w-full flex items-center justify-center">
                                 <ProgressSpinner />
@@ -267,9 +267,10 @@ const submit = (kycId) => {
                         </div>
                         <template v-else-if="kycResidency?.media?.length">
                             <div
-                                class="flex flex-col items-center justify-center self-stretch"
+                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                             >
-                                <div class="w-full flex items-center justify-center">
+                                <div class="w-full flex flex-col items-center gap-3 justify-center text-sm">
+                                    <span class="text-xs">{{ kycResidency?.media[0].file_name }}</span>
                                     <Button
                                         type="button"
                                         as="a"
@@ -287,9 +288,9 @@ const submit = (kycId) => {
                     <div v-else class="w-full flex flex-col items-start gap-1">
                         <InputLabel>{{ $t('public.file') }}</InputLabel>
                         <div
-                            class="flex flex-col items-center justify-center self-stretch"
+                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                         >
-                            <div class="w-full flex items-center justify-center">
+                            <div class="w-full flex flex-col items-center gap-3 justify-center text-sm">
                                 {{ $t('public.kyc_documents_pending') }}
                             </div>
                         </div>

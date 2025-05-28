@@ -131,9 +131,10 @@ const closeDialog = () => {
 
                             <div
                                 v-else
-                                class="flex flex-col items-center justify-center self-stretch"
+                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                             >
-                                <div class="w-full flex items-center">
+                                <div class="w-full flex flex-col items-center gap-3 justify-center h-[100px] text-sm">
+                                    <span class="font-semibold">{{ file.file_name }}</span>
                                     <Button
                                         type="button"
                                         as="a"
