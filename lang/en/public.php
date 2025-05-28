@@ -39,6 +39,7 @@ return [
     "female" => "Female",
     "media" => "Media",
     "file" => "File",
+    "view_file" => "View File",
     "download" => "Download",
     "paginator_caption" => "Showing {first} to {last} of {totalRecords} entries",
     "dashboard" => "Dashboard",

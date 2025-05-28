@@ -131,24 +131,18 @@ const closeDialog = () => {
 
                             <div
                                 v-else
-                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                                class="flex flex-col items-center justify-center self-stretch"
                             >
-                                <div class="w-full flex flex-col items-center gap-3 justify-center h-[100px] text-sm">
-                                    <span class="font-semibold">{{ file.file_name }}</span>
+                                <div class="w-full flex items-center">
                                     <Button
-                                        severity="info"
                                         type="button"
-                                        size="small"
                                         as="a"
-                                        :href="`/member/media/download/${file.id}`"
+                                        :label="$t('public.view_file')"
+                                        :href="file.original_url"
                                         target="_blank"
-                                        class="w-fit"
-                                    >
-                                        <IconCloudDownload size="20" stroke-width="1.5"/>
-                                        <span class="text-xs">
-                                            {{ $t('public.download') }}
-                                        </span>
-                                    </Button>
+                                        size="small"
+                                        severity="secondary"
+                                    />
                                 </div>
                             </div>
                         </template>

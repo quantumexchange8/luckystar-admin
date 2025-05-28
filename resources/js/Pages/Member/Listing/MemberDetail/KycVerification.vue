@@ -259,31 +259,26 @@ const submit = (kycId) => {
                         </InputLabel>
                         <div
                             v-if="isLoading"
-                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                            class="flex flex-col items-center justify-center self-stretch"
                         >
-                            <div class="w-full flex items-center justify-center h-[40px]">
+                            <div class="w-full flex items-center justify-center">
                                 <ProgressSpinner />
                             </div>
                         </div>
                         <template v-else-if="kycResidency?.media?.length">
                             <div
-                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                                class="flex flex-col items-center justify-center self-stretch"
                             >
-                                <div class="w-full flex flex-col items-center gap-1 justify-center h-[40px] text-sm">
-                                    <span class="text-xs">{{ kycResidency?.media[0].file_name }}</span>
+                                <div class="w-full flex items-center justify-center">
                                     <Button
                                         type="button"
                                         as="a"
-                                        :href="`/member/media/download/${kycResidency?.media[0].id}`"
+                                        :label="$t('public.view_file')"
+                                        :href="kycResidency?.media[0].original_url"
+                                        target="_blank"
                                         size="small"
-                                        severity="info"
-                                        class="w-[120px]"
-                                    >
-                                        <IconCloudDownload size="20" stroke-width="1.5"/>
-                                        <span class="text-xs">
-                                            {{ $t('public.download') }}
-                                        </span>
-                                    </Button>
+                                        severity="secondary"
+                                    />
                                 </div>
                             </div>
                         </template>
@@ -292,9 +287,9 @@ const submit = (kycId) => {
                     <div v-else class="w-full flex flex-col items-start gap-1">
                         <InputLabel>{{ $t('public.file') }}</InputLabel>
                         <div
-                            class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                            class="flex flex-col items-center justify-center self-stretch"
                         >
-                            <div class="w-full flex flex-col items-center gap-3 justify-center h-[40px] text-sm">
+                            <div class="w-full flex items-center justify-center">
                                 {{ $t('public.kyc_documents_pending') }}
                             </div>
                         </div>
