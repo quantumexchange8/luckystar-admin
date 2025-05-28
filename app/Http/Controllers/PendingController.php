@@ -136,7 +136,6 @@ class PendingController extends Controller
                         'user_id' => $master->user_id,
                         'category' => 'trading_account',
                         'transaction_type' => 'invest_capital',
-                        'from_meta_login' => $investment->meta_login,
                         'to_meta_login' => $master->meta_login,
                         'ticket' => $deal['deal_Id'] ?? null,
                         'transaction_number' => RunningNumberService::getID('transaction'),
@@ -201,7 +200,7 @@ class PendingController extends Controller
 
             if ($data['filters']['global']) {
                 $keyword = $data['filters']['global'];
-            
+
                 $query->where(function ($q) use ($keyword) {
                     $q->whereHas('user', function ($query) use ($keyword) {
                         $query->where(function ($q) use ($keyword) {
@@ -213,7 +212,7 @@ class PendingController extends Controller
                     });
                 });
             }
-            
+
             if (!empty($data['filters']['start_date']) && !empty($data['filters']['end_date'])) {
                 $start_date = Carbon::parse($data['filters']['start_date'])->addDay()->startOfDay();
                 $end_date = Carbon::parse($data['filters']['end_date'])->addDay()->endOfDay();
@@ -226,7 +225,7 @@ class PendingController extends Controller
                     $q->where('group_id', $data['filters']['group_id']);
                 });
             }
-            
+
             if (!empty($data['filters']['category'])) {
                 $query->where('category', $data['filters']['category']);
             }
@@ -255,7 +254,7 @@ class PendingController extends Controller
                     $kyc->id_number = $kyc->user->id_number ?? null;
                     $kyc->identity_number = $kyc->user->identity_number ?? null;
                     $kyc->address = $kyc->user->address ?? null;
-            
+
                     if ($kyc->user->relationLoaded('group') && $kyc->user->group && $kyc->user->group->relationLoaded('group') && $kyc->user->group->group) {
                         $group = $kyc->user->group->group;
                         $kyc->group_id = $group->id ?? null;
@@ -265,10 +264,10 @@ class PendingController extends Controller
                         $kyc->parent_group_id = $group->parent_group_id ?? null;
                     }
                 }
-            
+
                 unset($kyc->user);
             }
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $kycs,
@@ -289,22 +288,22 @@ class PendingController extends Controller
             'action' => trans('public.action'),
             'remarks' => trans('public.remarks'),
         ])->validate();
-    
+
         $kycRequest = Kyc::find($request->kyc_id);
-    
+
         if ($kycRequest && $kycRequest->kyc_status == 'pending') {
             if ($request->action === 'approve') {
                 $kycRequest->kyc_status = 'verified';
             } elseif ($request->action === 'reject') {
                 $kycRequest->kyc_status = 'unverified';
             }
-    
+
             $kycRequest->kyc_approval_at = Carbon::now();
-    
+
             if ($request->remarks) {
                 $kycRequest->kyc_approval_description = $request->remarks;
             }
-    
+
             $kycRequest->save();
         } else {
             return back()->with('toast', [
@@ -313,12 +312,12 @@ class PendingController extends Controller
                 'type' => 'warning',
             ]);
         }
-    
+
         return back()->with('toast', [
             'title' => trans('public.success'),
             'message' => trans('public.toast_kyc_approval_success'),
             'type' => 'success',
         ]);
     }
-    
+
 }

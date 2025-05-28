@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('account')->group(function () {
         Route::get('/listing', [AccountController::class, 'account_listing'])->name('account.listing');
         Route::get('/getAccountsData', [AccountController::class, 'getAccountsData'])->name('account.getAccountsData');
+        Route::get('/getAccountTransaction', [AccountController::class, 'getAccountTransaction'])->name('account.getAccountTransaction');
     });
 
     /**

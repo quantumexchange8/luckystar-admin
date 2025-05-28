@@ -478,4 +478,53 @@ class AccountController extends Controller
 
         return response()->json(['success' => false, 'data' => []]);
     }
+
+    public function getAccountTransaction(Request $request)
+    {
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
+            $meta_login = $data['filters']['meta_login']['value'];
+
+            $query = Transaction::where([
+                'category' => 'trading_account',
+                'status' => 'success',
+            ])->where(function ($q) use ($meta_login) {
+                $q->where('from_meta_login', $meta_login)
+                    ->orWhere('to_meta_login', $meta_login);
+            });
+
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay();
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                $query->whereBetween('created_at', [$start_date, $end_date]);
+            }
+
+            if (!empty($data['filters']['types']['value'])) {
+                $query->whereIn('transaction_type', $data['filters']['types']['value']);
+            }
+
+            //sort field/order
+            if ($data['sortField'] && $data['sortOrder']) {
+                $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
+                $query->orderBy($data['sortField'], $order);
+            } else {
+                $query->orderByDesc('updated_at')
+                    ->orderByDesc('id');
+            }
+
+//            if ($request->has('exportStatus')) {
+//                return Excel::download(new InvestmentExport($query, $status), now() . '-investment-report.xlsx');
+//            }
+
+            $accounts = $query->paginate($data['rows']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $accounts,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'data' => []]);
+    }
 }

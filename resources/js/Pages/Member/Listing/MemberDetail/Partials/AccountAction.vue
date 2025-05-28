@@ -12,7 +12,8 @@ import {
     IconSettingsDollar,
     IconScale,
     IconKey,
-    IconListSearch
+    IconListSearch,
+    IconReport
 } from "@tabler/icons-vue";
 import {computed, h, ref} from "vue";
 import AccountAdjustment from "@/Pages/Member/Account/Partials/AccountAdjustment.vue";
@@ -21,6 +22,7 @@ import ChangePassword from "@/Pages/Member/Account/Partials/ChangePassword.vue";
 import { trans } from "laravel-vue-i18n";
 import { router } from "@inertiajs/vue3";
 import AccountDetail from "@/Pages/Account/Partials/AccountDetail.vue";
+import AccountReport from "@/Pages/Account/Partials/AccountReport.vue";
 
 const props = defineProps({
     account: Object,
@@ -36,6 +38,14 @@ const items = ref([
         command: () => {
             visible.value = true;
             dialogType.value = 'account_details';
+        },
+    },
+    {
+        label: 'account_report',
+        icon: h(IconReport),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'account_report';
         },
     },
     {
@@ -160,11 +170,19 @@ const requireConfirmation = (action_type) => {
     <Dialog
         v-model:visible="visible"
         modal
-        :header="dialogType === 'account_balance' || dialogType === 'account_credit' ? $t(`public.${dialogType + '_adjustment'}`) : $t(`public.${dialogType}`)"
-        class="dialog-xs sm:dialog-sm"
+        :header="dialogType === 'account_balance' || dialogType === 'account_credit' ? $t(`public.${dialogType + '_adjustment'}`) : `${$t(`public.${dialogType}`)} #${account.meta_login}`"
+        :class="{
+            'dialog-xs md:dialog-sm': dialogType !== 'account_report',
+            'dialog-xs md:dialog-md': dialogType === 'account_report',
+        }"
     >
         <template v-if="dialogType === 'account_details'">
             <AccountDetail
+                :account="account"
+            />
+        </template>
+        <template v-if="dialogType === 'account_report'">
+            <AccountReport
                 :account="account"
             />
         </template>
