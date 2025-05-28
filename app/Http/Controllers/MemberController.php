@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kyc;
 use App\Models\User;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Inertia\Inertia;
 use App\Models\Group;
 use App\Models\Wallet;
@@ -45,7 +46,13 @@ class MemberController extends Controller
         if ($request->has('lazyEvent')) {
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true); //only() extract parameters in lazyEvent
 
-            $query = User::with('group.group:id,name,color', 'country:id,name,translations', 'upline:id,first_name,last_name,email,id_number', 'rank:id,rank_name')
+            $query = User::with([
+                'group.group:id,name,color',
+                'country:id,name,translations',
+                'upline:id,first_name,last_name,email,id_number',
+                'rank:id,rank_name',
+                'media',
+            ])
                 ->withSum('active_subscriptions', 'subscription_amount')
                 ->whereNot('role', 'super_admin');
 
@@ -121,26 +128,20 @@ class MemberController extends Controller
                 $query->orderByDesc('created_at');
             }
 
-            // Handle pagination
-            $rowsPerPage = $data['rows'] ?? 15; // Default to 15 if 'rows' not provided
-
             // // Export logic
             // if ($request->has('exportStatus') && $request->exportStatus) {
             //     $members = $query; // Fetch all members for export
             //     return Excel::download(new MemberListingExport($members), now() . '-members.xlsx');
             // }
 
-            $query->select('id', 'first_name', 'last_name', 'username', 'email', 'id_number', 'country_id', 'upline_id', 'hierarchyList', 'role', 'setting_rank_id', 'status');
-
-            $users = $query->paginate($rowsPerPage);
-
-            foreach ($users as $user) {
+            $users = $query->paginate($data['rows']);
+            $users->getCollection()->transform(function ($user) {
                 $country = $user->country ?? null;
                 $group = $user->group->group ?? null;
                 $upline = $user->upline ?? null;
                 $rank = $user->rank ?? null;
 
-                $user->capital = $user->active_subscriptions_sum_subscription_amount;
+                $user->active_capital = $user->active_subscriptions_sum_subscription_amount;
                 $user->profile_photo = $user?->getFirstMediaUrl('profile_photo');
 
                 $user->country_name = $country?->name;
@@ -164,14 +165,18 @@ class MemberController extends Controller
                 unset($user->group);
                 unset($user->upline);
                 unset($user->rank);
-            }
+                unset($user->media);
 
+                return $user;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $users,
+            ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $users,
-        ]);
+        return response()->json(['success' => false, 'data' => []]);
     }
 
     public function addNewMember(AddMemberRequest $request)
@@ -495,7 +500,7 @@ class MemberController extends Controller
         // return Storage::disk('s3')->download($media->getPath(), $media->file_name);
 
         $media = Media::findOrFail($mediaId);
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 
         return $disk->download($media->getPath(), $media->file_name);

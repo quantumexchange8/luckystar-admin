@@ -399,7 +399,7 @@ class AccountController extends Controller
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
 
             $query = TradingAccount::with([
-                'user',
+                'user:id,first_name,last_name,email,username',
                 'user.media',
                 'user.upline',
                 'user.group.group:id,name,group_leader_id,color',

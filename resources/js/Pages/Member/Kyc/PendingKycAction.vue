@@ -70,6 +70,11 @@ const closeDialog = () => {
                 <span class="text-sm font-medium">{{ kyc.full_name }}</span>
                 <span class="text-surface-500 text-sm">{{ kyc.email }}</span>
             </div>
+            <Tag
+                severity="contrast"
+                class="w-fit text-nowrap"
+                :value="$t('public.' + kyc.proof_type)"
+            />
         </div>
 
         <div class="flex flex-col items-center gap-4 self-stretch">
@@ -92,21 +97,13 @@ const closeDialog = () => {
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
                     <div class="w-[140px] text-surface-500 text-xs font-medium">
-                        {{ $t('public.proof_type') }}
-                    </div>
-                    <div class="text-surface-950 dark:text-white text-sm font-medium">
-                        {{ $t('public.' + kyc.proof_type) }}
-                    </div>
-                </div>
-                <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
-                    <div class="w-[140px] text-surface-500 text-xs font-medium">
                         {{ $t('public.ic_passport_no') }}
                     </div>
                     <div class="text-surface-950 dark:text-white text-sm font-medium">
                         {{ kyc.identity_number }}
                     </div>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
+                <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                     <div class="w-[140px] text-surface-500 text-xs font-medium">
                         {{ $t('public.address') }}
                     </div>
@@ -115,40 +112,44 @@ const closeDialog = () => {
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-start gap-1 self-stretch">
-                    <div class="w-[140px] text-surface-500 text-xs font-medium">
+                    <div class="min-w-[140px] text-surface-500 text-xs font-medium">
                         {{ $t('public.file') }}
                     </div>
-                    <div class="flex flex-col gap-2 overflow-hidden max-w-full">
+                    <div class="flex flex-col gap-2 overflow-hidden w-full">
                         <template v-for="file in kyc.media" :key="file.id">
-                            <div  v-if="file.mime_type.startsWith('image/')" class="w-full flex flex-col gap-3 items-center p-3 rounded-md border-2 border-dashed">
+                            <div
+                                v-if="file.mime_type.startsWith('image/')"
+                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                            >
                                 <Image
                                     :src="file.original_url"
                                     :alt="file.file_name"
                                     preview
-                                    imageClass="w-full h-[100px] object-contain"
+                                    imageClass="w-full h-[120px] object-contain"
                                 />
                             </div>
-                            
-                            <div v-else class="flex flex-col gap-1">
-                                <span class="truncate text-surface-950 dark:text-white font-medium w-full">
-                                    {{ file.file_name }}
-                                </span>
 
-                                <Button
-                                    severity="info"
-                                    rounded
-                                    type="button"
-                                    size="small"
-                                    as="a"
-                                    :href="`/member/media/download/${file.id}`"
-                                    target="_blank"
-                                    class="w-fit"
-                                >
-                                    <IconCloudDownload size="20" stroke-width="1.5"/>
-                                    <span class="truncate font-medium">
-                                        {{ $t('public.download') }}
-                                    </span>
-                                </Button>
+                            <div
+                                v-else
+                                class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
+                            >
+                                <div class="w-full flex flex-col items-center gap-3 justify-center h-[100px] text-sm">
+                                    <span class="font-semibold">{{ file.file_name }}</span>
+                                    <Button
+                                        severity="info"
+                                        type="button"
+                                        size="small"
+                                        as="a"
+                                        :href="`/member/media/download/${file.id}`"
+                                        target="_blank"
+                                        class="w-fit"
+                                    >
+                                        <IconCloudDownload size="20" stroke-width="1.5"/>
+                                        <span class="text-xs">
+                                            {{ $t('public.download') }}
+                                        </span>
+                                    </Button>
+                                </div>
                             </div>
                         </template>
                     </div>

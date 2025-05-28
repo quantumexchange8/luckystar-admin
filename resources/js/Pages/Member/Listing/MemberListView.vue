@@ -38,10 +38,6 @@ const dt = ref();
 const users = ref();
 const totalRecords = ref(0);
 const first = ref(0);
-const rows = ref(10);
-const page = ref(0);
-const sortField = ref(null);  
-const sortOrder = ref(null);  // (1 for ascending, -1 for descending)
 const { formatRgbaColor, formatAmount, formatNameLabel } = generalFormat();
 const { locale } = useLangObserver();
 
@@ -87,12 +83,6 @@ watchEffect(() => {
         loadLazyData();
     }
 });
-
-// Watch for changes on the entire 'filters' object and debounce the API call
-watch(filters, debounce(() => {
-    page.value = 0; // Reset to first page when filters change
-    loadLazyData(); // Call loadLazyData function to fetch the data
-}, 1000), { deep: true });
 
 // Watch for individual changes in upline_id and group_id and apply them to filters
 watch([upline_id, group_id], ([newUplineId, newGroupId], [oldUplineId, oldGroupId]) => {
@@ -255,7 +245,6 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
             lazy
             removableSort
             :first="first"
-            :page="page"
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"
             tableStyle="md:min-width: 50rem"
@@ -326,16 +315,16 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                     <template #body="slotProps">
                         <div class="text-surface-950 dark:text-white text-sm flex flex-wrap gap-1 items-center truncate">
                             {{ slotProps.data.id_number }}
-                            <IconAlertCircleFilled  
-                                :size="20" 
-                                stroke-width="1.25" 
-                                class="text-red-500 grow-0 shrink-0" 
+                            <IconAlertCircleFilled
+                                :size="20"
+                                stroke-width="1.25"
+                                class="text-red-500 grow-0 shrink-0"
                                 v-if="slotProps.data.kyc_status == 'pending'"
                             />
-                            <!-- <IconAlertCircleFilled  
-                                :size="20" 
-                                stroke-width="1.25" 
-                                class="text-red-500 grow-0 shrink-0" 
+                            <!-- <IconAlertCircleFilled
+                                :size="20"
+                                stroke-width="1.25"
+                                class="text-red-500 grow-0 shrink-0"
                                 v-if="slotProps.data.kyc_status == 'pending'"
                                 v-tooltip.top="$t('public.trading_account_inactive_warning')"
                             /> -->
@@ -460,13 +449,13 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                     </template>
                 </Column>
                 <Column
-                    field="capital"
+                    field="active_capital"
                     sortable
                     :header="$t('public.capital')"
                     class="hidden md:table-cell"
                 >
                     <template #body="slotProps">
-                        {{ formatAmount(slotProps.data.capital ?? 0) }}
+                        {{ formatAmount(slotProps.data.active_capital ?? 0) }}
                     </template>
                 </Column>
                 <Column
@@ -501,16 +490,16 @@ watch([totalVerified, totalUnverified, totalUsers], () => {
                                     <div class="flex flex-col items-start">
                                         <div class="font-medium flex items-center justify-between max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
                                             <span class="truncate">{{ slotProps.data.full_name }}</span>
-                                            <IconAlertCircleFilled  
-                                                :size="20" 
-                                                stroke-width="1.25" 
-                                                class="text-red-500 flex-shrink-0 ml-2" 
+                                            <IconAlertCircleFilled
+                                                :size="20"
+                                                stroke-width="1.25"
+                                                class="text-red-500 flex-shrink-0 ml-2"
                                                 v-if="slotProps.data.kyc_status == 'pending'"
                                             />
-                                            <!-- <IconAlertCircleFilled  
-                                                :size="20" 
-                                                stroke-width="1.25" 
-                                                class="text-red-500 flex-shrink-0 ml-2" 
+                                            <!-- <IconAlertCircleFilled
+                                                :size="20"
+                                                stroke-width="1.25"
+                                                class="text-red-500 flex-shrink-0 ml-2"
                                                 v-if="slotProps.data.kyc_status == 'pending'"
                                                 v-tooltip.top="$t('public.trading_account_inactive_warning')"
                                             /> -->

@@ -91,11 +91,17 @@ class User extends Authenticatable implements HasMedia
 
     public function getKycStatusAttribute(): string
     {
-        if ($this->kycs()->count() === 0) {
+        if (!$this->relationLoaded('kycs')) {
+            return 'unverified'; // or optionally lazy load: $this->load('kycs')
+        }
+
+        $kycs = $this->kycs;
+
+        if ($kycs->isEmpty()) {
             return 'unverified';
         }
 
-        return $this->kycs()->where('kyc_status', '!=', 'verified')->exists() ? 'unverified' : 'verified';
+        return $kycs->where('kyc_status', '!=', 'verified')->isNotEmpty() ? 'unverified' : 'verified';
     }
 
     public function country(): BelongsTo
