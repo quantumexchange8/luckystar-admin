@@ -433,7 +433,7 @@ const exportReport = () => {
                     >
                         <template #body="{data}">
                             <div class="flex flex-col">
-                                <span class="font-semibold">{{ data.trading_master.master_name }}</span>
+                                <span class="font-semibold text-nowrap">{{ data.trading_master.master_name }}</span>
                                 <span class="text-xs text-surface-500">{{ data.master_meta_login }}</span>
                             </div>
                         </template>
@@ -447,7 +447,7 @@ const exportReport = () => {
                         <template #body="{data}">
                             <Tag
                                 severity="secondary"
-                                class="text-xs"
+                                class="text-xs text-nowrap"
                                 :value="data.trading_master.account_type.name"
                             />
                         </template>
@@ -472,7 +472,7 @@ const exportReport = () => {
                             <Tag
                                 severity="warn"
                                 :value="dayjs().diff(dayjs(data.approval_at), 'day') + ' ' + $t('public.days')"
-                                class="text-xs lowercase"
+                                class="text-xs lowercase text-nowrap"
                             />
                         </template>
                     </Column>

@@ -351,13 +351,13 @@ watchEffect(() => {
                     </Column>
                     <Column
                         field="account_type"
-                        class="table-cell min-w-36"
+                        class="table-cell"
                         :header="$t('public.account_type')"
                     >
                         <template #body="{data}">
                             <Tag
                                 severity="secondary"
-                                class="text-xs"
+                                class="text-xs text-nowrap"
                                 :value="data.account_type.name"
                             />
                         </template>

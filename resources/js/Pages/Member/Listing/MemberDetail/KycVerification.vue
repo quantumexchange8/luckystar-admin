@@ -269,16 +269,17 @@ const submit = (kycId) => {
                             <div
                                 class="flex flex-col justify-center gap-3 items-center self-stretch p-3 rounded-md border-2 border-dashed transition-colors duration-150 bg-surface-50 dark:bg-surface-950 border-surface-300 dark:border-surface-600"
                             >
-                                <div class="w-full flex flex-col items-center gap-3 justify-center text-sm">
+                                <div class="w-full flex flex-col items-center gap-1 justify-center text-sm h-10">
                                     <span class="text-xs">{{ kycResidency?.media[0].file_name }}</span>
                                     <Button
                                         type="button"
                                         as="a"
+                                        text
                                         :label="$t('public.view_file')"
                                         :href="kycResidency?.media[0].original_url"
                                         target="_blank"
                                         size="small"
-                                        severity="secondary"
+                                        severity="info"
                                     />
                                 </div>
                             </div>
