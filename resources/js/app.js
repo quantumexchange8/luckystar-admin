@@ -10,7 +10,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import Tooltip from 'primevue/tooltip';
 import { i18nVue } from 'laravel-vue-i18n';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Lucky Star Admin';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

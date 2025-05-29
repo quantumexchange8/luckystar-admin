@@ -8,7 +8,7 @@
             <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
         @endif
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Lucky Star Admin') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

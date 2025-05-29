@@ -14,7 +14,6 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\TradingAccount;
 use App\Services\GroupService;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +28,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Throwable;
+use Carbon\Carbon;
 
 class MemberController extends Controller
 {
@@ -42,29 +42,28 @@ class MemberController extends Controller
 
     public function getMemberListingData(Request $request)
     {
-
         if ($request->has('lazyEvent')) {
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true); //only() extract parameters in lazyEvent
 
             $query = User::with([
                 'group.group:id,name,color',
-                'country:id,name,translations',
+                'country:id,name,translations,iso2',
                 'upline:id,first_name,last_name,email,id_number',
                 'rank:id,rank_name',
                 'media',
+                'kycs'
             ])
                 ->withSum('active_subscriptions', 'subscription_amount')
                 ->whereNot('role', 'super_admin');
 
-            $search = $data['filters']['global'];
-            if ($search) {
-                $query->where(function ($query) use ($search) {
-                    $keyword = $search;
 
+            if ($data['filters']['global']['value']) {
+                $keyword = $data['filters']['global']['value'];
+
+                $query->where(function ($query) use ($keyword) {
                     $query->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
                         ->orWhere('email', 'like', '%' . $keyword . '%')
                         ->orWhere('id_number', 'like', '%' . $keyword . '%')
-
                         ->orWhereHas('upline', function ($q) use ($keyword) {
                             $q->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
                                 ->orWhere('email', 'like', '%' . $keyword . '%')
@@ -73,42 +72,42 @@ class MemberController extends Controller
                 });
             }
 
-            if ($data['filters']['group_id']) {
-                $query->whereHas('group', function ($query) use ($data) {
-                    $query->where('group_id', $data['filters']['group_id']);
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay();
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                $query->whereBetween('created_at', [$start_date, $end_date]);
+            }
+
+            if (!empty($data['filters']['group_id']['value'])) {
+                $query->whereHas('group', function($q) use ($data) {
+                    $q->where('group_id', $data['filters']['group_id']['value']['id']);
                 });
             }
 
-            if ($data['filters']['upline_id']) {
-                $query->where('upline_id', $data['filters']['upline_id']);
+            if (!empty($data['filters']['referrers']['value'])) {
+                $selected_referrers = $data['filters']['referrers']['value'];
+                $userIds = array_column($selected_referrers, 'user_id');
+
+                $query->whereIn('upline_id', $userIds);
             }
 
-            if ($data['filters']['status']) {
-                $query->where('status', $data['filters']['status']);
+            if (!empty($data['filters']['status']['value'])) {
+                $query->where('status', $data['filters']['status']['value']);
             }
 
-            if ($data['filters']['kyc_status']) {
-                $kycStatus = $data['filters']['kyc_status'];
-
-                if ($kycStatus == 'verified') {
-                    // Include users who have all KYC records verified
-                    $query->whereHas('kycs', function ($kycQuery) {
-                        $kycQuery->where('status', 'verified');
+            if (!empty($data['filters']['kyc_status']['value'])) {
+                $statusFilter = $data['filters']['kyc_status']['value'];
+                if ($statusFilter === 'verified') {
+                    $query->whereHas('kycs')
+                    ->whereDoesntHave('kycs', function ($q) {
+                        $q->where('kyc_status', '!=', 'verified');
                     });
-                    $query->where(function($query) {
-                        $query->whereHas('kycs', function ($kycQuery) {
-                            $kycQuery->where('status', 'verified');
-                        })
-                        ->orWhereDoesntHave('kycs');
-                    });
-                } elseif ($kycStatus == 'unverified') {
-                    // Include users who either have no KYC records or have unverified KYC records
-                    $query->whereDoesntHave('kycs', function ($kycQuery) {
-                        $kycQuery->where('status', 'verified');
-                    });
-                    $query->orWhere(function ($query) {
-                        $query->whereHas('kycs', function ($kycQuery) {
-                            $kycQuery->where('status', 'unverified');
+                } elseif ($statusFilter === 'unverified') {
+                    $query->where(function ($q) {
+                        $q->whereDoesntHave('kycs')
+                        ->orWhereHas('kycs', function ($q2) {
+                            $q2->where('kyc_status', '!=', 'verified');
                         });
                     });
                 }
@@ -128,11 +127,31 @@ class MemberController extends Controller
                 $query->orderByDesc('created_at');
             }
 
-            // // Export logic
-            // if ($request->has('exportStatus') && $request->exportStatus) {
-            //     $members = $query; // Fetch all members for export
-            //     return Excel::download(new MemberListingExport($members), now() . '-members.xlsx');
-            // }
+            $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
+
+            $last_month_users = (clone $query)
+                ->whereDate('created_at', '<=', $endOfLastMonth)
+                ->count();
+
+            $total_users = (clone $query)
+                ->count();
+
+            $users_trend = $total_users - $last_month_users;
+
+            $verified_users = (clone $query)
+                ->whereHas('kycs', function ($q) {
+                    $q->where('kyc_status', 'verified');
+                })
+                ->count();
+
+            $unverified_users = (clone $query)
+                ->where(function ($q) {
+                    $q->whereDoesntHave('kycs')
+                        ->orWhereHas('kycs', function ($sub) {
+                            $sub->where('kyc_status', '!=', 'verified');
+                        });
+                })
+                ->count();
 
             $users = $query->paginate($data['rows']);
             $users->getCollection()->transform(function ($user) {
@@ -145,6 +164,7 @@ class MemberController extends Controller
                 $user->profile_photo = $user?->getFirstMediaUrl('profile_photo');
 
                 $user->country_name = $country?->name;
+                $user->country_iso2 = $country?->iso2;
                 $user->country_translations = $country?->translations;
 
                 $user->group_id = $group?->id;
@@ -173,6 +193,10 @@ class MemberController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $users,
+                'totalUsers' => (float) $total_users,
+                'usersTrend' => (float) $users_trend,
+                'verifiedUsers' => (float) $verified_users,
+                'unverifiedUsers' => (float) $unverified_users,
             ]);
         }
 

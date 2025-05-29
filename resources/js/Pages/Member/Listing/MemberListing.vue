@@ -10,14 +10,16 @@ const props = defineProps({
     countries: Array,
 })
 
-const totalVerified = ref(null);
-const totalUnverified = ref(null);
 const totalUsers = ref(null);
+const usersTrend = ref(null);
+const verifiedUsers = ref(null);
+const unverifiedUsers = ref(null);
 
 const handleUpdateTotals = (data) => {
-    totalVerified.value = data.totalVerified;
-    totalUnverified.value = data.totalUnverified;
     totalUsers.value = data.totalUsers;
+    usersTrend.value = data.usersTrend;
+    verifiedUsers.value = data.verifiedUsers;
+    unverifiedUsers.value = data.unverifiedUsers;
 };
 </script>
 
@@ -32,10 +34,11 @@ const handleUpdateTotals = (data) => {
             </div>
 
             <!-- data overview -->
-            <MemberOverview 
-                :totalVerified="totalVerified"
-                :totalUnverified="totalUnverified"
+            <MemberOverview
                 :totalUsers="totalUsers"
+                :usersTrend="usersTrend"
+                :verifiedUsers="verifiedUsers"
+                :unverifiedUsers="unverifiedUsers"
             />
 
             <!-- data table -->

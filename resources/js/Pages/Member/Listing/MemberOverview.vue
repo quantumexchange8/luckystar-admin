@@ -1,55 +1,105 @@
 <script setup>
-import { computed } from 'vue'
 import { generalFormat } from "@/Composables/format.js"
-import { MemberIcon, IBIcon, UserIcon } from '@/Components/Icons/solid';
-import { trans, wTrans } from "laravel-vue-i18n";
-import { Card, ProgressSpinner } from "primevue";
+import { Card } from "primevue";
+import {IconUsers, IconTrendingDown, IconTrendingUp, IconUserCheck, IconUserX} from "@tabler/icons-vue";
 
 const props = defineProps({
-  totalVerified: Number,
-  totalUnverified: Number,
-  totalUsers: Number,
+    totalUsers: Number,
+    usersTrend: Number,
+    verifiedUsers: Number,
+    unverifiedUsers: Number,
 })
 
 const { formatAmount } = generalFormat()
-
-const dataOverviews = computed(() => [
-  {
-    icon: MemberIcon,
-    total: props.totalVerified,
-    label: trans('public.total_verified'),
-  },
-  {
-    icon: IBIcon,
-    total: props.totalUnverified,
-    label: trans('public.total_unverified'),
-  },
-  {
-    icon: UserIcon,
-    total: props.totalUsers,
-    label: trans('public.total_user'),
-  },
-])
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 w-full gap-3 md:gap-5">
-    <Card
-      v-for="(item, index) in dataOverviews"
-      :key="index"
-      class="w-full"
-    >
-      <template #content>
-        <div class="flex justify-center items-center gap-5 self-stretch">
-          <component :is="item.icon" class="w-12 h-12 grow-0 shrink-0" />
-          <div class="flex flex-col items-start gap-1 w-full">
-            <div class="text-surface-950 dark:text-white text-lg md:text-2xl font-semibold">
-              {{ formatAmount(item.total, 0, '') }}
-            </div>
-            <span class="text-surface-500 dark:text-white text-xs md:text-sm">{{ item.label }}</span>
-          </div>
-        </div>
-      </template>
-    </Card>
-  </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 w-full gap-3 md:gap-5">
+        <Card class="w-full">
+            <template #content>
+                <div class="flex gap-3 items-center">
+                    <div class="flex flex-col w-full">
+                        <span class="text-sm w-full text-surface-400 dark:text-surface-500">{{ $t('public.total_user') }}</span>
+                        <div
+                            v-if="totalUsers !== null"
+                            class="flex gap-2 items-end"
+                        >
+                            <span class="text-xl font-medium">{{ formatAmount(totalUsers, 0, '') }}</span>
+                            <div
+                                v-if="usersTrend !== 0"
+                                :class="[
+                                    'flex gap-1 items-center',
+                                    {
+                                        'text-green-500': usersTrend > 0,
+                                        'text-red-500': usersTrend < 0,
+                                    }
+                                ]">
+                                <IconTrendingUp
+                                    v-if="usersTrend > 0"
+                                    size="18"
+                                    stroke-width="1.5"
+                                />
+                                <IconTrendingDown
+                                    v-else-if="usersTrend < 0"
+                                    size="18"
+                                    stroke-width="1.5"
+                                />
+                                {{ formatAmount(usersTrend, 0, '') }} <span class="text-xs text-surface-500">{{ $t('public.compare_last_month') }}</span>
+                            </div>
+                        </div>
+                        <div v-else class="text-xl">
+                            {{ $t('public.calculating') }}...
+                        </div>
+                    </div>
+                    <div class="bg-cyan-100 dark:bg-cyan-900/30 rounded-md text-cyan-500 p-2">
+                        <IconUsers size="28" stroke-width="1.5" />
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <Card class="w-full">
+            <template #content>
+                <div class="flex gap-3 items-center">
+                    <div class="flex flex-col w-full">
+                        <span class="text-sm w-full text-surface-400 dark:text-surface-500">{{ $t('public.verified') }}</span>
+                        <div
+                            v-if="verifiedUsers !== null"
+                            class="flex gap-2 items-end"
+                        >
+                            <span class="text-xl font-medium">{{ formatAmount(verifiedUsers, 0, '') }}</span>
+                        </div>
+                        <div v-else class="text-xl">
+                            {{ $t('public.calculating') }}...
+                        </div>
+                    </div>
+                    <div class="bg-green-100 dark:bg-green-900/30 rounded-md text-green-500 p-2">
+                        <IconUserCheck size="28" stroke-width="1.5" />
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <Card class="w-full">
+            <template #content>
+                <div class="flex gap-3 items-center">
+                    <div class="flex flex-col w-full">
+                        <span class="text-sm w-full text-surface-400 dark:text-surface-500">{{ $t('public.unverified') }}</span>
+                        <div
+                            v-if="unverifiedUsers !== null"
+                            class="flex gap-2 items-end"
+                        >
+                            <span class="text-xl font-medium">{{ formatAmount(unverifiedUsers, 0, '') }}</span>
+                        </div>
+                        <div v-else class="text-xl">
+                            {{ $t('public.calculating') }}...
+                        </div>
+                    </div>
+                    <div class="bg-red-100 dark:bg-red-900/30 rounded-md text-red-500 p-2">
+                        <IconUserX size="28" stroke-width="1.5" />
+                    </div>
+                </div>
+            </template>
+        </Card>
+    </div>
 </template>
