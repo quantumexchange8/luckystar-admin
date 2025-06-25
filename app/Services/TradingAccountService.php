@@ -98,7 +98,7 @@ class TradingAccountService {
      * @throws ConnectionException
      * @throws Throwable
      */
-    public function createDeal($trading_account, $amount, $comment, $type, $account_type, $deal_type)
+    public function createDeal($trading_account, $name, $amount, $comment, $type, $account_type, $deal_type)
     {
         if ($account_type->type == 'virtual') {
             $dealResponse = [
@@ -130,7 +130,7 @@ class TradingAccountService {
 
             $userData = [
                 'group' => $account_type->name,
-                'name' => Auth::user()->full_name,
+                'name' => $name,
                 'company' => null,
                 'leverage' => $trading_account->margin_leverage,
                 'balance' => $newBalance,

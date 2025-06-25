@@ -126,10 +126,10 @@ class PendingController extends Controller
                         ->addDay()
                         ->startOfDay();
 
-                    $master = $investment->trading_master;
+                    $master = $investment->trading_master->trading_account;
                     $master_account_type = AccountType::find($master->account_type_id);
 
-                    $deal = (new TradingAccountService())->createDeal($master, $investment->subscription_amount, "Login #$investment->meta_login", MetaService::DEPOSIT, $master_account_type, MetaService::DEAL_BALANCE);
+                    $deal = (new TradingAccountService())->createDeal($master, $master->master_name, $investment->subscription_amount, "Login #$investment->meta_login", MetaService::DEPOSIT, $master_account_type, MetaService::DEAL_BALANCE);
 
                     Transaction::create([
                         'user_id' => $master->user_id,

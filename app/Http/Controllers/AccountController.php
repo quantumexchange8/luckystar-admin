@@ -146,7 +146,8 @@ class AccountController extends Controller
         }
 
         try {
-            $deal = (new TradingAccountService())->createDeal($trading_account, $amount, $transaction->remarks, $changeType, $trading_account->account_type, $dealType);
+            $trading_user = $trading_account->trading_user;
+            $deal = (new TradingAccountService())->createDeal($trading_account, $trading_user->name, $amount, $transaction->remarks, $changeType, $trading_account->account_type, $dealType);
 
             $transaction->update([
                 'ticket' => $deal['deal_Id'],

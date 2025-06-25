@@ -65,4 +65,9 @@ class TradingMaster extends Model
     {
         return $this->hasMany(TradingSubscription::class, 'master_meta_login', 'meta_login')->where('status', 'revoked');
     }
+
+    public function trading_account(): BelongsTo
+    {
+        return $this->belongsTo(TradingAccount::class, 'meta_login', 'meta_login');
+    }
 }

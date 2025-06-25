@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             GroupSeeder::class,
             AccountTypeSeeder::class,
             RunningNumberSeeder::class,
+            OccupationSeeder::class,
+            IndustrySeeder::class,
         ]);
     }
 }
