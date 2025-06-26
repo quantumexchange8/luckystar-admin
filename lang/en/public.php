@@ -456,4 +456,6 @@ return [
     "fee" => "Fee",
     "receive" => "Receive",
     "remarks_required_reject" => "Remarks field is required when action is rejected",
+    "pending_withdrawal" => "Pending Withdrawal",
+    
 ];
