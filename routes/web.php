@@ -15,6 +15,7 @@ use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelectOptionController;
 use App\Http\Controllers\TopUpProfileController;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return Redirect::route('login');
@@ -201,6 +202,28 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/addTopUpProfile', [TopUpProfileController::class, 'addTopUpProfile'])->name('account_type.addTopUpProfile');
     });
+
+    /**
+     * ==============================
+     *            Reports
+     * ==============================
+     */
+    Route::prefix('report')->group(function () {
+
+        /**
+         * ==============================
+         *          Transaction
+         * ==============================
+         */
+        Route::prefix('transaction')->group(function () {
+            Route::get('/top_up', [TransactionController::class, 'top_up'])->name('report.transaction.top_up');
+            Route::get('/get_top_up_listing_data', [TransactionController::class, 'get_top_up_listing_data'])->name('report.transaction.get_top_up_listing_data');
+
+            Route::get('/withdrawal', [TransactionController::class, 'withdrawal'])->name('report.transaction.withdrawal');
+            Route::get('/get_withdrawal_listing_data', [TransactionController::class, 'get_withdrawal_listing_data'])->name('report.transaction.get_withdrawal_listing_data');
+        });
+    });
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

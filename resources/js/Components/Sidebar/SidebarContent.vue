@@ -21,7 +21,8 @@ import {
     IconChartPie,
     IconId,
     IconServerCog,
-    IconSettingsDollar
+    IconSettingsDollar,
+    IconCreditCardPay,
 } from '@tabler/icons-vue';
 import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue";
 
@@ -193,6 +194,31 @@ watchEffect(() => {
                 <IconSettingsDollar :size="20" stroke-width="1.5" />
             </template>
         </SidebarLink>
+
+        <SidebarCategoryLabel
+            :title="$t('public.reports')"
+        />
+
+        <SidebarCollapsible
+            :title="$t('public.transaction')"
+            :active="route().current('transaction.*')"
+        >
+            <template #icon>
+                <IconCreditCardPay :size="20" stroke-width="1.5" />
+            </template>
+
+            <SidebarCollapsibleItem
+                :title="$t('public.top_up')"
+                :href="route('report.transaction.top_up')"
+                :active="route().current('report.transaction.top_up')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.withdrawal')"
+                :href="route('report.transaction.withdrawal')"
+                :active="route().current('report.transaction.withdrawal')"
+            />
+        </SidebarCollapsible>
 
 <!--        <SidebarLink-->
 <!--            :title="'Accounts'"-->
