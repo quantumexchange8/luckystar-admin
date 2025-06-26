@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Throwable;
-use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Enums\MetaService;
 use App\Models\AccountType;
@@ -11,11 +10,14 @@ use App\Models\Kyc;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\TradingSubscription;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
 use App\Services\RunningNumberService;
 use App\Services\TradingAccountService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class PendingController extends Controller
 {
@@ -195,7 +197,7 @@ class PendingController extends Controller
                 'user.group.group',
                 'media',
             ])
-            ->where('kyc_status', 'pending');
+                ->where('kyc_status', 'pending');
 
             if ($data['filters']['global']) {
                 $keyword = $data['filters']['global'];
@@ -204,9 +206,9 @@ class PendingController extends Controller
                     $q->whereHas('user', function ($query) use ($keyword) {
                         $query->where(function ($q) use ($keyword) {
                             $q->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
-                              ->orWhere('email', 'like', '%' . $keyword . '%')
-                              ->orWhere('username', 'like', '%' . $keyword . '%')
-                              ->orWhere('id_number', 'like', '%' . $keyword . '%');
+                                ->orWhere('email', 'like', '%' . $keyword . '%')
+                                ->orWhere('username', 'like', '%' . $keyword . '%')
+                                ->orWhere('id_number', 'like', '%' . $keyword . '%');
                         });
                     });
                 });
@@ -319,4 +321,121 @@ class PendingController extends Controller
         ]);
     }
 
+    public function pending_withdrawal()
+    {
+        return Inertia::render('Pending/Withdrawal/PendingWithdrawal');
+    }
+
+    public function getPendingWithdrawalsData(Request $request)
+    {
+        if ($request->has('lazyEvent')) {
+            $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
+
+            $query = Transaction::query()
+                ->with([
+                    'user:id,first_name,last_name,email,upline_id',
+                ])
+                ->where('transaction_type', 'withdrawal')
+                ->where('status', 'pending');
+
+            if ($data['filters']['global']['value']) {
+                $keyword = $data['filters']['global']['value'];
+
+                $query->where(function ($q) use ($keyword) {
+                    $q->whereHas('user', function ($query) use ($keyword) {
+                        $query->where(function ($q) use ($keyword) {
+                            $q->whereRaw("CONCAT(`first_name`, ' ', `last_name`) LIKE ?", ['%' . $keyword . '%'])
+                                ->orWhere('email', 'like', '%' . $keyword . '%')
+                                ->orWhere('username', 'like', '%' . $keyword . '%');
+                        });
+                    })->orWhere('transaction_number', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            //date filter
+            if (!empty($data['filters']['start_date']['value']) && !empty($data['filters']['end_date']['value'])) {
+                $start_date = Carbon::parse($data['filters']['start_date']['value'])->addDay()->startOfDay(); //add day to ensure capture entire day
+                $end_date = Carbon::parse($data['filters']['end_date']['value'])->addDay()->endOfDay();
+
+                $query->whereBetween('created_at', [$start_date, $end_date]);
+            }
+
+            //sort field/order
+            if ($data['sortField'] && $data['sortOrder']) {
+                $order = $data['sortOrder'] == 1 ? 'asc' : 'desc';
+                $query->orderBy($data['sortField'], $order);
+            } else {
+                $query->latest();
+            }
+
+            $withdrawals = $query->paginate($data['rows']);
+
+            $totalWithdrawalAmount = (clone $query)
+                ->sum('amount');
+
+            $pendingWithdrawalCounts = (clone $query)
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'data' => $withdrawals,
+                'totalWithdrawalAmount' => $totalWithdrawalAmount,
+                'pendingWithdrawalCounts' => $pendingWithdrawalCounts,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'data' => []]);
+    }
+
+    public function pendingWithdrawalApproval(Request $request)
+    {
+        Validator::make($request->all(), [
+            'transaction_id' => ['required'],
+            'action' => ['required'],
+        ])->setAttributeNames([
+            'transaction_id' => trans('public.investment'),
+            'action' => trans('public.action'),
+        ])->validate();
+
+        $transaction = Transaction::find($request->transaction_id);
+        $wallet = Wallet::find($transaction->from_wallet_id);
+        
+        if ($transaction->status == 'pending') {
+            switch ($request->action) {
+                case 'approve':
+                    $transaction->status = 'success';
+                    break;
+
+                case 'reject':
+                    if (!$request->remarks) {
+                        throw ValidationException::withMessages(['remarks' => trans('public.remarks_required_reject')]);
+                    }
+                    $transaction->status = 'rejected';
+                    $transaction->remarks = $request->remarks;
+
+                    $wallet->balance += $transaction->amount;
+                    $wallet->save();
+                    break;
+
+                default:
+                    break;
+            }
+
+            $transaction->approval_at = Carbon::now();
+            $transaction->handle_by = Auth::id();
+            $transaction->save();
+        } else {
+            return back()->with('toast', [
+                'title' => trans('public.invalid_action'),
+                'message' => trans('public.toast_withdrawal_not_pending_warning'),
+                'type' => 'warning',
+            ]);
+        }
+
+        return back()->with('toast', [
+            'title' => trans('public.success'),
+            'message' => trans('public.toast_withdrawal_approval_success'),
+            'type' => 'success',
+        ]);
+    }
 }

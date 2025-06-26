@@ -85,6 +85,12 @@ watchEffect(() => {
                 :href="route('pending.investment')"
                 :active="route().current('pending.investment')"
             />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.withdrawal')"
+                :href="route('pending.withdrawal')"
+                :active="route().current('pending.withdrawal')"
+            />
         </SidebarCollapsible>
 
         <SidebarCategoryLabel

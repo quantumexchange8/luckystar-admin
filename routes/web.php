@@ -57,7 +57,12 @@ Route::middleware('auth')->group(function () {
          *          Withdrawal
          * ==============================
          */
+        Route::prefix('withdrawal')->group(function () {
+            Route::get('/', [PendingController::class, 'pending_withdrawal'])->name('pending.withdrawal');
+            Route::get('/getPendingWithdrawalsData', [PendingController::class, 'getPendingWithdrawalsData'])->name('pending.getPendingWithdrawalsData');
 
+            Route::post('/pendingWithdrawalApproval', [PendingController::class, 'pendingWithdrawalApproval'])->name('pending.pendingWithdrawalApproval');
+        });
         /**
          * ==============================
          *          Investment
@@ -120,7 +125,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/change_password', [AccountController::class, 'change_password'])->name('member.change_password');
         // Route::post('/refreshAllAccount', [AccountController::class, 'refreshAllAccount'])->name('member.refreshAllAccount');
         Route::delete('/accountDelete', [AccountController::class, 'accountDelete'])->name('member.accountDelete');
-
     });
 
     /**
@@ -203,4 +207,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

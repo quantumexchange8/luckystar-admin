@@ -446,4 +446,14 @@ return [
     "top_up_capital" => "Top Up Capital",
     "select_type" => "Select Type",
     "loading_transaction_caption" => "Loading transaction data. Please wait.",
+
+    "total_withdrawal" => "Total Withdrawal",
+    "total_withdrawal_amount" => "Total Withdrawal Amount",
+    "transaction_number" => "Transaction Number",
+    "filter_by_date" => "Filter By Date",
+    "withdrawal_request" => "Withdrawal Request",
+    "to" => "To",
+    "fee" => "Fee",
+    "receive" => "Receive",
+    "remarks_required_reject" => "Remarks field is required when action is rejected",
 ];
