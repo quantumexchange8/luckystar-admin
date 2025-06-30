@@ -468,4 +468,11 @@ return [
     "filter_by_type" => "Filter By Type",
     "filter_by_status" => "Filter By Status",
     "details" => "Details",
+    "adjustment" => "Adjustment",
+    "total_adjustment" => "Total Adjustment",
+    "total_adjustment_amount" => "Total Adjustment Amount",
+    "total_redemption" => "Total Redemption",
+    "total_redemption_amount" => "Total Redemption Amount",
+    "redemption" => "Redemption",
+    
 ];

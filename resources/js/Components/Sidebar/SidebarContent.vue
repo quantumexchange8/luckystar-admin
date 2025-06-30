@@ -218,6 +218,24 @@ watchEffect(() => {
                 :href="route('report.transaction.withdrawal')"
                 :active="route().current('report.transaction.withdrawal')"
             />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.adjustment')"
+                :href="route('report.transaction.adjustment')"
+                :active="route().current('report.transaction.adjustment')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.redemption')"
+                :href="route('report.transaction.redemption')"
+                :active="route().current('report.transaction.redemption')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.transfer')"
+                :href="route('report.transaction.transfer')"
+                :active="route().current('report.transaction.transfer')"
+            />
         </SidebarCollapsible>
 
 <!--        <SidebarLink-->

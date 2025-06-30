@@ -221,6 +221,15 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/withdrawal', [TransactionController::class, 'withdrawal'])->name('report.transaction.withdrawal');
             Route::get('/get_withdrawal_listing_data', [TransactionController::class, 'get_withdrawal_listing_data'])->name('report.transaction.get_withdrawal_listing_data');
+
+            Route::get('/adjustment', [TransactionController::class, 'adjustment'])->name('report.transaction.adjustment');
+            Route::get('/get_adjustment_listing_data', [TransactionController::class, 'get_adjustment_listing_data'])->name('report.transaction.get_adjustment_listing_data');
+
+            Route::get('/redemption', [TransactionController::class, 'redemption'])->name('report.transaction.redemption');
+            Route::get('/get_redemption_listing_data', [TransactionController::class, 'get_redemption_listing_data'])->name('report.transaction.get_redemption_listing_data');
+
+            Route::get('/transfer', [TransactionController::class, 'transfer'])->name('report.transaction.transfer');
+            Route::get('/get_transfer_listing_data', [TransactionController::class, 'get_transfer_listing_data'])->name('report.transaction.get_transfer_listing_data');
         });
     });
 
