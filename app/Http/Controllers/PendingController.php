@@ -296,7 +296,7 @@ class PendingController extends Controller
             if ($request->action === 'approve') {
                 $kycRequest->kyc_status = 'verified';
             } elseif ($request->action === 'reject') {
-                $kycRequest->kyc_status = 'unverified';
+                $kycRequest->kyc_status = 'rejected';
             }
 
             $kycRequest->kyc_approval_at = Carbon::now();

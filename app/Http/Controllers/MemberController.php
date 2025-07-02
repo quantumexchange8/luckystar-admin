@@ -546,7 +546,7 @@ class MemberController extends Controller
             $kyc->kyc_approval_at = now();
             $kyc->kyc_approval_description = $request->remarks ?? null;
         } else if ($request->action === 'reject') {
-            $kyc->kyc_status = 'unverified';
+            $kyc->kyc_status = 'rejected';
             $kyc->kyc_approval_at = now();
             $kyc->kyc_approval_description = $request->remarks ?? null;
         }
