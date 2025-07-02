@@ -28,7 +28,7 @@
 }
 
 .p-select.p-disabled {
-    @apply bg-surface-200 text-surface-500 dark:bg-surface-700 dark:text-surface-400 opacity-100 cursor-default
+    @apply bg-surface-100 dark:bg-surface-800 opacity-100 cursor-default
 }
 
 .p-select-clear-icon {
@@ -55,7 +55,7 @@
 }
 
 .p-select.p-disabled .p-select-label {
-    @apply text-surface-500 dark:text-surface-400
+    @apply text-surface-500 dark:text-surface-500
 }
 
 .p-select-label-empty {
@@ -79,7 +79,7 @@ input.p-select-label {
 }
 
 .p-select-header {
-    @apply pt-2 pb-1 px-3
+    @apply pt-2 pb-1 px-4
 }
 
 .p-select-filter {
@@ -95,7 +95,7 @@ input.p-select-label {
 }
 
 .p-select-list {
-    @apply m-0 py-1 list-none gap-[2px] flex flex-col
+    @apply m-0 p-1 list-none gap-[2px] flex flex-col
 }
 
 .p-select-option {
@@ -109,7 +109,7 @@ input.p-select-label {
 }
 
 .p-select-option.p-select-option-selected {
-    @apply bg-primary-50 text-primary-500 dark:bg-primary-950 dark:text-primary-100
+    @apply bg-primary-50 text-primary-500 dark:bg-highlight
 }
 
 /* .p-select-option.p-select-option-selected.p-focus {

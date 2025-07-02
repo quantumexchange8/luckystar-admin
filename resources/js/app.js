@@ -6,7 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
+import {ConfirmationService, ToastService} from 'primevue';
 import Tooltip from 'primevue/tooltip';
 import { i18nVue } from 'laravel-vue-i18n';
 
@@ -27,6 +27,7 @@ createInertiaApp({
                 theme: 'none'
             })
             .use(ConfirmationService)
+            .use(ToastService)
             .directive('tooltip', Tooltip)
             .use(i18nVue, {
                 resolve: async lang => {

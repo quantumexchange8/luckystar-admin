@@ -55,7 +55,7 @@ const removeRow = (index) => {
         </div>
 
         <!-- Rows -->
-        <div class="flex flex-col items-center self-stretch max-h-[220px] overflow-y-auto">
+        <div class="flex flex-col items-center self-stretch max-h-[240px] overflow-y-auto">
             <div
                 v-for="(row, index) in rows"
                 :key="index"

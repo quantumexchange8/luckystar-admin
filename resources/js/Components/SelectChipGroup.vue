@@ -41,7 +41,7 @@ const isSelected = (item) => {
         >
             <div class="flex items-center self-stretch">
                 <div
-                    class="flex-grow text-xs font-semibold transition-colors duration-300 group-hover:text-primary-700 dark:group-hover:text-primary"
+                    class="flex-grow text-sm font-semibold transition-colors duration-300 group-hover:text-primary-700 dark:group-hover:text-primary"
                     :class="{
                         'text-primary-700 dark:text-primary-200': isSelected(item),
                         'text-surface-950 dark:text-white': !isSelected(item),
@@ -54,8 +54,8 @@ const isSelected = (item) => {
                     </slot>
                 </div>
 
-                <div v-if="isSelected(item)" class="absolute right-2">
-                    <IconCircleCheckFilled size="16" stroke-width="1.5" color="#34d399" />
+                <div v-if="isSelected(item)" class="absolute right-2 text-primary">
+                    <IconCircleCheckFilled size="16" stroke-width="1.5" />
                 </div>
             </div>
         </div>

@@ -2,14 +2,13 @@
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import {
     InputText,
     Password,
     Checkbox,
     Button,
 } from "primevue";
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 defineProps({
     canResetPassword: {
@@ -36,10 +35,6 @@ const submit = () => {
 <template>
     <GuestLayout>
         <Head title="Log in" />
-
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
-        </div>
 
         <form
             @submit.prevent="submit"
@@ -96,14 +91,6 @@ const submit = () => {
                     :disabled="form.processing"
                     :label="'Login'"
                 />
-
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-surface-600 underline hover:text-surface-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-surface-400 dark:hover:text-surface-100 dark:focus:ring-offset-surface-800"
-                >
-                    Forgot your password?
-                </Link>
             </div>
         </form>
     </GuestLayout>
