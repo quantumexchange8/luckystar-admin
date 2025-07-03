@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('trader_name')->nullable();
             $table->unsignedInteger('meta_login')->nullable();
             $table->unsignedBigInteger('account_type_id')->nullable();
+            $table->string('strategy_account_type')->nullable();
             $table->integer('leverage')->nullable();
             $table->string('category')->nullable();
             $table->string('type')->nullable();
+            $table->longText('description')->nullable();
             $table->decimal('sharing_profit')->nullable();
             $table->decimal('market_profit')->nullable();
             $table->decimal('company_profit')->nullable();

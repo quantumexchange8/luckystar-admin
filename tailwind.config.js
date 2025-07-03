@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -44,8 +45,39 @@ export default {
                 '2xl': '1536px',
                 '3xl': '1792px',
             },
+            typography: ({ theme }) => ({
+                DEFAULT: {
+                    css: {
+                        '--tw-prose-counters': theme('colors.zinc[500]'),
+                        h1: {
+                            fontSize: '24px',
+                            lineHeight: '32px',
+                            margin: '0 auto',
+                        },
+                        h2: {
+                            fontSize: '20px',
+                            lineHeight: '28px',
+                            margin: '0 auto',
+                        },
+                        p: {
+                            fontSize: '14px',
+                            lineHeight: '20px',
+                            margin: '0 auto',
+                        },
+                        'li > p': {
+                            marginTop: '0',
+                            marginBottom: '0',
+                        },
+                        li: {
+                            marginTop: '0',
+                            marginBottom: '0',
+                        },
+                        maxWidth: '100ch',
+                    },
+                },
+            }),
         },
     },
 
-    plugins: [forms, require('tailwindcss-primeui')],
+    plugins: [forms, require('tailwindcss-primeui'), typography],
 };

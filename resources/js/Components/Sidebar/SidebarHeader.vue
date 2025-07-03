@@ -24,9 +24,9 @@ import { IconX } from '@tabler/icons-vue';
                 <ApplicationLogo aria-hidden="true" class="w-10 h-10 shrink-0 grow-0 overflow-hidden fill-primary" />
                 <div
                     v-show="sidebarState.isOpen || sidebarState.isHovered"
-                    class="text-surface-800 dark:text-white"
+                    class="font-bold text-sm text-surface-800 dark:text-white"
                 >
-                    Lucky Star
+                    {{ $t('public.lucky_star_admin') }}
                 </div>
             </div>
         </Link>

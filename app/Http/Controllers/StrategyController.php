@@ -8,12 +8,15 @@ use App\Models\TradingMaster;
 use App\Models\TradingMasterHasFee;
 use App\Models\TradingSubscription;
 use App\Models\User;
+use App\Services\Data\CreateTradingAccount;
+use App\Services\Data\CreateTradingUser;
 use App\Services\TradingAccountService;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Throwable;
 
@@ -21,14 +24,23 @@ class StrategyController extends Controller
 {
     public function index()
     {
-        // TODO:: Get LIVE account type
-        $account_types = AccountType::where('status', 'active')
+        return Inertia::render('Strategy/StrategyListing', [
+
+            'strategiesCount' => TradingMaster::count(),
+        ]);
+    }
+
+    public function create()
+    {
+        $account_types = AccountType::where([
+            'type' => 'live',
+            'status' => 'active',
+        ])
             ->get()
             ->toArray();
 
-        return Inertia::render('Strategy/StrategyListing', [
+        return Inertia::render('Strategy/CreateStrategy', [
             'accountTypes' => $account_types,
-            'strategiesCount' => TradingMaster::count(),
         ]);
     }
 
@@ -38,13 +50,27 @@ class StrategyController extends Controller
      */
     public function addStrategy(Request $request)
     {
-        $form_step = $request->step;
-
-        $rules = [
+        Validator::make($request->all(), [
             'strategy_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
             'trader_name' => ['required'],
             'category' => ['required'],
-            'account_type_id' => ['required'],
+            'strategy_account_type' => ['required'],
+            'account_type_id' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('strategy_account_type') == 'create_new' && empty($value)) {
+                        return $fail(trans('validation.required', ['attribute' => trans('public.account_type')]));
+                    }
+                    return 'nullable';
+                },
+            ],
+            'account_number' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('strategy_account_type') == 'existing' && empty($value)) {
+                        return $fail(trans('validation.required', ['attribute' => trans('public.account_number')]));
+                    }
+                    return 'nullable';
+                },
+            ],
             'estimated_lot' => ['required'],
             'estimated_monthly_return' => ['required'],
             'max_drawdown' => ['required'],
@@ -52,10 +78,27 @@ class StrategyController extends Controller
             'additional_capital' => ['nullable', 'numeric'],
             'additional_investors' => ['nullable', 'numeric'],
             'visible_to' => ['required'],
-            'leverage' => ['required'],
-        ];
-
-        $attributeNames = [
+            'description' => ['required'],
+            'leverage' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('strategy_account_type') == 'create_new' && empty($value)) {
+                        return $fail(trans('validation.required', ['attribute' => trans('public.leverage')]));
+                    }
+                    return 'nullable';
+                },
+            ],
+            'minimum_investment' => ['required'],
+            'investment_period' => ['required'],
+            'investment_period_type' => ['required'],
+            'settlement_period' => ['required'],
+            'settlement_period_type' => ['required'],
+            'can_top_up' => ['required'],
+            'can_terminate' => ['required'],
+            'sharing_profit' => ['required'],
+            'market_profit' => ['required'],
+            'company_profit' => ['required'],
+            'management_fee' => ['nullable'],
+        ])->setAttributeNames([
             'strategy_name' => trans('public.strategy_name'),
             'trader_name' => trans('public.trader_name'),
             'category' => trans('public.category'),
@@ -67,64 +110,57 @@ class StrategyController extends Controller
             'additional_capital' => trans('public.additional_capital'),
             'additional_investors' => trans('public.additional_investors'),
             'visible_to' => trans('public.visible_to'),
+            'description' => trans('public.description'),
             'leverage' => trans('public.leverage'),
-        ];
+            'minimum_investment' => trans('public.minimum_investment'),
+            'investment_period' => trans('public.investment_period'),
+            'investment_period_type' => trans('public.investment_period'),
+            'settlement_period' => trans('public.settlement_period'),
+            'settlement_period_type' => trans('public.settlement_period'),
+            'can_top_up' => trans('public.top_up_strategy'),
+            'can_terminate' => trans('public.terminate_strategy'),
+            'sharing_profit' => trans('public.profit_distribution'),
+            'market_profit' => trans('public.profit_distribution'),
+            'company_profit' => trans('public.profit_distribution'),
+            'management_fee' => trans('public.management_fee_setting'),
+        ])->validate();
 
-        switch ($form_step) {
-            case 1:
-                Validator::make($request->all(), $rules)
-                    ->setAttributeNames($attributeNames)
-                    ->validate();
+        $service = new TradingAccountService();
+        $connection = $service->getConnectionStatus();
 
-                return back();
+        if ($connection != 0) {
+            return back()->with('toast', [
+                'title' => trans('public.connection_error'),
+                'message' => trans('public.meta_trader_connection_error'),
+                'type' => 'error',
+            ]);
+        }
 
-            case 2:
-                $rules['minimum_investment'] = ['required'];
-                $rules['investment_period'] = ['required'];
-                $rules['investment_period_type'] = ['required'];
-                $rules['settlement_period'] = ['required'];
-                $rules['settlement_period_type'] = ['required'];
-                $rules['can_top_up'] = ['required'];
-                $rules['can_terminate'] = ['required'];
-                $rules['sharing_profit'] = ['required'];
-                $rules['market_profit'] = ['required'];
-                $rules['company_profit'] = ['required'];
+        $strategy_account_type = $request->strategy_account_type;
+        if ($strategy_account_type == 'existing') {
+            $meta_user = $service->getMetaUser($request->account_number);
+            if (!$meta_user['login']) {
+                throw ValidationException::withMessages(['account_number' => trans('public.account_not_found')]);
+            }
 
-                $attributeNames['minimum_investment'] = trans('public.minimum_investment');
-                $attributeNames['investment_period'] = trans('public.investment_period');
-                $attributeNames['investment_period_type'] = trans('public.investment_period');
-                $attributeNames['settlement_period'] = trans('public.settlement_period');
-                $attributeNames['settlement_period_type'] = trans('public.settlement_period');
-                $attributeNames['can_top_up'] = trans('public.top_up_strategy');
-                $attributeNames['can_terminate'] = trans('public.terminate_strategy');
-                $attributeNames['sharing_profit'] = trans('public.profit_distribution');
-                $attributeNames['market_profit'] = trans('public.profit_distribution');
-                $attributeNames['company_profit'] = trans('public.profit_distribution');
-
-                Validator::make($request->all(), $rules)
-                    ->setAttributeNames($attributeNames)
-                    ->validate();
-                return back();
-
-            default:
-                $rules['management_fee'] = ['nullable'];
-                $attributeNames['management_fee'] = trans('public.management_fee_setting');
-
-                Validator::make($request->all(), $rules)
-                    ->setAttributeNames($attributeNames)
-                    ->validate();
-                break;
+            $leverage = $meta_user['leverage'];
+            $account_type = AccountType::firstWhere('slug', $meta_user['group']);
+        } else {
+            $meta_user = [];
+            $leverage = $request->leverage['setting_leverage']['value'];
+            $account_type = AccountType::find($request->account_type_id);
         }
 
         $user = User::find(2);
-        $leverage = $request->leverage['setting_leverage']['value'];
 
         $master = TradingMaster::create([
             'user_id' => $user['id'],
             'master_name' => $request->strategy_name,
             'trader_name' => $request->trader_name,
             'leverage' => $leverage,
+            'strategy_account_type' => $strategy_account_type,
             'category' => $request->category,
+            'description' => $request->description,
             'estimated_lot' => $request->estimated_lot,
             'estimated_monthly_return' => $request->estimated_monthly_return,
             'max_drawdown' => $request->max_drawdown,
@@ -141,22 +177,18 @@ class StrategyController extends Controller
             'settlement_period_type' => $request->settlement_period_type,
         ]);
 
-        $service = new TradingAccountService();
-        $connection = $service->getConnectionStatus();
-
-        if ($connection != 0) {
-            return back()->with('toast', [
-                'title' => trans('public.connection_error'),
-                'message' => trans('public.meta_trader_connection_error'),
-                'type' => 'error',
-            ]);
+        if ($master->strategy_account_type == 'existing') {
+            $meta_user['account_type_id'] = $account_type->id;
+            (new CreateTradingAccount)->execute($user, $meta_user);
+            (new CreateTradingUser)->execute($user, $meta_user);
+            $master->account_type_id = $account_type->id;
+            $master->meta_login = $meta_user['login'];
+        } else {
+            $metaAccount = $service->createUser($user, $master->master_name, $account_type, $leverage);
+            $master->account_type_id = $account_type->id;
+            $master->meta_login = $metaAccount['login'];
         }
 
-        $account_type = AccountType::find($request->account_type_id);
-        $metaAccount = $service->createUser($user, $account_type, $leverage);
-        $master->account_type_id = $account_type->id;
-        $master->leverage = $leverage;
-        $master->meta_login = $metaAccount['login'];
         $master->save();
 
         $groups = $request->visible_to;
@@ -181,7 +213,7 @@ class StrategyController extends Controller
             }
         }
 
-        return back()->with('toast', [
+        return to_route('strategy.listing')->with('toast', [
             'title' => trans('public.success'),
             'message' => trans('public.toast_create_strategy_success'),
             'type' => 'success',

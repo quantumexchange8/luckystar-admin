@@ -20,7 +20,7 @@ class TradingAccountService {
     private string $login = "10012";
     private string $password = "Test1234.";
     //private string $baseURL = "http://192.168.0.224:5000/api";
-    private string $baseURL = "http://43.231.4.154:5000/api";
+    private string $baseURL = "http://219.93.129.12:5000/api";
 
     private string $token = "6f0d6f97-3042-4389-9655-9bc321f3fc1e";
     private string $environmentName = "live";
@@ -65,23 +65,24 @@ class TradingAccountService {
      * @throws ConnectionException
      * @throws Throwable
      */
-    public function createUser(UserModel $user, $account_type, $leverage)
+    public function createUser(UserModel $user, $master_name, $account_type, $leverage)
     {
         if ($account_type->type == 'virtual') {
             $data = [
-                'name' => $user->full_name,
+                'name' => $master_name,
                 'login' => RunningNumberService::getID('virtual_account'),
                 'leverage' => $leverage,
                 'account_type_id' => $account_type->id
             ];
         } else {
             $accountResponse = Http::acceptJson()->post($this->baseURL . "/create_user", [
-                'name' => $user->full_name,
-                'group' => $account_type->name,
+                'name' => $master_name,
+                'group' => $account_type->account_group,
                 'leverage' => $leverage,
                 'eMail' => $user->email,
             ]);
             $data = $accountResponse->json();
+            $data['account_type_id'] = $account_type->id;
 
             if (!$account_type->allow_trade) {
                 $this->disableTrade($data['login']);

@@ -18,8 +18,10 @@ defineProps({
         <span v-if="value">
             {{ value }}<span class="text-red-500 text-sm font-medium"> *</span>
         </span>
-        <span v-else>
-            <slot />
-        </span>
+        <div v-else>
+            <div class="mb-0.5">
+                <slot />
+            </div>
+        </div>
     </label>
 </template>
