@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subscriber;
+use App\Models\Subscription;
+use DB;
+use Exception;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use Inertia\Inertia;
 use App\Enums\MetaService;
@@ -31,9 +37,8 @@ class PendingController extends Controller
         if ($request->has('lazyEvent')) {
             $data = json_decode($request->only(['lazyEvent'])['lazyEvent'], true);
 
-            $query = TradingSubscription::with([
+            $query = Subscriber::with([
                 'user',
-                'user.upline',
                 'user.group.group:id,name,color',
                 'trading_master',
                 'trading_master.account_type',
@@ -68,15 +73,6 @@ class PendingController extends Controller
                 });
             }
 
-            if (!empty($data['filters']['referrers']['value'])) {
-                $query->whereHas('user', function ($q) use ($data) {
-                    $selected_referrers = $data['filters']['referrers']['value'];
-                    $userIds = array_column($selected_referrers, 'user_id');
-
-                    $q->whereIn('upline_id', $userIds);
-                });
-            }
-
             if (!empty($data['filters']['status']['value'])) {
                 $query->where('status', $data['filters']['status']['value']);
             }
@@ -106,57 +102,131 @@ class PendingController extends Controller
      */
     public function pendingInvestmentApproval(Request $request)
     {
+
         Validator::make($request->all(), [
-            'investment_id' => ['required'],
+            'subscriber_id' => ['required'],
             'action' => ['required'],
             'remarks' => ['nullable', 'required_if:action,reject'],
         ])->setAttributeNames([
-            'investment_id' => trans('public.investment'),
+            'subscriber_id' => trans('public.investment'),
             'action' => trans('public.action'),
             'remarks' => trans('public.remarks'),
         ])->validate();
 
-        $investment = TradingSubscription::find($request->investment_id);
+        $subscriber = Subscriber::find($request->subscriber_id);
 
-        if ($investment->status == 'pending') {
+        if ($subscriber->status == 'pending') {
             switch ($request->action) {
                 case 'approve':
-                    $investment->status = 'active';
-                    $investment->expired_at = Carbon::now()->add($investment->subscription_period, $investment->subscription_period_type)->endOfDay();
-                    $investment->settlement_at = Carbon::now()
-                        ->add($investment->settlement_period, $investment->settlement_period_type)
-                        ->addDay()
-                        ->startOfDay();
+                    $subscriber->status = 'subscribing';
+                    $subscriber->completed_at = Carbon::now()->add($subscriber->subscription_period, $subscriber->subscription_period_unit)->endOfDay();
+                    $subscriber->settlement_start_at = Carbon::now();
+                    $subscriber->settlement_end_at = Carbon::now()
+                        ->add($subscriber->settlement_period, $subscriber->settlement_period_unit)
+                        ->subDay()
+                        ->endOfDay();
 
-                    $master = $investment->trading_master->trading_account;
-                    $master_account_type = AccountType::find($master->account_type_id);
+                    DB::beginTransaction();
 
-                    $deal = (new TradingAccountService())->createDeal($master, $master->master_name, $investment->subscription_amount, "Login #$investment->meta_login", MetaService::DEPOSIT, $master_account_type, MetaService::DEAL_BALANCE);
+                    try {
+                        $master = $subscriber->trading_master->trading_account;
+                        $master_account_type = AccountType::where([
+                            'type' => 'live',
+                            'account_group' => $subscriber->master_account_type,
+                        ])->first();
 
-                    Transaction::create([
-                        'user_id' => $master->user_id,
-                        'category' => 'trading_account',
-                        'transaction_type' => 'invest_capital',
-                        'to_meta_login' => $master->meta_login,
-                        'ticket' => $deal['deal_Id'] ?? null,
-                        'transaction_number' => RunningNumberService::getID('transaction'),
-                        'amount' => $investment->subscription_amount,
-                        'from_currency' => 'USD',
-                        'to_currency' => 'USD',
-                        'conversion_rate' => 1,
-                        'conversion_amount' => $investment->subscription_amount,
-                        'transaction_amount' => $investment->subscription_amount,
-                        'fund_type' => $investment->real_fund > 0 ? MetaService::REAL_FUND : MetaService::DEMO_FUND,
-                        'status' => 'success',
-                        'comment' => $deal['conduct_Deal']['comment'] ?? 'Deposit',
-                        'approval_at' => now(),
-                    ]);
+                        $maxAttempts = 5;
+                        $attempts = 0;
 
+                        do {
+                            try {
+                                Subscription::create([
+                                    'subscriber_id'        => $subscriber->id,
+                                    'subscription_amount'  => $subscriber->initial_amount,
+                                    'real_fund'            => $subscriber->user->role == 'user' ? $subscriber->initial_amount : 0,
+                                    'demo_fund'            => $subscriber->user->role != 'user' ? $subscriber->initial_amount : 0,
+                                    'subscription_number'  => RunningNumberService::getID('subscription'),
+                                ]);
+
+                                $success = true;
+
+                            } catch (QueryException $e) {
+                                if ($e->getCode() === '23000') { // Duplicate
+                                    $attempts++;
+                                    $success = false;
+                                } else {
+                                    throw $e;
+                                }
+                            }
+                        } while (!$success && $attempts < $maxAttempts);
+
+                        if (!$success) {
+                            DB::rollBack();
+                            return back()->with('toast', [
+                                'title' => trans('public.invalid_action'),
+                                'message' => trans('public.try_error', ['attempts_count' => $maxAttempts]),
+                                'type' => 'error',
+                            ]);
+                        }
+
+                        // Attempt to create deal
+                        $deal = (new TradingAccountService())->createDeal(
+                            $master,
+                            $master->master_name,
+                            $subscriber->initial_amount,
+                            "Login #$subscriber->meta_login",
+                            MetaService::DEPOSIT,
+                            $master_account_type,
+                            MetaService::DEAL_BALANCE
+                        );
+
+                        if (!$deal || !isset($deal['deal_Id'])) {
+                            // Fail: rollback the subscription
+                            DB::rollBack();
+
+                            return back()->with('toast', [
+                                'title' => trans('public.invalid_action'),
+                                'message' => 'Failed to create deal, please try again.',
+                                'type' => 'error',
+                            ]);
+                        }
+
+                        // All good — create transaction record
+                        Transaction::create([
+                            'user_id' => $master->user_id,
+                            'category' => 'trading_account',
+                            'transaction_type' => 'invest_capital',
+                            'to_meta_login' => $master->meta_login,
+                            'ticket' => $deal['deal_Id'],
+                            'transaction_number' => RunningNumberService::getID('transaction'),
+                            'amount' => $subscriber->initial_amount,
+                            'from_currency' => 'USD',
+                            'to_currency' => 'USD',
+                            'conversion_rate' => 1,
+                            'conversion_amount' => $subscriber->initial_amount,
+                            'transaction_amount' => $subscriber->initial_amount,
+                            'status' => 'success',
+                            'comment' => $deal['conduct_Deal']['comment'] ?? 'Deposit',
+                            'approval_at' => now(),
+                        ]);
+
+                        DB::commit();
+
+                    } catch (Throwable $e) {
+                        DB::rollBack();
+                        Log::error('Error during subscription + deal creation: ' . $e->getMessage());
+
+                        return back()->with('toast', [
+                            'title' => trans('public.invalid_action'),
+                            'message' => 'An error occurred while processing, please try again.',
+                            'type' => 'error',
+                        ]);
+                    }
                     break;
 
                 case 'reject':
-                    $investment->status = 'rejected';
-                    $investment->remarks = $request->remarks;
+                    $subscriber->status = 'rejected';
+                    $subscriber->remarks = $request->remarks;
 
                     break;
 
@@ -164,9 +234,8 @@ class PendingController extends Controller
                     break;
             }
 
-            $investment->approval_at = Carbon::now();
-            $investment->handle_by = Auth::id();
-            $investment->save();
+            $subscriber->approval_at = Carbon::now();
+            $subscriber->save();
         } else {
             return back()->with('toast', [
                 'title' => trans('public.invalid_action'),
@@ -399,7 +468,7 @@ class PendingController extends Controller
 
         $transaction = Transaction::find($request->transaction_id);
         $wallet = Wallet::find($transaction->from_wallet_id);
-        
+
         if ($transaction->status == 'pending') {
             switch ($request->action) {
                 case 'approve':

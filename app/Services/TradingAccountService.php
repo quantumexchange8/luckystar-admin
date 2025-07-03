@@ -16,14 +16,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Client\ConnectionException;
 
 class TradingAccountService {
-    private string $port = "8443";
-    private string $login = "10012";
-    private string $password = "Test1234.";
     //private string $baseURL = "http://192.168.0.224:5000/api";
     private string $baseURL = "http://219.93.129.12:5000/api";
-
-    private string $token = "6f0d6f97-3042-4389-9655-9bc321f3fc1e";
-    private string $environmentName = "live";
 
     public function getConnectionStatus()
     {
@@ -130,7 +124,7 @@ class TradingAccountService {
             }
 
             $userData = [
-                'group' => $account_type->name,
+                'group' => $account_type->account_group,
                 'name' => $name,
                 'company' => null,
                 'leverage' => $trading_account->margin_leverage,

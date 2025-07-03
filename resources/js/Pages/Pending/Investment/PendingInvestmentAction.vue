@@ -8,7 +8,7 @@ import InputError from "@/Components/InputError.vue";
 import {useForm} from "@inertiajs/vue3";
 
 const props = defineProps({
-    investment: Object,
+    subscriber: Object,
 })
 
 const visible = ref(false);
@@ -25,7 +25,7 @@ const handleApproval = (action) => {
 }
 
 const form = useForm({
-    investment_id: props.investment.id,
+    subscriber_id: props.subscriber.id,
     action: '',
     remarks: '',
 });
@@ -65,11 +65,11 @@ const closeDialog = () => {
             class="flex flex-col-reverse md:flex-row md:items-center gap-3 self-stretch w-full pb-4 border-b dark:border-surface-600"
         >
             <div class="flex flex-col items-start w-full">
-                <span class="text-sm font-medium">{{ investment.user.full_name }}</span>
-                <span class="text-surface-500 text-xs">{{ investment.user.email }}</span>
+                <span class="text-sm font-medium">{{ subscriber.user.full_name }}</span>
+                <span class="text-surface-500 text-xs">{{ subscriber.user.email }}</span>
             </div>
             <div class="min-w-[180px] font-semibold text-xl md:text-right">
-                {{ formatAmount(investment.subscription_amount) }}
+                {{ formatAmount(subscriber.initial_amount) }}
             </div>
         </div>
 
@@ -80,7 +80,7 @@ const closeDialog = () => {
                         {{ $t('public.requested_date') }}
                     </div>
                     <div class="text-surface-950 dark:text-white text-sm font-medium">
-                        {{ dayjs(investment.created_at).format('YYYY/MM/DD HH:mm:ss') }}
+                        {{ dayjs(subscriber.created_at).format('YYYY/MM/DD HH:mm:ss') }}
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
@@ -88,7 +88,7 @@ const closeDialog = () => {
                         {{ $t('public.account') }}
                     </div>
                     <div class="text-surface-950 dark:text-white text-sm font-medium">
-                        {{ investment.meta_login }}
+                        {{ subscriber.meta_login }}
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
@@ -96,7 +96,7 @@ const closeDialog = () => {
                         {{ $t('public.strategy') }}
                     </div>
                     <div class="text-surface-950 dark:text-white text-sm font-medium">
-                        {{ investment.trading_master.master_name }} - {{ investment.master_meta_login }}
+                        {{ subscriber.trading_master.master_name }} - {{ subscriber.master_login }}
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">
@@ -106,7 +106,7 @@ const closeDialog = () => {
                     <Tag
                         severity="secondary"
                         class="text-xs"
-                        :value="investment.trading_master.account_type.name"
+                        :value="subscriber.trading_master.account_type.name"
                     />
                 </div>
                 <div v-if="approvalAction" class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">

@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('master_account_type', 50);
             $table->string('type', 50)->nullable();
             $table->string('subscriber_number', 50)->nullable()->unique();
+            $table->decimal('initial_amount', 13)->nullable();
             $table->integer('subscription_period')->nullable();
             $table->string('subscription_period_unit', 50)->nullable();
             $table->timestamp('completed_at')->nullable();

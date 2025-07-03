@@ -27,7 +27,7 @@ class UpdateTradingUser
             ->where('meta_login', $meta_login)
             ->first();
 
-        $accountType = AccountType::firstWhere('name', $data['group']);
+        $accountType = AccountType::firstWhere('account_group', $data['group']);
 
         if (Auth::user()->role == 'user') {
             $tradingUser->real_fund = $data['balance'];
