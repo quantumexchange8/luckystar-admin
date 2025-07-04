@@ -485,4 +485,5 @@ return [
     "choose_file" => "Choose File",
     "replace_file" => "Replace File",
     "max_size" => "Max Size",
+    "try_error" => "Failed to generate unique order number after :attempts_count attempts."
 ];

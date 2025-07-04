@@ -27,12 +27,14 @@ import {
 import SidebarCategoryLabel from "@/Components/Sidebar/SidebarCategoryLabel.vue";
 
 const page = usePage();
-const pendingKYC = ref(0);
+const pendingKYC = ref(page.props.pendingKYC);
+const pendingSubscriberCounts = ref(page.props.pendingSubscriberCounts);
 
 const getPendingCounts = async () => {
     try {
         const response = await axios.get('/getPendingCounts');
         pendingKYC.value = response.data.pendingKYC
+        pendingSubscriberCounts.value = response.data.pendingSubscriberCounts
     } catch (error) {
         console.error('Error pending counts:', error);
     }
@@ -76,6 +78,7 @@ watchEffect(() => {
         <SidebarCollapsible
             :title="$t('public.pending')"
             :active="route().current('pending.*')"
+            :pending-counts="pendingSubscriberCounts"
         >
             <template #icon>
                 <IconClockDollar :size="20" stroke-width="1.5" />
@@ -85,6 +88,7 @@ watchEffect(() => {
                 :title="$t('public.investment')"
                 :href="route('pending.investment')"
                 :active="route().current('pending.investment')"
+                :pending-counts="pendingSubscriberCounts"
             />
 
             <SidebarCollapsibleItem

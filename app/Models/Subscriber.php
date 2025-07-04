@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscriber extends Model
@@ -17,6 +18,7 @@ class Subscriber extends Model
         'master_account_type',
         'type',
         'subscriber_number',
+        'initial_amount',
         'subscription_period',
         'subscription_period_unit',
         'completed_at',
@@ -39,5 +41,21 @@ class Subscriber extends Model
             'approval_at' => 'datetime',
             'unsubscribed_at' => 'datetime',
         ];
+    }
+
+    // Relations
+    public function trading_master(): BelongsTo
+    {
+        return $this->belongsTo(TradingMaster::class, 'master_login', 'meta_login');
+    }
+
+    public function trading_account(): BelongsTo
+    {
+        return $this->belongsTo(TradingAccount::class, 'meta_login', 'meta_login');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

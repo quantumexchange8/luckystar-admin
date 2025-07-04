@@ -154,7 +154,7 @@ class StrategyController extends Controller
         $user = User::find(2);
 
         $master = TradingMaster::create([
-            'user_id' => $user['id'],
+            'user_id' => $user->id,
             'master_name' => $request->strategy_name,
             'trader_name' => $request->trader_name,
             'leverage' => $leverage,

@@ -29,7 +29,7 @@ import {usePage} from "@inertiajs/vue3";
 
 const isLoading = ref(false);
 const dt = ref(null);
-const investments = ref([]);
+const subscribers = ref([]);
 const {formatAmount, formatRgbaColor} = generalFormat();
 const totalRecords = ref(0);
 const first = ref(0);
@@ -63,12 +63,12 @@ const loadLazyData = (event) => {
             const response = await fetch(url);
             const results = await response.json();
 
-            investments.value = results?.data?.data;
+            subscribers.value = results?.data?.data;
             totalRecords.value = results?.data?.total;
             isLoading.value = false;
         }, 100);
     }  catch (e) {
-        investments.value = [];
+        subscribers.value = [];
         totalRecords.value = 0;
         isLoading.value = false;
     }
@@ -193,7 +193,7 @@ watchEffect(() => {
     <Card class="w-full">
         <template #content>
             <DataTable
-                :value="investments"
+                :value="subscribers"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 lazy
                 paginator
@@ -259,7 +259,7 @@ watchEffect(() => {
                         <span class="text-sm text-surface-700 dark:text-surface-300">{{ $t('public.loading_pending_data') }}</span>
                     </div>
                 </template>
-                <template v-if="investments?.length > 0">
+                <template v-if="subscribers?.length > 0">
                     <Column
                         field="created_at"
                         sortable
@@ -320,23 +320,6 @@ watchEffect(() => {
                         </template>
                     </Column>
                     <Column
-                        field="referer"
-                        class="table-cell min-w-36"
-                        :header="$t('public.referrer')"
-                    >
-                        <template #body="{data}">
-                            <div class="flex items-center gap-2">
-                                <div v-if="data.user" class="flex flex-col">
-                                    <span class="font-semibold">{{ data.user.upline.full_name }}</span>
-                                    <span class="text-xs text-surface-500">{{ data.user.upline.email }}</span>
-                                </div>
-                                <div v-else class="h-[39px] flex items-center self-stretch">
-                                    -
-                                </div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column
                         field="meta_login"
                         sortable
                         class="table-cell"
@@ -372,13 +355,13 @@ watchEffect(() => {
                         </template>
                     </Column>
                     <Column
-                        field="investment_amount"
+                        field="initial_amount"
                         class="table-cell"
                         sortable
-                        :header="$t('public.fund_size')"
+                        :header="$t('public.amount')"
                     >
                         <template #body="{data}">
-                            <span class="font-medium">{{ formatAmount(data.subscription_amount) }}</span>
+                            <span class="font-medium">{{ formatAmount(data.initial_amount) }}</span>
                         </template>
                     </Column>
                     <Column
@@ -387,7 +370,7 @@ watchEffect(() => {
                     >
                         <template #body="{data}">
                             <PendingInvestmentAction
-                                :investment="data"
+                                :subscriber="data"
                             />
                         </template>
                     </Column>
